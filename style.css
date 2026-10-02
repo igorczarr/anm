@@ -1,0 +1,217 @@
+/* Fontes */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Variáveis de Cores Baseadas na Paleta */
+:root {
+    --bg-dark: #030A06;
+    --bg-darker: #0A150D;
+    --accent-olive: #57552E;
+    --text-primary: #D5C5AA;
+    
+    --secondary-light: #E4DBCB;
+    --secondary-dark: #161410;
+    --secondary-peach: #F7DECA;
+    --secondary-green: #30483A;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* --- Preloader --- */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-darker);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.loader-content {
+    width: 100px;
+    height: 100px;
+}
+
+.cifrao-svg {
+    width: 100%;
+    height: 100%;
+    animation: rotate 2s linear infinite;
+}
+
+.path-cifrao {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: draw 2s ease-in-out infinite alternate;
+}
+
+@keyframes draw {
+    0% {
+        stroke-dashoffset: 200;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Linkpage Container --- */
+.linkpage-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Header --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.main-logo {
+    width: 180px;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--secondary-peach);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: var(--text-primary);
+    opacity: 0.8;
+}
+
+/* --- Links Section --- */
+.links-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 4rem;
+}
+
+.link-item {
+    background-color: var(--secondary-dark);
+    color: var(--secondary-light);
+    text-decoration: none;
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(213, 197, 170, 0.1);
+    transition: all 0.3s ease;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.link-item:hover {
+    background-color: var(--accent-olive);
+    color: var(--bg-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(87, 85, 46, 0.4);
+    border-color: var(--accent-olive);
+}
+
+.link-item:hover .link-icon {
+    transform: translateX(5px);
+}
+
+.link-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+/* --- Footer --- */
+.footer-section {
+    text-align: center;
+    margin-top: auto;
+    padding-top: 2rem;
+}
+
+.footer-logo {
+    width: 100px;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.footer-logo:hover {
+    opacity: 1;
+}
+
+.footer-section p {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    opacity: 0.6;
+}
