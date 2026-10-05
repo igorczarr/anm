@@ -26,8 +26,21 @@ pool.connect((err, client, release) => {
 app.use(cors());
 app.use(express.json());
 
-// Servir arquivos estáticos (HTML, CSS, JS, Imagens, Fontes) da pasta atual
+// Servir arquivos estáticos (HTML, CSS, JS, Imagens, Fontes)
 app.use(express.static(__dirname));
+
+// Rotas da Aplicação
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/patrocinio', (req, res) => {
+    res.sendFile(path.join(__dirname, 'patrocinio.html'));
+});
+
+app.get('/projeto', (req, res) => {
+    res.sendFile(path.join(__dirname, 'projeto.html'));
+});
 
 // Rota de exemplo para testar o banco de dados
 app.get('/api/test-db', async (req, res) => {
@@ -44,9 +57,9 @@ app.get('/api/test-db', async (req, res) => {
     }
 });
 
-// Rota principal (Fallback)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Fallback para qualquer outra rota não encontrada (retorna para a home)
+app.use((req, res) => {
+    res.redirect('/');
 });
 
 // Iniciar o servidor

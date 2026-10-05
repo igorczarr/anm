@@ -7,32 +7,18 @@
 }
 
 @font-face {
-    font-family: 'Montserrat';
-    src: url('fonts/Montserrat-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-}
-
-@font-face {
     font-family: 'Playfair Display';
     src: url('fonts/PlayfairDisplay-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
 }
 
-@font-face {
-    font-family: 'Playfair Display';
-    src: url('fonts/PlayfairDisplay-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-}
-
-/* Variáveis de Cores Baseadas na Paleta */
+/* Variáveis de Cores Baseadas na Paleta - Old Money Aesthetic */
 :root {
-    --bg-dark: #030A06;
-    --bg-darker: #0A150D;
-    --accent-olive: #57552E;
-    --text-primary: #D5C5AA;
+    --bg-dark: #030A06;        /* Quase Preto - Fundo Principal */
+    --bg-darker: #0A150D;      /* Verde Escuro Profundo */
+    --accent-olive: #57552E;   /* Verde Oliva - Detalhes Clássicos */
+    --text-primary: #D5C5AA;   /* Bege/Dourado Claro - Textos e Bordas */
     
     --secondary-light: #E4DBCB;
     --secondary-dark: #161410;
@@ -48,13 +34,42 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: var(--bg-dark);
+    /* Gradiente Animado - Contraste e Dinamismo */
+    background: linear-gradient(135deg, var(--bg-dark), var(--bg-darker), var(--secondary-dark), var(--secondary-green));
+    background-size: 300% 300%;
+    animation: gradientMove 12s ease infinite;
     color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
+    position: relative;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Fundo com Watermark Elegante */
+.background-watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    height: 80vw;
+    max-width: 800px;
+    max-height: 800px;
+    background-image: url('/img/logo-dark.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.03; /* Extremamente sutil */
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* --- Preloader --- */
@@ -64,90 +79,94 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-darker);
+    background-color: var(--bg-dark);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    transition: opacity 0.8s ease, visibility 0.8s;
+    transition: opacity 1.5s ease, visibility 1.5s;
 }
 
 .loader-content {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.cifrao-svg {
+.preloader-logo {
     width: 100%;
-    height: 100%;
-    animation: rotate 2s linear infinite;
+    height: auto;
+    animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.path-cifrao {
-    stroke-dasharray: 200;
-    stroke-dashoffset: 200;
-    animation: draw 2s ease-in-out infinite alternate;
-}
-
-@keyframes draw {
-    0% {
-        stroke-dashoffset: 200;
-    }
-    100% {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); }
 }
 
 /* --- Linkpage Container --- */
-.linkpage-container {
+.linkpage-container, .content-container {
     width: 100%;
-    max-width: 600px;
-    padding: 3rem 1.5rem;
+    max-width: 500px;
+    padding: 4rem 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: fadeIn 1s ease forwards;
+    animation: fadeIn 1.5s ease forwards;
+    z-index: 1;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- Header --- */
 .header-section {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .main-logo {
-    width: 180px;
+    width: 110px;
     max-width: 100%;
-    margin-bottom: 1.5rem;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    margin-bottom: 2rem;
+    transition: transform 0.5s ease;
+}
+
+.main-logo:hover {
+    transform: scale(1.03);
 }
 
 .page-title {
     font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-    color: var(--secondary-peach);
-    margin-bottom: 0.5rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 6px;
+    text-transform: uppercase;
 }
 
 .page-subtitle {
-    font-size: 1rem;
-    color: var(--text-primary);
-    opacity: 0.8;
+    font-size: 0.75rem;
+    color: var(--accent-olive);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.5;
+    max-width: 80%;
+}
+
+.separator {
+    width: 40px;
+    height: 1px;
+    background-color: var(--accent-olive);
+    margin-top: 2rem;
 }
 
 /* --- Links Section --- */
@@ -155,63 +174,119 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1.5rem;
     margin-bottom: 4rem;
 }
 
 .link-item {
-    background-color: var(--secondary-dark);
-    color: var(--secondary-light);
+    background-color: transparent;
+    color: var(--text-primary);
     text-decoration: none;
-    padding: 1.2rem 1.5rem;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid rgba(213, 197, 170, 0.1);
-    transition: all 0.3s ease;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    padding: 1.2rem;
+    text-align: center;
+    border: 1px solid rgba(213, 197, 170, 0.3); /* D5C5AA with opacity */
+    transition: all 0.4s ease;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.link-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--accent-olive);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
 }
 
 .link-item:hover {
-    background-color: var(--accent-olive);
-    color: var(--bg-dark);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(87, 85, 46, 0.4);
     border-color: var(--accent-olive);
+    color: var(--secondary-light);
 }
 
-.link-item:hover .link-icon {
-    transform: translateX(5px);
+.link-item:hover::before {
+    opacity: 0.15;
 }
 
-.link-icon {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
+/* --- Content Pages (Projeto e Patrocínio) --- */
+.text-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.sub-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--secondary-peach);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+}
+
+.elegant-text {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: rgba(213, 197, 170, 0.8);
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    text-align-last: center;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3rem;
+}
+
+.btn-outline {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--accent-olive);
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    color: var(--secondary-peach);
+    border-bottom-color: var(--secondary-peach);
 }
 
 /* --- Footer --- */
 .footer-section {
     text-align: center;
     margin-top: auto;
-    padding-top: 2rem;
-}
-
-.footer-logo {
-    width: 100px;
-    margin-bottom: 1rem;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-}
-
-.footer-logo:hover {
-    opacity: 1;
+    padding-bottom: 2rem;
 }
 
 .footer-section p {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     color: var(--text-primary);
-    opacity: 0.6;
+    opacity: 0.5;
+    letter-spacing: 2px;
+}
+
+/* --- Destaque Lista VIP --- */
+.link-highlight {
+    background-color: var(--text-primary);
+    color: var(--bg-dark);
+    border-color: var(--text-primary);
+    font-weight: 700;
+}
+
+.link-highlight::before {
+    background-color: var(--bg-darker);
+}
+
+.link-highlight:hover {
+    background-color: var(--accent-olive);
+    color: var(--text-primary);
+    border-color: var(--accent-olive);
 }
