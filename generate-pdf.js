@@ -12,29 +12,14 @@ const puppeteer = require('puppeteer');
     // Configura o viewport para simular um desktop de alta resolução
     await page.setViewport({ width: 1440, height: 900 });
 
-    // Acessa a página de patrocínio local
-    console.log('Acessando a página de patrocínio...');
-    await page.goto('http://localhost:3000/patrocinio', { waitUntil: 'networkidle0' });
+    // Acessa a versão institucional para impressão
+    console.log('Acessando a página de proposta...');
+    await page.goto('http://localhost:3000/proposta-print.html', { waitUntil: 'networkidle0' });
 
-    // Injeta CSS para desativar as animações do AOS e remover o preloader,
-    // garantindo que todo o conteúdo apareça no PDF
-    await page.addStyleTag({
-        content: `
-            #preloader { display: none !important; }
-            [data-aos] { opacity: 1 !important; transform: none !important; transition: none !important; }
-            body { 
-                background-color: #000000 !important; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-            }
-            .top-nav { display: none !important; }
-            .dynamic-section { page-break-inside: avoid; }
-        `
-    });
-
+    // Não precisamos injetar CSS de tela escura aqui, o HTML já foi feito para A4.
     console.log('Gerando o PDF...');
     await page.pdf({
-      path: 'Proposta_A_Nova_Moeda.pdf',
+      path: 'Proposta_Institucional_A_Nova_Moeda.pdf',
       format: 'A4',
       printBackground: true,
       margin: {

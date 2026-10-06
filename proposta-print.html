@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Proposta Institucional - A Nova Moeda</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        /* Configuração base para impressão A4 */
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #1a1a1a;
+            background-color: #ffffff;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            font-size: 11pt;
+        }
+
+        /* Tipografia */
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: #030A06;
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 24pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #57552E;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 18pt;
+            color: #57552E;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 14pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #000000;
+        }
+
+        blockquote {
+            font-family: 'Playfair Display', serif;
+            font-size: 14pt;
+            font-style: italic;
+            border-left: 4px solid #57552E;
+            padding-left: 15px;
+            margin: 25px 0;
+            color: #333333;
+            page-break-inside: avoid;
+        }
+
+        .highlight {
+            background-color: rgba(87, 85, 46, 0.1);
+            padding: 2px 5px;
+        }
+
+        /* Estrutura da Capa */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            page-break-after: always;
+        }
+
+        .cover-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 40px;
+        }
+
+        .cover-title {
+            font-size: 32pt;
+            border: none;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        .cover-subtitle {
+            font-size: 16pt;
+            color: #57552E;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+        }
+
+        .cover-details {
+            font-size: 12pt;
+            color: #666666;
+            border-top: 1px solid #cccccc;
+            padding-top: 20px;
+            width: 60%;
+        }
+
+        /* Estrutura das Páginas de Conteúdo */
+        .page-break {
+            page-break-before: always;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        /* Tabelas e Grids para Cotas de Patrocínio */
+        .tier-box {
+            border: 1px solid #57552E;
+            padding: 20px;
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            background-color: #fcfcfc;
+        }
+
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dddddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tier-title {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #030A06;
+            margin: 0;
+        }
+
+        .tier-price {
+            font-size: 18pt;
+            color: #57552E;
+            font-weight: bold;
+        }
+
+        .tier-content p {
+            margin-bottom: 10px;
+        }
+
+        .tier-recommendation {
+            font-size: 10pt;
+            color: #57552E;
+            font-style: italic;
+            margin-top: 15px;
+            border-top: 1px dotted #cccccc;
+            padding-top: 10px;
+        }
+
+        /* Listas Estilizadas */
+        ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Perfis dos Palestrantes */
+        .speaker-box {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            border-left: 3px solid #57552E;
+            page-break-inside: avoid;
+        }
+
+        .speaker-name {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 5px;
+            color: #030A06;
+        }
+
+        .speaker-desc {
+            font-size: 10pt;
+            color: #444444;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CAPA -->
+    <div class="cover-page">
+        <!-- Logo escura para melhor contraste em fundo branco -->
+        <img src="http://localhost:3000/img/logo-dark.png" alt="A Nova Moeda Logo" class="cover-logo" onerror="this.style.display='none'">
+        
+        <h1 class="cover-title">A NOVA MOEDA</h1>
+        <div class="cover-subtitle">Proposta Institucional de Patrocínio</div>
+        
+        <div class="cover-details">
+            <p>17 de Novembro de 2026 · 19H</p>
+            <p>Auditório 2 — UEFS</p>
+        </div>
+    </div>
+
+    <!-- PÁGINA 1: CONTEXTO E PROVOCAÇÃO -->
+    <div class="section page-break">
+        <h1>Um Encontro entre Pessoas, Ideias e Empresas</h1>
+        
+        <p>No dia <strong>17 de novembro</strong>, o Auditório 2 da <strong>Universidade Estadual de Feira de Santana — UEFS</strong> receberá uma experiência dedicada a discutir uma transformação silenciosa da sociedade contemporânea:</p>
+        
+        <p class="highlight">A forma como a falta de conexão está alterando pessoas, mercados, organizações e relações de trabalho.</p>
+
+        <p>A Nova Moeda parte de uma provocação fundamental:</p>
+
+        <blockquote>
+            Em uma sociedade em que dinheiro continua sendo importante, mas atenção, confiança, relacionamento e acesso se tornam cada vez mais disputados, o que realmente possui valor?
+        </blockquote>
+
+        <p>Essa discussão aproxima estudantes, professores, profissionais, empreendedores e empresas em torno de um mesmo tema. É justamente nessa interseção que nasce nossa proposta de patrocínio.</p>
+    </div>
+
+    <div class="section">
+        <h2>Uma oportunidade para estar perto de quem está construindo o próximo mercado</h2>
+        <p>A universidade concentra pessoas em formação. São futuros administradores, advogados, profissionais de tecnologia, empreendedores, gestores e especialistas que começam a definir suas escolhas profissionais e suas relações com marcas.</p>
+        
+        <p>Para uma empresa, estar nesse ambiente não precisa significar apenas colocar o logotipo em uma peça publicitária. Pode significar <strong>aproximação</strong>.</p>
+        
+        <ul>
+            <li>Aproximação com novos talentos.</li>
+            <li>Aproximação com potenciais consumidores.</li>
+            <li>Aproximação com futuros parceiros.</li>
+            <li>Aproximação com uma geração que ainda está decidindo quais empresas merecem sua atenção.</li>
+        </ul>
+        
+        <p>Por isso, estruturamos o patrocínio de <strong>A Nova Moeda</strong> para que cada empresa possa escolher o nível de envolvimento que faça sentido para sua estratégia.</p>
+    </div>
+
+    <!-- PÁGINA 2: O PONTO DE CONTATO -->
+    <div class="section page-break">
+        <h1>O Patrocínio não é um Espaço Publicitário. É um Ponto de Contato.</h1>
+        <p>O projeto foi pensado para que as marcas estejam presentes de maneira natural na experiência do público.</p>
+        <p>Uma empresa pode simplesmente apoiar a realização do evento e ganhar presença institucional. Pode também oferecer uma vantagem exclusiva aos participantes, criar uma ação própria, apresentar um produto, realizar um sorteio, disponibilizar uma experiência ou abrir uma porta para futuras oportunidades profissionais.</p>
+        
+        <p>A diferença está justamente aí: <strong>o público não precisa apenas ver a sua marca. Ele pode interagir com ela.</strong></p>
+    </div>
+
+    <div class="section">
+        <h2>O que sua empresa pode construir dentro do evento</h2>
+        <p>A proposta combina diferentes formas de presença, permitindo que o investimento esteja associado ao objetivo da empresa.</p>
+
+        <ul>
+            <li><strong>VISIBILIDADE:</strong> Presença institucional nos canais e materiais relacionados ao evento, associando a marca a uma iniciativa acadêmica e empresarial de relevância regional.</li>
+            <li><strong>EXPERIÊNCIA:</strong> Possibilidade de criar uma ativação que faça parte da experiência do público, em vez de apenas interrompê-la.</li>
+            <li><strong>RELACIONAMENTO:</strong> Contato direto com estudantes, profissionais e empreendedores em um ambiente presencial de interação.</li>
+            <li><strong>OFERTA:</strong> Condições especiais, benefícios, cupons e ações destinadas exclusivamente aos participantes.</li>
+            <li><strong>TALENTOS:</strong> Acesso ao <em>Banco de Talentos A Nova Moeda</em>, formado por participantes que demonstrarem interesse em oportunidades profissionais.</li>
+            <li><strong>CONTINUIDADE:</strong> Possibilidade de prolongar a presença da marca após o evento através de ações e conteúdo relacionados à parceria.</li>
+        </ul>
+    </div>
+
+    <!-- PÁGINA 3: COTAS DE PATROCÍNIO -->
+    <div class="section page-break">
+        <h1>Opções de Investimento e Cotas</h1>
+        <p>Um evento sobre conexão precisa fazer conexão de verdade. Esse é um princípio importante para nós. Não faria sentido discutir uma economia baseada em relacionamentos enquanto transformamos o patrocinador em um simples logo no fundo do palco.</p>
+        <p>Por isso, as empresas parceiras poderão participar de maneira proporcional ao nível de investimento realizado. O formato foi organizado em três modalidades:</p>
+
+        <div class="tier-box">
+            <div class="tier-header">
+                <h3 class="tier-title">Modalidade: TROCA</h3>
+                <span class="tier-price">R$ 150</span>
+            </div>
+            <div class="tier-content">
+                <p>Para empresas que desejam apoiar o evento e associar sua marca ao projeto.</p>
+                <p>A modalidade contempla presença institucional entre os parceiros, divulgação nas comunicações previstas para patrocinadores, participação no reconhecimento público das empresas apoiadoras e inclusão no ambiente de parceiros do evento.</p>
+                <p>Também existe a possibilidade de disponibilizar um <strong>benefício exclusivo ao público</strong>, permitindo que a parceria gere uma primeira oportunidade de contato comercial.</p>
+                <div class="tier-recommendation">Indicada para: empresas que desejam presença institucional e aproximação inicial com o público.</div>
+            </div>
+        </div>
+
+        <div class="tier-box">
+            <div class="tier-header">
+                <h3 class="tier-title">Modalidade: CONEXÃO</h3>
+                <span class="tier-price">R$ 250</span>
+            </div>
+            <div class="tier-content">
+                <p>Para empresas que querem transformar presença em interação.</p>
+                <p>Além das entregas da modalidade anterior, a empresa poderá desenvolver uma <strong>ativação própria dentro do evento</strong>, utilizando recursos como QR Code, cupom, desafio, quiz, sorteio ou outra mecânica compatível com a estrutura da experiência.</p>
+                <p>A proposta é simples: <strong>atrair atenção → provocar uma ação → gerar contato</strong>.</p>
+                <div class="tier-recommendation">Indicada para: empresas que desejam interação direta, tráfego e relacionamento com o público.</div>
+            </div>
+        </div>
+
+        <div class="tier-box">
+            <div class="tier-header">
+                <h3 class="tier-title">Modalidade: CIRCULAÇÃO</h3>
+                <span class="tier-price">R$ 500</span>
+            </div>
+            <div class="tier-content">
+                <p>Para empresas que querem uma presença mais completa.</p>
+                <p>Essa modalidade amplia a participação da marca dentro da experiência e permite a construção de uma <strong>ativação própria</strong>, com possibilidade de utilização de espaço físico para materiais, produtos ou brindes, conforme a estrutura disponível.</p>
+                <p>Também contempla a possibilidade de patrocinar um sorteio ou experiência para o público. A empresa deixa de ser apenas uma apoiadora e passa a ocupar um papel mais visível. A parceria continua após o dia 17: a empresa recebe uma peça digital produzida pela organização após o evento.</p>
+                <div class="tier-recommendation">Indicada para: empresas que desejam unir exposição, experiência, relacionamento e ativação de marca.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA 4: BANCO DE TALENTOS & EXPERIÊNCIA -->
+    <div class="section page-break">
+        <h1>O Banco de Talentos</h1>
+        <p>Uma das iniciativas do evento será a formação do <strong>Banco de Talentos A Nova Moeda</strong>. Participantes que desejarem poderão disponibilizar seus dados profissionais para integrar essa base, mediante autorização.</p>
+        <p>Os patrocinadores terão acesso a esse banco para identificar potenciais talentos e oportunidades de contratação, de acordo com suas necessidades. Isso cria uma conexão particularmente relevante:</p>
+        
+        <blockquote>Universidade → Talento → Empresa</blockquote>
+        
+        <p>Para a empresa, o evento deixa de ser apenas um investimento em comunicação e se torna uma porta de entrada estratégica para recrutamento.</p>
+    </div>
+
+    <div class="section">
+        <h2>Por que apoiar a Nova Moeda?</h2>
+        <p>Marcas fortes não são construídas somente através de exposição. São construídas através de associação. Ao participar do projeto, sua empresa se associa a uma iniciativa que reúne <strong>educação, discussão de mercado, comportamento, empreendedorismo, carreira, inovação e conexão humana.</strong></p>
+        <p>O patrocinador estará inserido em um contexto contemporâneo. Não se trata apenas de "essa empresa anunciou aqui", mas sim de <strong>"essa empresa esteve aqui porque acredita nessa discussão"</strong>.</p>
+    </div>
+
+    <div class="section">
+        <h2>A Experiência</h2>
+        <p>Uma noite de debates com cinco especialistas conduzindo a discussão a partir de diferentes perspectivas:</p>
+        
+        <div class="speaker-box">
+            <div class="speaker-name">Sérgio Passos</div>
+            <p class="speaker-desc">Advogado, psicólogo e empresário.</p>
+        </div>
+        <div class="speaker-box">
+            <div class="speaker-name">Janaína Daltro</div>
+            <p class="speaker-desc">Professora, administradora, corretora e ex-empresária do ramo alimentício.</p>
+        </div>
+        <div class="speaker-box">
+            <div class="speaker-name">Denilson Carneiro</div>
+            <p class="speaker-desc">Advogado, professor de Direito, presidente da OAB Trânsito Feira de Santana e empreendedor.</p>
+        </div>
+        <div class="speaker-box">
+            <div class="speaker-name">Dulcila Torres</div>
+            <p class="speaker-desc">Professora, administradora e especialista em felicidade organizacional.</p>
+        </div>
+        <div class="speaker-box">
+            <div class="speaker-name">Daniel Duarte</div>
+            <p class="speaker-desc">Professor e administrador.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Nosso Convite</h2>
+        <p>Não estamos procurando simplesmente empresas para financiar um evento. Estamos procurando empresas que tenham interesse em estar próximas das pessoas, talentos e ideias que estão construindo o futuro do mercado.</p>
+        <p>A Nova Moeda é o nosso espaço. <strong>Sua empresa pode fazer parte dele.</strong></p>
+    </div>
+
+</body>
+</html>
