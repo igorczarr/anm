@@ -6,52 +6,248 @@
     <title>A Nova Moeda - O Projeto</title>
     <link rel="icon" type="image/png" href="/img/logo-light.png">
     
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
-    <!-- End Google Tag Manager -->
-
     <link rel="stylesheet" href="/style.css">
+    <!-- Animação AOS (Animate on Scroll) para dar dinamismo sem pesar -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body class="page-content">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="preloader">
+        <div class="loader-content">
+            <img src="/img/logo-light.png" alt="Carregando..." class="preloader-logo">
+        </div>
+    </div>
 
     <div class="background-watermark"></div>
 
-    <main class="content-container">
-        <header class="header-section">
-            <a href="/">
-                <img src="/img/logo-light.png" alt="A Nova Moeda Logo" class="main-logo">
-            </a>
-            <h1 class="page-title">O PROJETO</h1>
-            <div class="separator"></div>
-        </header>
+    <!-- HEADER FLUTUANTE -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <img src="/img/logo-light.png" alt="A Nova Moeda">
+        </a>
+        <a href="https://www.even3.com.br" target="_blank" class="btn-outline-small">INSCREVER-SE</a>
+    </nav>
 
-        <section class="text-section">
-            <p class="elegant-text">
-                Bem-vindo ao projeto A Nova Moeda. Nossa missão é redefinir os padrões de valor e excelência no mercado atual. 
-                Com uma visão voltada para o futuro e raízes cravadas na tradição e na sofisticação, apresentamos um ecossistema 
-                único de oportunidades.
-            </p>
-            <p class="elegant-text">
-                Explore nossas iniciativas, conheça nossos parceiros e faça parte de um movimento focado em exclusividade e alta performance.
-            </p>
-            <div class="actions">
-                <a href="/" class="btn-outline">Voltar ao Início</a>
+    <main class="projeto-container">
+        
+        <!-- HERO SECTION -->
+        <section class="hero-section" data-aos="fade-up" data-aos-duration="1500">
+            <h1 class="hero-title">A NOVA MOEDA</h1>
+            <p class="hero-subtitle">E se a coisa mais valiosa da próxima economia não estiver na sua conta bancária?</p>
+            <div class="hero-details">
+                <span class="detail-item">17 DE NOVEMBRO · 19H</span>
+                <span class="detail-divider">|</span>
+                <span class="detail-item">UEFS · AUDITÓRIO 2</span>
+            </div>
+            <div class="scroll-indicator">
+                <span>DESCUBRA</span>
+                <div class="line-down"></div>
             </div>
         </section>
-        
+
+        <!-- A REALIDADE / O PROBLEMA -->
+        <section class="dynamic-section problem-section">
+            <div class="text-block" data-aos="fade-up">
+                <p class="elegant-text big">Vivemos no momento mais conectado da história.</p>
+                <div class="stats-grid">
+                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="100">
+                        <span class="stat-number">+100</span>
+                        <span class="stat-label">Seguidores</span>
+                    </div>
+                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="200">
+                        <span class="stat-number">+10</span>
+                        <span class="stat-label">Grupos</span>
+                    </div>
+                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="300">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Mensagens</span>
+                    </div>
+                </div>
+                <p class="elegant-text">Uma tela capaz de colocar milhares de pessoas a poucos centímetros de nós.</p>
+                <p class="elegant-text highlight-gold">Ainda assim, alguma coisa parece estar faltando.</p>
+                <h2 class="massive-word" data-aos="fade-in">CONEXÃO.</h2>
+            </div>
+        </section>
+
+        <!-- DADOS E GRÁFICOS SIMULADOS -->
+        <section class="dynamic-section data-section">
+            <div class="split-layout">
+                <div class="split-text" data-aos="fade-right">
+                    <p class="elegant-text">E isso não é apenas uma questão pessoal. Está mudando a forma como consumimos, trabalhamos, construímos carreiras e fazemos negócios.</p>
+                    <div class="quote-box">
+                        <p>“Por que estamos tão conectados e tão sozinhos?”</p>
+                    </div>
+                    <p class="elegant-text">A Organização Mundial da Saúde estima que <strong>1 em cada 6 pessoas</strong> experimente solidão. Entre jovens, a proporção é ainda maior: <strong>21%</strong>.</p>
+                </div>
+                <div class="split-visual" data-aos="fade-left">
+                    <!-- Dados Monumentais em Tipografia -->
+                    <div class="luxury-stats-container">
+                        <div class="luxury-stat">
+                            <span class="lux-number">1 / 6</span>
+                            <span class="lux-desc">EXPERIMENTAM SOLIDÃO</span>
+                        </div>
+                        <div class="luxury-divider"></div>
+                        <div class="luxury-stat">
+                            <span class="lux-number">21%</span>
+                            <span class="lux-desc">DOS ADOLESCENTES</span>
+                        </div>
+                        <div class="luxury-divider"></div>
+                        <div class="luxury-stat gold">
+                            <span class="lux-number">+</span>
+                            <span class="lux-desc">O CONTATO DIGITAL AUMENTOU, O PRESENCIAL CAIU (OCDE)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- A GRANDE PERGUNTA -->
+        <section class="dynamic-section question-section" data-aos="fade-up">
+            <h2 class="monumental-quote">O QUE ACONTECE COM A ECONOMIA QUANDO A CONEXÃO SE TORNA UM ATIVO ESCASSO?</h2>
+            <div class="separator-center"></div>
+        </section>
+
+        <!-- O QUE É A NOVA MOEDA -->
+        <section class="dynamic-section concept-section">
+            <div class="text-block" data-aos="fade-up">
+                <h3 class="section-title">O QUE É A NOVA MOEDA?</h3>
+                <p class="elegant-text">Antes de uma venda existe atenção. Antes de uma parceria existe confiança. Antes de uma inovação existe troca.</p>
+                <p class="elegant-text highlight-gold">E antes de tudo isso existe conexão.</p>
+                <p class="elegant-text"><strong>A Nova Moeda</strong> é uma experiência para investigar esse território. Quem será capaz de criar valor em uma economia que começa a desejar conexão?</p>
+            </div>
+            
+            <div class="manifesto-box" data-aos="flip-up">
+                <h4>ISTO NÃO É MAIS UM EVENTO UNIVERSITÁRIO</h4>
+                <p>Uma palestra. Um slide atrás do outro. Ninguém mais lembra no dia seguinte.</p>
+                <p>Aqui, não queremos apenas especialistas num palco. Queremos ideias em conflito, pessoas na mesma sala e perguntas difíceis em circulação.</p>
+            </div>
+        </section>
+
+        <!-- A INVESTIGAÇÃO / PALESTRANTES (COM CONTAGEM REGRESSIVA) -->
+        <section class="dynamic-section speakers-section" id="investigacao">
+            <h3 class="section-title" data-aos="fade-up">QUATRO PERGUNTAS.<br>UMA MESMA ECONOMIA.</h3>
+            <p class="elegant-text text-center" data-aos="fade-up">Não são quatro palestras desconectadas. É uma investigação.</p>
+            
+            <div class="speakers-grid">
+                <!-- Pauta 1 -->
+                <div class="speaker-card" data-aos="fade-up">
+                    <div class="speaker-frame">
+                        <div class="countdown" data-date="Nov 05, 2026 19:00:00">REVELAÇÃO EM BREVE</div>
+                        <div class="speaker-overlay"></div>
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-number">01</span>
+                        <h4 class="speaker-theme">A SOLIDÃO NA ERA DA HIPERCONEXÃO</h4>
+                        <p class="speaker-desc">Indivíduo e Comportamento</p>
+                    </div>
+                </div>
+
+                <!-- Pauta 2 -->
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="speaker-frame">
+                        <div class="countdown" data-date="Nov 05, 2026 19:00:00">REVELAÇÃO EM BREVE</div>
+                        <div class="speaker-overlay"></div>
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-number">02</span>
+                        <h4 class="speaker-theme">QUANDO A SOLIDÃO VIRA MERCADO</h4>
+                        <p class="speaker-desc">Consumo, Mercado e Oportunidades</p>
+                    </div>
+                </div>
+
+                <!-- Pauta 3 -->
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="speaker-frame">
+                        <div class="countdown" data-date="Nov 05, 2026 19:00:00">REVELAÇÃO EM BREVE</div>
+                        <div class="speaker-overlay"></div>
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-number">03</span>
+                        <h4 class="speaker-theme">TRABALHO, CARREIRA E A SOLIDÃO CORPORATIVA</h4>
+                        <p class="speaker-desc">Relações Profissionais e Organizações</p>
+                    </div>
+                </div>
+
+                <!-- Pauta 4 -->
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="speaker-frame">
+                        <div class="countdown" data-date="Nov 05, 2026 19:00:00">REVELAÇÃO EM BREVE</div>
+                        <div class="speaker-overlay"></div>
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-number">04</span>
+                        <h4 class="speaker-theme">PODEMOS CONSTRUIR UMA ECONOMIA DA CONEXÃO?</h4>
+                        <p class="speaker-desc">Felicidade e Ambientes Conectados</p>
+                    </div>
+                </div>
+
+                <!-- Pauta 5 (Mistério) -->
+                <div class="speaker-card secret-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="speaker-frame secret-frame">
+                        <div class="secret-mark">?</div>
+                        <div class="countdown" data-date="Nov 17, 2026 19:00:00">REVELAÇÃO NO EVENTO</div>
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-number">05</span>
+                        <h4 class="speaker-theme">PAUTA SECRETA</h4>
+                        <p class="speaker-desc">Informação Restrita</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- O QUE VOCE LEVA PARA CASA -->
+        <section class="dynamic-section takeaways-section">
+            <h3 class="section-title text-center" data-aos="fade-up">O QUE VOCÊ LEVA PARA CASA?</h3>
+            <div class="takeaways-grid">
+                <div class="takeaway-item" data-aos="fade-right">
+                    <h5>CERTIFICADO</h5>
+                    <p>Registro formal da sua participação no evento.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-left">
+                    <h5>BANCO DE TALENTOS</h5>
+                    <p>Seus perfis poderão ser apresentados às empresas patrocinadoras.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-right">
+                    <h5>CONEXÃO COM EMPRESAS</h5>
+                    <p>Seu próximo contato profissional pode estar sentado ao seu lado.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-left">
+                    <h5>BRINDES EXCLUSIVOS</h5>
+                    <p>Concorra a brindes oferecidos especialmente para o evento.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAMADA FINAL -->
+        <section class="dynamic-section final-cta" data-aos="fade-in">
+            <div class="cta-box">
+                <h2 class="cta-quote">Conteúdo você provavelmente encontrará em algum lugar. O que você não consegue reproduzir depois é a sala cheia.</h2>
+                <p class="elegant-text">A Nova Moeda acontece em uma data específica.</p>
+                <div class="hero-details">
+                    <span class="detail-item">17/11 · 19H</span>
+                    <span class="detail-divider">|</span>
+                    <span class="detail-item">UEFS · AUDITÓRIO 2</span>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="https://www.even3.com.br" target="_blank" class="btn-solid-gold">RESERVAR MINHA PARTICIPAÇÃO</a>
+                    <a href="https://wa.me/seu-numero-aqui" target="_blank" class="btn-outline">FALAR COM A ORGANIZAÇÃO</a>
+                </div>
+            </div>
+        </section>
+
         <footer class="footer-section">
-            <p>&copy; 2026 A NOVA MOEDA</p>
+            <img src="/img/logo-light.png" alt="A Nova Moeda Logo" class="footer-logo">
+            <p>&copy; 2026 A NOVA MOEDA. TODOS OS DIREITOS RESERVADOS.</p>
         </footer>
+
     </main>
 
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="/script.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 50 });
+    </script>
 </body>
 </html>
