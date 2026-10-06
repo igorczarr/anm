@@ -772,3 +772,88 @@ body {
     color: #030504;
     border: none;
 }
+
+/* Tiers / Planos de Patrocínio */
+.tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 4rem;
+}
+
+.tier-card {
+    background: #030504;
+    border: 1px solid rgba(213, 197, 170, 0.2);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.tier-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--secondary-peach);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.highlight-tier {
+    border-color: var(--accent-olive);
+    background: linear-gradient(to bottom, #030504, rgba(87, 85, 46, 0.05));
+}
+
+.highlight-tier::before {
+    content: 'RECOMENDADO';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: #030504;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 0.2rem 1rem;
+    font-weight: bold;
+}
+
+.tier-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(213, 197, 170, 0.1);
+}
+
+.tier-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.tier-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.tier-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--secondary-peach);
+}
+
+.tier-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-indicated {
+    margin-top: auto;
+    font-size: 0.75rem;
+    color: var(--accent-olive);
+    padding-top: 1.5rem;
+    border-top: 1px dotted rgba(213, 197, 170, 0.2);
+    line-height: 1.5;
+}
