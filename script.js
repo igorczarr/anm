@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Configuração do tempo mínimo do preloader (em milissegundos)
-    const PRELOADER_MIN_TIME = 2500; // Tempo aumentado para apreciar a logo
+    const PRELOADER_MIN_TIME = 3500; // Tempo ajustado para exibir a animação completa de desenho do SVG
     
     const preloader = document.getElementById('preloader');
     const mainContent = document.querySelector('.linkpage-container') || document.querySelector('.content-container');
