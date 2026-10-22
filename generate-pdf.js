@@ -14,7 +14,9 @@ const puppeteer = require('puppeteer');
 
     // Acessa a versão institucional para impressão
     console.log('Acessando a página de proposta...');
-    await page.goto('http://localhost:3001/proposta-print.html', { waitUntil: 'networkidle0' });
+    const path = require('path');
+    const fileUrl = 'file:///' + path.resolve(__dirname, 'proposta-print.html').replace(/\\/g, '/');
+    await page.goto(fileUrl, { waitUntil: 'networkidle0' });
 
     // Não precisamos injetar CSS de tela escura aqui, o HTML já foi feito para A4.
     console.log('Gerando o PDF...');

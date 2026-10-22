@@ -882,3 +882,116 @@ body {
     border-top: 1px dotted rgba(213, 197, 170, 0.2);
     line-height: 1.5;
 }
+
+
+/* Card de Contato - Diretoria Financeira */
+.sponsor-contact-box {
+    margin: 2.5rem auto 1.8rem auto;
+    padding: 1.8rem 2.2rem;
+    background: rgba(87, 85, 46, 0.08);
+    border: 1px solid rgba(213, 197, 170, 0.25);
+    border-radius: 4px;
+    max-width: 520px;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.sponsor-contact-box:hover {
+    border-color: var(--secondary-peach);
+    background: rgba(87, 85, 46, 0.12);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.sponsor-contact-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    background: rgba(87, 85, 46, 0.3);
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 0.8rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+.sponsor-contact-name {
+    font-family: 'Quantum', serif;
+    font-size: 1.4rem;
+    color: #ffffff;
+    letter-spacing: 2px;
+    margin: 0 0 0.3rem 0;
+}
+
+.sponsor-contact-role {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    opacity: 0.85;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.sponsor-contact-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-family: 'Quantum', serif;
+    font-size: 1.3rem;
+    color: var(--secondary-peach);
+    text-decoration: none;
+    letter-spacing: 2px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.sponsor-contact-phone:hover {
+    color: #ffffff;
+    transform: scale(1.03);
+}
+
+.sponsor-contact-phone svg {
+    stroke: var(--secondary-peach);
+    transition: stroke 0.3s ease;
+}
+
+.sponsor-contact-phone:hover svg {
+    stroke: #ffffff;
+}
+
+.btn-tier-cta {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.2rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-tier-cta:hover {
+    background: var(--text-primary);
+    color: #030504;
+}
+
+.highlight-tier .btn-tier-cta {
+    background: linear-gradient(135deg, var(--text-primary), var(--secondary-peach));
+    color: #030504;
+    border: none;
+}
+
+.highlight-tier .btn-tier-cta:hover {
+    box-shadow: 0 0 15px rgba(247, 222, 202, 0.4);
+    transform: translateY(-2px);
+}
