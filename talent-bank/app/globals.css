@@ -1,0 +1,432 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PlayfairDisplay";
+  src: url("/fonts/PlayfairDisplay-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root,
+html[data-theme="light"] {
+  --bg-page: #F6F7F9;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #EEF1F5;
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --text-soft: #64748B;
+  --border-color: #E2E8F0;
+  --brand-primary: #14532D;
+  --brand-primary-hover: #166534;
+  --brand-accent: #B4833E;
+  --brand-soft: #ECFDF5;
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+html[data-theme="dark"] {
+  --bg-page: #0B0F17;
+  --bg-card: #111827;
+  --bg-subtle: #1E293B;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-soft: #64748B;
+  --border-color: #1E293B;
+  --brand-primary: #10B981;
+  --brand-primary-hover: #059669;
+  --brand-accent: #D5C5AA;
+  --brand-soft: rgba(16, 185, 129, 0.12);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 12px 28px -6px rgba(0, 0, 0, 0.45);
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Tipografia moderna e limpa: substitui a fonte decorativa antiga por hierarquia SaaS contemporânea */
+.font-display {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.font-editorial {
+  font-family: "PlayfairDisplay", Georgia, serif;
+}
+
+/* Adaptação inteligente de toda a plataforma para o Tema Claro (Light Mode Default) e Dark Mode */
+html[data-theme="light"] body,
+html[data-theme="light"] .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#030A06\]\/90,
+html[data-theme="light"] .bg-\[\#030A06\]\/95 {
+  background-color: var(--bg-page) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme="light"] header.bg-\[\#030A06\]\/90 {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+html[data-theme="light"] .bg-\[\#0A150D\],
+html[data-theme="light"] .bg-\[\#0A150D\]\/95,
+html[data-theme="light"] .bg-\[\#0A150D\]\/90,
+html[data-theme="light"] .bg-\[\#0A150D\]\/80,
+html[data-theme="light"] .bg-\[\#0A150D\]\/70,
+html[data-theme="light"] .bg-\[\#0A150D\]\/60,
+html[data-theme="light"] .bg-\[\#0A150D\]\/40 {
+  background-color: var(--bg-card) !important;
+  box-shadow: var(--shadow-card);
+}
+
+/* Cards internos e inputs em Light Mode */
+html[data-theme="light"] .bg-\[\#0A150D\] .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#0A150D\]\/90 .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#0A150D\]\/80 .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#0A150D\]\/70 .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#0A150D\]\/60 .bg-\[\#030A06\],
+html[data-theme="light"] .bg-\[\#030A06\]\/70,
+html[data-theme="light"] .bg-\[\#030A06\]\/80,
+html[data-theme="light"] .bg-\[\#030A06\]\/60 {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+  border-radius: 10px !important;
+}
+
+html[data-theme="light"] input:focus,
+html[data-theme="light"] select:focus,
+html[data-theme="light"] textarea:focus {
+  border-color: #14532D !important;
+  box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.12) !important;
+}
+
+/* Textos limpos e legíveis em Light Mode */
+html[data-theme="light"] .text-\[\#F7DECA\] {
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] .text-\[\#D5C5AA\],
+html[data-theme="light"] .text-\[\#D5C5AA\]\/90,
+html[data-theme="light"] .text-\[\#D5C5AA\]\/85,
+html[data-theme="light"] .text-\[\#D5C5AA\]\/80 {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .text-\[\#D5C5AA\]\/75,
+html[data-theme="light"] .text-\[\#D5C5AA\]\/70,
+html[data-theme="light"] .text-\[\#D5C5AA\]\/65,
+html[data-theme="light"] .text-\[\#D5C5AA\]\/60 {
+  color: #64748B !important;
+}
+
+/* Bordas suaves e cantos arredondados estilo Monday / ClickUp / LinkedIn */
+html[data-theme="light"] [class*="border-[#D5C5AA]"],
+html[data-theme="light"] [class*="border-[#57552E]"] {
+  border-color: #E2E8F0 !important;
+}
+
+/* Botões primários imponentes em Verde Floresta Executivo no modo claro */
+html[data-theme="light"] .bg-\[\#D5C5AA\] {
+  background-color: #14532D !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+}
+
+html[data-theme="light"] .bg-\[\#D5C5AA\]:hover {
+  background-color: #166534 !important;
+}
+
+/* Status badges em Light Mode */
+html[data-theme="light"] .text-emerald-300,
+html[data-theme="light"] .text-emerald-200 {
+  color: #047857 !important;
+}
+
+html[data-theme="light"] .bg-emerald-950\/30 {
+  background-color: #ECFDF5 !important;
+}
+
+html[data-theme="light"] .text-amber-300,
+html[data-theme="light"] .text-amber-200 {
+  color: #B45309 !important;
+}
+
+html[data-theme="light"] .bg-amber-950\/30 {
+  background-color: #FFFBEB !important;
+}
+
+html[data-theme="light"] .text-red-300,
+html[data-theme="light"] .text-red-200 {
+  color: #B91C1C !important;
+}
+
+html[data-theme="light"] .bg-red-950\/30 {
+  background-color: #FEF2F2 !important;
+}
+
+/* Arredondamento moderno e redução de caixa-alta excessiva em ambos os temas */
+div[class*="border"],
+section[class*="border"],
+form[class*="border"],
+a[class*="px-"],
+button[class*="px-"],
+button[class*="py-"] {
+  border-radius: 12px;
+}
+
+span[class*="px-2"],
+span[class*="px-3"] {
+  border-radius: 9999px;
+}
+
+[class*="tracking-[0.2"],
+[class*="tracking-[0.3"],
+[class*="tracking-[0.18"],
+[class*="tracking-[0.16"] {
+  letter-spacing: 0.04em !important;
+}
+
+/* Barra de Scroll personalizada e sofisticada (Claro e Escuro) */
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #14532D #EEF1F5;
+}
+
+/* ============================================================================
+   SISTEMA GLOBAL DE MICRO-ANIMAÇÕES E INTERATIVIDADE (Monday / Linear / ClickUp)
+   ============================================================================ */
+
+@keyframes pageReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardFloatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(20, 83, 45, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(20, 83, 45, 0);
+  }
+}
+
+/* Entrada suave das páginas e seções */
+main,
+body > div.flex-1 > div {
+  animation: pageReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Animação escalonada (stagger) nos grids de cards e KPIs */
+.grid > div,
+.grid > a {
+  animation: cardFloatIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.24s ease,
+    background-color 0.2s ease !important;
+}
+
+.grid > *:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.grid > *:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.grid > *:nth-child(3) {
+  animation-delay: 0.11s;
+}
+.grid > *:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.grid > *:nth-child(5) {
+  animation-delay: 0.19s;
+}
+.grid > *:nth-child(6) {
+  animation-delay: 0.23s;
+}
+
+/* Elevação fluida ao passar o mouse em cards */
+.grid > div[class*="border"]:hover,
+.grid > a[class*="border"]:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover) !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Botões e CTAs com física elástica (spring) e resposta tátil */
+button,
+a[class*="px-"] {
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease !important;
+}
+
+button:hover:not(:disabled),
+a[class*="px-"]:hover {
+  transform: translateY(-1.5px);
+}
+
+button:active:not(:disabled),
+a[class*="px-"]:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Botões primários com brilho sutil na elevação */
+.bg-\[\#14532D\]:hover,
+html[data-theme="light"] .bg-\[\#D5C5AA\]:hover {
+  box-shadow: 0 8px 20px -4px rgba(20, 83, 45, 0.35) !important;
+}
+
+/* Ícones ganham vida ao interagir com botões, links ou cards */
+button svg,
+a svg,
+.group svg {
+  transition:
+    transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 0.2s ease;
+}
+
+button:hover svg,
+a:hover svg,
+.group:hover svg {
+  transform: scale(1.14) rotate(-3deg);
+}
+
+/* Setas direcionais deslizam suavemente para a direita no hover */
+a:hover svg.lucide-arrow-right,
+button:hover svg.lucide-arrow-right {
+  transform: translateX(4px) scale(1.08);
+}
+
+a:hover svg.lucide-arrow-left,
+button:hover svg.lucide-arrow-left {
+  transform: translateX(-4px) scale(1.08);
+}
+
+/* Linhas de tabelas corporativas com transição fluida */
+tbody tr {
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* Inputs com foco suave */
+input,
+select,
+textarea {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+html[data-theme="dark"] {
+  scrollbar-color: #B4833E #0B0F17;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #14532D 0%, #1E6B3B 100%);
+  border-radius: 9999px;
+  border: 2px solid var(--bg-subtle);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #0F3F22 0%, #14532D 100%);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0B0F17;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #57552E 0%, #B4833E 100%);
+  border-radius: 9999px;
+  border: 2px solid #0B0F17;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #B4833E 0%, #D5C5AA 100%);
+}
