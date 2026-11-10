@@ -10,6 +10,8 @@ import {
   WorkModality,
   LanguageProficiency,
   ConsentPurpose,
+  SkillLevel,
+  EvidenceType,
 } from "@prisma/client";
 
 function slugify(value: string): string {
@@ -248,6 +250,8 @@ export async function addSkillAction(formData: FormData) {
     },
   });
 
+  const level = (String(formData.get("level") || "INTERMEDIARIO") as SkillLevel);
+
   await prisma.candidateSkill.upsert({
     where: {
       candidateId_skillId: {
@@ -259,6 +263,9 @@ export async function addSkillAction(formData: FormData) {
     create: {
       candidateId: profile.id,
       skillId: skill.id,
+      level: ["BASICO", "INTERMEDIARIO", "AVANCADO"].includes(level)
+        ? level
+        : "INTERMEDIARIO",
     },
   });
 
@@ -266,6 +273,97 @@ export async function addSkillAction(formData: FormData) {
   revalidatePath("/painel");
   revalidatePath("/curriculo");
   redirect("/perfil?salvo=competencia");
+}
+
+// Passaporte: ajustar nível da competência
+export async function setSkillLevelAction(formData: FormData) {
+  const { profile } = await getOrCreateCurrentCandidate();
+  const candidateSkillId = String(formData.get("candidateSkillId") || "");
+  const level = String(formData.get("level") || "") as SkillLevel;
+  if (!candidateSkillId || !["BASICO", "INTERMEDIARIO", "AVANCADO"].includes(level)) return;
+
+  await prisma.candidateSkill.updateMany({
+    where: { id: candidateSkillId, candidateId: profile.id },
+    data: { level },
+  });
+  revalidatePath("/perfil");
+  redirect("/perfil?salvo=nivel#passaporte");
+}
+
+// Passaporte: anexar evidência (DECLARADA -> DOCUMENTADA automaticamente)
+export async function addSkillEvidenceAction(formData: FormData) {
+  const { profile } = await getOrCreateCurrentCandidate();
+  const candidateSkillId = String(formData.get("candidateSkillId") || "");
+  const title = String(formData.get("title") || "").trim();
+  const urlRaw = String(formData.get("url") || "").trim();
+  const description = String(formData.get("description") || "").trim() || null;
+  const typeRaw = String(formData.get("type") || "LINK") as EvidenceType;
+  if (!candidateSkillId || !title) return;
+
+  let url: string | null = null;
+  if (urlRaw) {
+    try {
+      const parsed = new URL(/^https?:\/\//i.test(urlRaw) ? urlRaw : `https://${urlRaw}`);
+      if (!["http:", "https:"].includes(parsed.protocol)) return;
+      url = parsed.toString();
+    } catch {
+      return;
+    }
+  }
+
+  const owned = await prisma.candidateSkill.findFirst({
+    where: { id: candidateSkillId, candidateId: profile.id },
+  });
+  if (!owned) return;
+
+  await prisma.skillEvidence.create({
+    data: {
+      candidateSkillId,
+      title,
+      url,
+      description,
+      type: ["LINK", "CERTIFICADO", "PROJETO", "TRABALHO"].includes(typeRaw)
+        ? typeRaw
+        : "LINK",
+    },
+  });
+
+  if (owned.evidenceStatus === "DECLARADA") {
+    await prisma.candidateSkill.update({
+      where: { id: candidateSkillId },
+      data: { evidenceStatus: "DOCUMENTADA" },
+    });
+  }
+
+  revalidatePath("/perfil");
+  redirect("/perfil?salvo=evidencia#passaporte");
+}
+
+export async function removeSkillEvidenceAction(formData: FormData) {
+  const { profile } = await getOrCreateCurrentCandidate();
+  const evidenceId = String(formData.get("evidenceId") || "");
+  if (!evidenceId) return;
+
+  const evidence = await prisma.skillEvidence.findFirst({
+    where: { id: evidenceId, candidateSkill: { candidateId: profile.id } },
+  });
+  if (!evidence) return;
+
+  await prisma.skillEvidence.delete({ where: { id: evidenceId } });
+
+  // Sem evidências restantes: volta para DECLARADA, exceto se já demonstrada/validada por avaliador
+  const remaining = await prisma.skillEvidence.count({
+    where: { candidateSkillId: evidence.candidateSkillId },
+  });
+  if (remaining === 0) {
+    await prisma.candidateSkill.updateMany({
+      where: { id: evidence.candidateSkillId, evidenceStatus: "DOCUMENTADA" },
+      data: { evidenceStatus: "DECLARADA" },
+    });
+  }
+
+  revalidatePath("/perfil");
+  redirect("/perfil?salvo=evidencia_removida#passaporte");
 }
 
 export async function removeSkillAction(formData: FormData) {

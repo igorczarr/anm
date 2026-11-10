@@ -4,8 +4,29 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function sanitizeDatabaseUrl() {
+  if (process.env.DATABASE_URL) {
+    let url = process.env.DATABASE_URL.trim();
+    if (
+      (url.startsWith('"') && url.endsWith('"')) ||
+      (url.startsWith("'") && url.endsWith("'"))
+    ) {
+      url = url.slice(1, -1).trim();
+    }
+    process.env.DATABASE_URL = url;
+  }
+}
+
+sanitizeDatabaseUrl();
+
 function createPrismaClient() {
+  sanitizeDatabaseUrl();
+  const dbUrl =
+    process.env.DATABASE_URL ||
+    "postgresql://postgres:postgres@localhost:5432/postgres?schema=arena";
+
   const baseClient = new PrismaClient({
+    datasourceUrl: dbUrl,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 

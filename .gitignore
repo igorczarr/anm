@@ -1,3 +1,6 @@
 node_modules/
 .env
+.env.*
+.env*.txt
+*.env
 .DS_Store

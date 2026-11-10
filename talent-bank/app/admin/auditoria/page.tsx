@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { updateUserRoleAdminAction } from "@/app/actions/lgpd";
 import { createRecruiterInviteAction } from "@/app/actions/auth";
+
+export const dynamic = "force-dynamic";
 import {
   ShieldAlert,
   Users,

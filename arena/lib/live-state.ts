@@ -8,21 +8,29 @@ import { Prisma } from "@prisma/client";
 export const DEFAULT_EVENT_SLUG = "a-nova-moeda-2026";
 
 export async function getPrimaryEvent() {
-  const event = await prisma.event.findUnique({
-    where: { slug: DEFAULT_EVENT_SLUG },
-    include: {
-      liveState: true,
-    },
-  });
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+  try {
+    const event = await prisma.event.findUnique({
+      where: { slug: DEFAULT_EVENT_SLUG },
+      include: {
+        liveState: true,
+      },
+    });
 
-  if (event) return event;
+    if (event) return event;
 
-  return prisma.event.findFirst({
-    include: {
-      liveState: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
+    return await prisma.event.findFirst({
+      include: {
+        liveState: true,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  } catch (err) {
+    console.warn("getPrimaryEvent: Banco de dados inacessível ou não configurado:", err);
+    return null;
+  }
 }
 
 export async function ensureLiveState(eventId: string) {

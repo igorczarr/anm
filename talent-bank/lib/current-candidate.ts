@@ -17,7 +17,9 @@ export async function getOrCreateCurrentCandidate() {
     include: {
       educations: { orderBy: { startDate: "desc" } },
       experiences: { orderBy: { startDate: "desc" } },
-      skills: { include: { skill: true } },
+      skills: {
+        include: { skill: true, evidences: { orderBy: { createdAt: "desc" } } },
+      },
       languages: { orderBy: { createdAt: "asc" } },
       resumes: { orderBy: { updatedAt: "desc" } },
       applications: {
@@ -42,7 +44,9 @@ export async function getOrCreateCurrentCandidate() {
       include: {
         educations: { orderBy: { startDate: "desc" } },
         experiences: { orderBy: { startDate: "desc" } },
-        skills: { include: { skill: true } },
+        skills: {
+        include: { skill: true, evidences: { orderBy: { createdAt: "desc" } } },
+      },
         languages: { orderBy: { createdAt: "asc" } },
         resumes: { orderBy: { updatedAt: "desc" } },
         applications: {

@@ -234,7 +234,7 @@ export async function GET(req: NextRequest) {
       include: {
         educations: { orderBy: { startDate: "desc" } },
         experiences: { orderBy: { startDate: "desc" } },
-        skills: { include: { skill: true } },
+        skills: { include: { skill: true, evidences: true } },
         languages: { orderBy: { createdAt: "asc" } },
         resumes: { orderBy: { updatedAt: "desc" } },
         applications: {

@@ -338,3 +338,54 @@ export async function toggleArchiveCandidateAction(formData: FormData) {
   revalidatePath("/admin/candidatos");
   revalidatePath(`/admin/candidatos/${candidateId}`);
 }
+
+
+// Passaporte de Talentos: avaliador identificado altera o estado da competência
+export async function setSkillEvidenceStatusAdminAction(formData: FormData) {
+  const admin = await getCurrentAdminUser();
+  if (
+    admin.role !== "ADMIN" &&
+    admin.role !== "RECRUITER" &&
+    admin.role !== "JOB_MANAGER"
+  )
+    return;
+
+  const candidateSkillId = String(formData.get("candidateSkillId") || "");
+  const status = String(formData.get("status") || "");
+  if (
+    !candidateSkillId ||
+    !["DECLARADA", "DOCUMENTADA", "DEMONSTRADA", "VALIDADA"].includes(status)
+  )
+    return;
+
+  const current = await prisma.candidateSkill.findUnique({
+    where: { id: candidateSkillId },
+    include: { skill: true },
+  });
+  if (!current) return;
+
+  const isValidated = status === "VALIDADA";
+  await prisma.candidateSkill.update({
+    where: { id: candidateSkillId },
+    data: {
+      evidenceStatus: status as "DECLARADA" | "DOCUMENTADA" | "DEMONSTRADA" | "VALIDADA",
+      validatedById: isValidated ? admin.id : null,
+      validatedAt: isValidated ? new Date() : null,
+    },
+  });
+
+  await logAdminAction({
+    userId: admin.id,
+    action: "SKILL_STATUS_CHANGE",
+    entityType: "CandidateSkill",
+    entityId: candidateSkillId,
+    metadata: {
+      skill: current.skill.name,
+      from: current.evidenceStatus,
+      to: status,
+    },
+  });
+
+  revalidatePath(`/admin/candidatos/${current.candidateId}`);
+  revalidatePath("/perfil");
+}

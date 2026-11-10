@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
+import { EVIDENCE_BADGES, LEVEL_LABELS } from "@/lib/passport";
+import { setSkillEvidenceStatusAdminAction } from "@/app/actions/admin";
 import {
   ArrowLeft,
   FileDown,
@@ -24,7 +26,9 @@ async function CandidateDetailAdminContent({
     include: {
       educations: { orderBy: { startDate: "desc" } },
       experiences: { orderBy: { startDate: "desc" } },
-      skills: { include: { skill: true } },
+      skills: {
+        include: { skill: true, evidences: { orderBy: { createdAt: "desc" } } },
+      },
       languages: true,
       resumes: { orderBy: { updatedAt: "desc" } },
       applications: {
@@ -195,15 +199,71 @@ async function CandidateDetailAdminContent({
             <Award className="w-4 h-4" />
             Competências & Idiomas
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {candidate.skills.map((cs) => (
-              <span
-                key={cs.id}
-                className="px-3 py-1 border border-[#57552E] bg-[#030A06] text-xs text-[#F7DECA]"
-              >
-                {cs.skill.name}
-              </span>
-            ))}
+          <div className="space-y-2.5">
+            {candidate.skills.length === 0 && (
+              <p className="text-xs text-[#D5C5AA]/70">Nenhuma competência cadastrada.</p>
+            )}
+            {candidate.skills.map((cs) => {
+              const badge = EVIDENCE_BADGES[cs.evidenceStatus];
+              return (
+                <div
+                  key={cs.id}
+                  className="border border-[#57552E] bg-[#030A06] p-3 space-y-2 text-xs"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <strong className="text-[#F7DECA]">{cs.skill.name}</strong>
+                    <span className="text-[#D5C5AA]/70">
+                      {LEVEL_LABELS[cs.level]}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold ${badge.className}`}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
+                  {cs.evidences.map((ev) => (
+                    <div key={ev.id} className="text-[#D5C5AA]/85">
+                      • {ev.title} ({ev.type.toLowerCase()})
+                      {ev.url && (
+                        <>
+                          {" "}
+                          <a
+                            href={ev.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline text-[#F7DECA]"
+                          >
+                            abrir
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  <form
+                    action={setSkillEvidenceStatusAdminAction}
+                    className="flex items-center gap-2 pt-1"
+                  >
+                    <input type="hidden" name="candidateSkillId" value={cs.id} />
+                    <select
+                      name="status"
+                      defaultValue={cs.evidenceStatus}
+                      className="bg-white border border-slate-300 px-2 py-1 text-[11px] text-slate-900"
+                    >
+                      <option value="DECLARADA">Declarada</option>
+                      <option value="DOCUMENTADA">Documentada</option>
+                      <option value="DEMONSTRADA">Demonstrada</option>
+                      <option value="VALIDADA">Validada</option>
+                    </select>
+                    <button
+                      type="submit"
+                      className="px-3 py-1 bg-[#D5C5AA] text-[#030A06] font-semibold text-[11px] cursor-pointer"
+                    >
+                      Atualizar estado
+                    </button>
+                  </form>
+                </div>
+              );
+            })}
           </div>
           <div className="pt-3 border-t border-[#D5C5AA]/15 space-y-1 text-xs">
             {candidate.languages.map((l) => (

@@ -3,6 +3,8 @@ import { Navbar } from "@/components/navbar";
 import { LayoutChrome } from "@/components/layout-chrome";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "A Nova Moeda · Sistema de Gestão e Interação da Arena (UEFS)",
   description:

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getPrimaryEvent } from "@/lib/live-state";
 import {
@@ -13,11 +14,25 @@ import {
   Vote,
 } from "lucide-react";
 
-async function HomeContent() {
-  const event = await getPrimaryEvent();
+export const dynamic = "force-dynamic";
 
-  const [topics, speakers, macroSteps, pollsCount] = event
-    ? await Promise.all([
+type TopicWithSpeakers = Prisma.TopicGetPayload<{
+  include: { mainSpeaker: true; provoker: true };
+}>;
+type SpeakerItem = Prisma.SpeakerGetPayload<{}>;
+type StepItem = Prisma.ScheduleStepGetPayload<{}>;
+
+async function HomeContent() {
+  let event = null;
+  let topics: TopicWithSpeakers[] = [];
+  let speakers: SpeakerItem[] = [];
+  let macroSteps: StepItem[] = [];
+  let pollsCount = 0;
+
+  try {
+    event = await getPrimaryEvent();
+    if (event) {
+      [topics, speakers, macroSteps, pollsCount] = await Promise.all([
         prisma.topic.findMany({
           where: { eventId: event.id },
           include: { mainSpeaker: true, provoker: true },
@@ -32,8 +47,11 @@ async function HomeContent() {
           orderBy: { macroOrder: "asc" },
         }),
         prisma.poll.count({ where: { eventId: event.id } }),
-      ])
-    : [[], [], [], 0];
+      ]);
+    }
+  } catch (err) {
+    console.warn("HomeContent: Banco ainda não configurado ou indisponível na compilação:", err);
+  }
 
   const totalSec = macroSteps.reduce((acc, s) => acc + s.durationSec, 0);
   const totalMin = Math.round(totalSec / 60);
@@ -195,13 +213,13 @@ async function HomeContent() {
                 <div className="flex items-center justify-between">
                   <span className="text-[#D5C5AA]/65">Palestrante:</span>
                   <strong className="text-[#F7DECA]">
-                    {t.mainSpeaker.name}
+                    {t.mainSpeaker?.name ?? "A definir"}
                   </strong>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#D5C5AA]/65">Provocador(a):</span>
                   <span className="font-medium text-[#D5C5AA]">
-                    {t.provokerLabel}
+                    {t.provokerLabel || t.provoker?.name || "A definir"}
                   </span>
                 </div>
               </div>

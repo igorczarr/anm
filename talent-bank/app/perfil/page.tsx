@@ -10,9 +10,13 @@ import {
   deleteExperienceAction,
   addSkillAction,
   removeSkillAction,
+  setSkillLevelAction,
+  addSkillEvidenceAction,
+  removeSkillEvidenceAction,
   addLanguageAction,
   deleteLanguageAction,
 } from "@/app/actions/candidate";
+import { EVIDENCE_BADGES } from "@/lib/passport";
 import {
   Award,
   Briefcase,
@@ -36,6 +40,9 @@ const SAVE_MESSAGES: Record<string, string> = {
   experiencia_removida: "Experiência profissional removida do perfil.",
   competencia: "Competência vinculada ao seu perfil com sucesso!",
   competencia_removida: "Competência removida do seu perfil.",
+  nivel: "Nível da competência atualizado no seu Passaporte.",
+  evidencia: "Evidência anexada! A competência agora consta como Documentada.",
+  evidencia_removida: "Evidência removida do seu Passaporte.",
   idioma: "Idioma adicionado ao seu perfil com sucesso!",
   idioma_removido: "Idioma removido do seu perfil.",
 };
@@ -700,36 +707,148 @@ async function ProfileBuilderContent({
             </h2>
           </div>
 
-          {/* Competências atuais do candidato */}
-          <div className="flex flex-wrap gap-2">
+          {/* Passaporte de Talentos: competências com nível e evidências */}
+          <div id="passaporte" className="space-y-3">
             {profile.skills.length === 0 ? (
               <p className="text-xs text-slate-600">
                 Nenhuma competência adicionada ainda.
               </p>
             ) : (
-              profile.skills.map((cs) => (
-                <form
-                  key={cs.id}
-                  action={removeSkillAction}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#14532D]/30 bg-[#ECFDF5] text-xs font-semibold text-[#14532D]"
-                >
-                  <input
-                    type="hidden"
-                    name="candidateSkillId"
-                    value={cs.id}
-                  />
-                  <span>{cs.skill.name}</span>
-                  <button
-                    type="submit"
-                    className="text-[#14532D]/70 hover:text-red-600 font-bold cursor-pointer"
-                    title="Remover competência"
+              profile.skills.map((cs) => {
+                const badge = EVIDENCE_BADGES[cs.evidenceStatus];
+                return (
+                  <div
+                    key={cs.id}
+                    className="border border-slate-300 bg-white p-4 space-y-3 rounded-lg"
                   >
-                    ×
-                  </button>
-                </form>
-              ))
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <strong className="text-sm text-slate-900">
+                          {cs.skill.name}
+                        </strong>
+                        <span
+                          className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold ${badge.className}`}
+                          title={badge.hint}
+                        >
+                          {badge.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <form
+                          action={setSkillLevelAction}
+                          className="flex items-center gap-1.5"
+                        >
+                          <input type="hidden" name="candidateSkillId" value={cs.id} />
+                          <select
+                            name="level"
+                            defaultValue={cs.level}
+                            className="bg-white border border-slate-300 px-2 py-1 text-[11px] text-slate-900"
+                          >
+                            <option value="BASICO">Básico</option>
+                            <option value="INTERMEDIARIO">Intermediário</option>
+                            <option value="AVANCADO">Avançado</option>
+                          </select>
+                          <button
+                            type="submit"
+                            className="px-2.5 py-1 border border-slate-300 bg-white text-[11px] font-semibold text-slate-800 hover:bg-[#ECFDF5] cursor-pointer"
+                          >
+                            Salvar nível
+                          </button>
+                        </form>
+                        <form action={removeSkillAction}>
+                          <input type="hidden" name="candidateSkillId" value={cs.id} />
+                          <button
+                            type="submit"
+                            className="px-2 py-1 text-red-700 hover:bg-red-50 text-[11px] font-semibold cursor-pointer"
+                            title="Remover competência"
+                          >
+                            Remover
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+
+                    {cs.evidences.length > 0 && (
+                      <ul className="space-y-1.5">
+                        {cs.evidences.map((ev) => (
+                          <li
+                            key={ev.id}
+                            className="flex items-center justify-between gap-2 text-xs bg-slate-50 border border-slate-200 px-3 py-2"
+                          >
+                            <span className="text-slate-800">
+                              <strong>{ev.title}</strong>{" "}
+                              <span className="text-slate-500">({ev.type.toLowerCase()})</span>
+                              {ev.url && (
+                                <>
+                                  {" · "}
+                                  <a
+                                    href={ev.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[#14532D] underline"
+                                  >
+                                    abrir
+                                  </a>
+                                </>
+                              )}
+                            </span>
+                            <form action={removeSkillEvidenceAction}>
+                              <input type="hidden" name="evidenceId" value={ev.id} />
+                              <button
+                                type="submit"
+                                className="text-red-700 font-semibold cursor-pointer"
+                              >
+                                Excluir
+                              </button>
+                            </form>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <form
+                      action={addSkillEvidenceAction}
+                      className="grid grid-cols-1 sm:grid-cols-[110px_1fr_1fr_auto] gap-2"
+                    >
+                      <input type="hidden" name="candidateSkillId" value={cs.id} />
+                      <select
+                        name="type"
+                        className="bg-white border border-slate-300 px-2 py-2 text-xs text-slate-900"
+                      >
+                        <option value="LINK">Link</option>
+                        <option value="CERTIFICADO">Certificado</option>
+                        <option value="PROJETO">Projeto</option>
+                        <option value="TRABALHO">Trabalho</option>
+                      </select>
+                      <input
+                        type="text"
+                        name="title"
+                        required
+                        placeholder="Título da evidência"
+                        className="bg-white border border-slate-300 px-3 py-2 text-xs text-slate-900"
+                      />
+                      <input
+                        type="text"
+                        name="url"
+                        placeholder="Link (Drive, GitHub, certificado...)"
+                        className="bg-white border border-slate-300 px-3 py-2 text-xs text-slate-900"
+                      />
+                      <button
+                        type="submit"
+                        className="px-3 py-2 bg-[#14532D] text-white text-xs font-semibold hover:bg-[#166534] cursor-pointer"
+                      >
+                        + Evidência
+                      </button>
+                    </form>
+                  </div>
+                );
+              })
             )}
+            <p className="text-[11px] text-slate-600">
+              Declarada: informada por você · Documentada: com evidência · Demonstrada: comprovada em desafio · Validada: reconhecida por avaliador identificado.
+            </p>
           </div>
+
 
           {/* Sugestões rápidas do Briefing */}
           <div>

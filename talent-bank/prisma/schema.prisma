@@ -233,10 +233,48 @@ model CandidateSkill {
   skillId     String
   candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   skill       Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level          SkillLevel     @default(INTERMEDIARIO)
+  evidenceStatus EvidenceStatus @default(DECLARADA)
+  validatedById  String?
+  validatedAt    DateTime?
+  evidences      SkillEvidence[]
   createdAt   DateTime         @default(now())
 
   @@unique([candidateId, skillId])
   @@index([skillId])
+}
+
+enum SkillLevel {
+  BASICO
+  INTERMEDIARIO
+  AVANCADO
+}
+
+enum EvidenceStatus {
+  DECLARADA
+  DOCUMENTADA
+  DEMONSTRADA
+  VALIDADA
+}
+
+enum EvidenceType {
+  LINK
+  CERTIFICADO
+  PROJETO
+  TRABALHO
+}
+
+model SkillEvidence {
+  id               String         @id @default(cuid())
+  candidateSkillId String
+  candidateSkill   CandidateSkill @relation(fields: [candidateSkillId], references: [id], onDelete: Cascade)
+  type             EvidenceType   @default(LINK)
+  title            String
+  url              String?
+  description      String?
+  createdAt        DateTime       @default(now())
+
+  @@index([candidateSkillId])
 }
 
 model Language {

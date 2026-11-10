@@ -3,6 +3,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Navbar } from "@/components/navbar";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Talent Hub",
   description:
