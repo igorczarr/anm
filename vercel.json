@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/talentos",
+      "destination": "https://anm-talentos.vercel.app/talentos"
+    },
+    {
+      "source": "/talentos/:path*",
+      "destination": "https://anm-talentos.vercel.app/talentos/:path*"
+    }
+  ]
+}
