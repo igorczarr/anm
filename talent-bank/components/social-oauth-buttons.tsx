@@ -23,12 +23,13 @@ export function SocialOAuthButtons({
 
     try {
       const origin = window.location.origin;
-      const redirectUrl = `${origin}/entrar/sso-callback`;
+      const basePath = "/talentos";
+      const redirectUrl = `${origin}${basePath}/entrar/sso-callback`;
       const redirectUrlComplete = inviteToken
-        ? `${origin}/api/auth/post-login?convite=${encodeURIComponent(
+        ? `${origin}${basePath}/api/auth/post-login?convite=${encodeURIComponent(
             inviteToken
           )}`
-        : `${origin}/api/auth/post-login`;
+        : `${origin}${basePath}/api/auth/post-login`;
 
       if (!clerk.loaded || !clerk.client) {
         setErrorMsg("Aguarde 1 segundo enquanto o Clerk inicializa e tente novamente.");
@@ -47,7 +48,7 @@ export function SocialOAuthButtons({
             .filter(Boolean)
             .join(" ") || primaryEmail.split("@")[0];
 
-        window.location.href = `/api/auth/post-login?email=${encodeURIComponent(
+        window.location.href = `${basePath}/api/auth/post-login?email=${encodeURIComponent(
           primaryEmail
         )}&name=${encodeURIComponent(fullName)}&clerkId=${encodeURIComponent(
           clerk.user.id
@@ -74,7 +75,7 @@ export function SocialOAuthButtons({
         "";
 
       if (code === "session_exists") {
-        window.location.href = "/api/auth/post-login";
+        window.location.href = "/talentos/api/auth/post-login";
         return;
       }
 

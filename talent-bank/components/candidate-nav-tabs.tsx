@@ -92,7 +92,7 @@ export function CandidateNavTabs() {
         </nav>
 
         <a
-          href="/api/resumes/pdf"
+          href="/talentos/api/resumes/pdf"
           className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 hover:border-[#14532D] hover:text-[#14532D] transition"
         >
           <FileDown className="w-3.5 h-3.5 text-[#14532D]" />

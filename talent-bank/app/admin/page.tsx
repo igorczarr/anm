@@ -174,7 +174,7 @@ async function AdminDashboardContent({
 
         <form
           method="GET"
-          action="/admin"
+          action="/talentos/admin"
           className="flex flex-wrap items-center gap-3"
         >
           <div className="flex items-center gap-2 text-xs text-[#D5C5AA]">

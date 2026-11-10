@@ -3,9 +3,38 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const path = require('path');
+const http = require('http');
 
 const app = express();
 const port = process.env.PORT || 3001;
+const talentHubPort = process.env.TALENT_HUB_PORT || 3000;
+
+// Proxy reverso para o subcaminho /talentos (Talent Hub Next.js)
+app.use('/talentos', (req, res) => {
+    const proxyReq = http.request(
+        {
+            hostname: '127.0.0.1',
+            port: talentHubPort,
+            path: req.originalUrl,
+            method: req.method,
+            headers: {
+                ...req.headers,
+                host: `localhost:${talentHubPort}`,
+            },
+        },
+        (proxyRes) => {
+            res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
+            proxyRes.pipe(res, { end: true });
+        }
+    );
+
+    proxyReq.on('error', (err) => {
+        console.error('Erro no proxy /talentos:', err.message);
+        res.status(502).send('Talent Hub indisponível no momento.');
+    });
+
+    req.pipe(proxyReq, { end: true });
+});
 
 // Configuração do Banco de Dados PostgreSQL
 const pool = new Pool({

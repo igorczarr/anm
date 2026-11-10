@@ -11,7 +11,7 @@ export default function SSOSyncPage() {
     if (!isLoaded) return;
 
     if (!isSignedIn || !user) {
-      window.location.href = "/entrar";
+      window.location.href = "/talentos/entrar";
       return;
     }
 
@@ -26,7 +26,7 @@ export default function SSOSyncPage() {
     const params = new URLSearchParams(window.location.search);
     const convite = params.get("convite") || "";
 
-    window.location.href = `/api/auth/post-login?email=${encodeURIComponent(
+    window.location.href = `/talentos/api/auth/post-login?email=${encodeURIComponent(
       email
     )}&name=${encodeURIComponent(fullName)}&clerkId=${encodeURIComponent(
       user.id

@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   description:
     "Seu próximo passo profissional pode começar com uma conexão. Cadastre seu perfil, apresente suas competências e encontre oportunidades.",
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [{ url: "/talentos/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/talentos/icon.svg",
+    apple: "/talentos/icon.svg",
   },
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#D5C5AA]/70">
               <div className="flex items-center gap-2.5">
                 <img
-                  src="/icon.svg"
+                  src="/talentos/icon.svg"
                   alt="A Nova Moeda"
                   className="w-6 h-6 rounded-md"
                 />
@@ -39,13 +39,13 @@ export default function RootLayout({
                 <span>© 2026</span>
               </div>
               <div className="flex items-center gap-6 font-medium">
-                <a href="/privacidade" className="hover:text-[#F7DECA] transition">
+                <a href="/talentos/privacidade" className="hover:text-[#F7DECA] transition">
                   Termos & Privacidade (LGPD)
                 </a>
-                <a href="/vagas" className="hover:text-[#F7DECA] transition">
+                <a href="/talentos/vagas" className="hover:text-[#F7DECA] transition">
                   Oportunidades
                 </a>
-                <a href="/admin" className="hover:text-[#F7DECA] transition">
+                <a href="/talentos/admin" className="hover:text-[#F7DECA] transition">
                   Área de Recrutadores
                 </a>
               </div>

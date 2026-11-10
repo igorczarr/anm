@@ -10,6 +10,7 @@ import type {
   EventStatus,
   PollStatus,
   QuestionStatus,
+  StepStatus,
   StepType,
   TimerStatus,
 } from "@prisma/client";
@@ -41,9 +42,29 @@ export interface SyncStepInfo {
   stepType: StepType;
   arenaMode?: ArenaMode;
   sequenceOrder: number;
+  macroOrder?: number | null;
   durationSec: number;
+  actualDurationSec?: number | null;
+  status?: StepStatus;
   responsibleName: string;
   topicNumber: number | null;
+}
+
+export interface SyncTimerSessionRecord {
+  id: string;
+  stepCode: string;
+  stepTitle: string;
+  sequenceOrder: number;
+  plannedDurationSec: number;
+  effectiveDurationSec: number | null;
+  pausedTotalSec: number;
+  addedTotalSec: number;
+  reducedTotalSec: number;
+  overrunSec: number;
+  status: TimerStatus;
+  changedByName: string | null;
+  actualStartAt: string;
+  actualEndAt: string | null;
 }
 
 export interface SyncPollInfo {
@@ -79,12 +100,18 @@ export interface ArenaFullSnapshot {
     estimatedAudience: number;
     programmedDurationMin: number;
     scheduledStartAt: string | null;
+    actualStartAt?: string | null;
+    actualEndAt?: string | null;
     questionCharLimit: number;
     maxQuestionsPerTopic: number;
   };
   liveState: {
     status: EventStatus;
     arenaMode: ArenaMode;
+    activeStepId?: string | null;
+    activeTopicId?: string | null;
+    activePollId?: string | null;
+    selectedQuestionId?: string | null;
     questionsOpen: boolean;
     showTimerOnArena: boolean;
     soundAlertsEnabled: boolean;
@@ -102,6 +129,7 @@ export interface ArenaFullSnapshot {
   timer: ComputedTimerSnapshot;
   activeTopic: SyncTopicInfo | null;
   activeStep: SyncStepInfo | null;
+  prevStep?: SyncStepInfo | null;
   nextStep: SyncStepInfo | null;
   activePoll: SyncPollInfo | null;
   selectedQuestion: {
@@ -125,6 +153,8 @@ export interface ArenaFullSnapshot {
     questionsApproved: number;
     activePollVotes: number;
   };
+  operationalSteps?: SyncStepInfo[];
+  recentTimerSessions?: SyncTimerSessionRecord[];
 }
 
 export function useArenaSync(options?: {
@@ -259,7 +289,12 @@ export function useArenaSync(options?: {
       clearInterval(pollInterval);
       if (heartbeatInterval) clearInterval(heartbeatInterval);
     };
-  }, [fetchStateSnapshot, applyIncomingPayload, options?.isAdmin, options?.isArenaScreen]);
+  }, [
+    fetchStateSnapshot,
+    applyIncomingPayload,
+    options?.isAdmin,
+    options?.isArenaScreen,
+  ]);
 
   // Atualização local suave (250ms) baseada estritamente na referência temporal do servidor
   useEffect(() => {

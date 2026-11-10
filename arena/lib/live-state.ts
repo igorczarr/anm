@@ -85,8 +85,6 @@ export async function getArenaSyncSnapshot(options?: {
     nowMs: serverNow,
   });
 
-  // Se o cliente já possui a versão (seq) atual e não houve mudança estrutural,
-  // retornamos confirmação leve com o timer recalculado pelo relógio do servidor
   if (
     options?.sinceSeq &&
     options.sinceSeq >= liveState.seq &&
@@ -116,6 +114,7 @@ export async function getArenaSyncSnapshot(options?: {
     questionsTotal,
     questionsPending,
     questionsApproved,
+    recentTimerSessions,
   ] = await Promise.all([
     liveState.activeTopicId
       ? prisma.topic.findUnique({
@@ -189,14 +188,38 @@ export async function getArenaSyncSnapshot(options?: {
         },
       },
     }),
+    options?.includeAdminStats
+      ? prisma.timerSession.findMany({
+          where: { eventId: event.id },
+          include: {
+            step: {
+              select: {
+                code: true,
+                title: true,
+                sequenceOrder: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 15,
+        })
+      : Promise.resolve([]),
   ]);
 
   let nextStep = null;
+  let prevStep = null;
   if (activeStep) {
     nextStep =
       allOperationalSteps.find(
         (s) => s.sequenceOrder > activeStep.sequenceOrder
       ) ?? null;
+    const prevCandidates = allOperationalSteps.filter(
+      (s) => s.sequenceOrder < activeStep.sequenceOrder
+    );
+    prevStep =
+      prevCandidates.length > 0
+        ? prevCandidates[prevCandidates.length - 1]
+        : null;
   } else {
     nextStep = allOperationalSteps[0] ?? null;
   }
@@ -272,12 +295,18 @@ export async function getArenaSyncSnapshot(options?: {
       estimatedAudience: event.estimatedAudience,
       programmedDurationMin: event.programmedDurationMin,
       scheduledStartAt: event.scheduledStartAt,
+      actualStartAt: event.actualStartAt,
+      actualEndAt: event.actualEndAt,
       questionCharLimit: event.questionCharLimit,
       maxQuestionsPerTopic: event.maxQuestionsPerTopic,
     },
     liveState: {
       status: liveState.status,
       arenaMode: liveState.arenaMode,
+      activeStepId: liveState.activeStepId,
+      activeTopicId: liveState.activeTopicId,
+      activePollId: liveState.activePollId,
+      selectedQuestionId: liveState.selectedQuestionId,
       questionsOpen: liveState.questionsOpen,
       showTimerOnArena: liveState.showTimerOnArena,
       soundAlertsEnabled: liveState.soundAlertsEnabled,
@@ -325,12 +354,30 @@ export async function getArenaSyncSnapshot(options?: {
           arenaMode: activeStep.arenaMode,
           sequenceOrder: activeStep.sequenceOrder,
           durationSec: activeStep.durationSec,
+          actualDurationSec: activeStep.actualDurationSec,
+          status: activeStep.status,
           responsibleName:
             activeStep.responsibleName ||
             activeStep.speaker?.name ||
             activeStep.topic?.mainSpeaker.name ||
             "Organização",
           topicNumber: activeStep.topic?.number ?? null,
+        }
+      : null,
+    prevStep: prevStep
+      ? {
+          id: prevStep.id,
+          code: prevStep.code,
+          title: prevStep.title,
+          stepType: prevStep.stepType,
+          sequenceOrder: prevStep.sequenceOrder,
+          durationSec: prevStep.durationSec,
+          responsibleName:
+            prevStep.responsibleName ||
+            prevStep.speaker?.name ||
+            prevStep.topic?.mainSpeaker.name ||
+            "Organização",
+          topicNumber: prevStep.topic?.number ?? null,
         }
       : null,
     nextStep: nextStep
@@ -368,5 +415,43 @@ export async function getArenaSyncSnapshot(options?: {
       questionsApproved,
       activePollVotes: activePoll?.totalVotes ?? 0,
     },
+    ...(options?.includeAdminStats
+      ? {
+          operationalSteps: allOperationalSteps.map((st) => ({
+            id: st.id,
+            code: st.code,
+            title: st.title,
+            stepType: st.stepType,
+            arenaMode: st.arenaMode,
+            sequenceOrder: st.sequenceOrder,
+            macroOrder: st.macroOrder,
+            durationSec: st.durationSec,
+            actualDurationSec: st.actualDurationSec,
+            status: st.status,
+            responsibleName:
+              st.responsibleName ||
+              st.speaker?.name ||
+              st.topic?.mainSpeaker.name ||
+              "Organização",
+            topicNumber: st.topic?.number ?? null,
+          })),
+          recentTimerSessions: recentTimerSessions.map((ts) => ({
+            id: ts.id,
+            stepCode: ts.step.code,
+            stepTitle: ts.step.title,
+            sequenceOrder: ts.step.sequenceOrder,
+            plannedDurationSec: ts.plannedDurationSec,
+            effectiveDurationSec: ts.effectiveDurationSec,
+            pausedTotalSec: ts.pausedTotalSec,
+            addedTotalSec: ts.addedTotalSec,
+            reducedTotalSec: ts.reducedTotalSec,
+            overrunSec: ts.overrunSec,
+            status: ts.status,
+            changedByName: ts.changedByName,
+            actualStartAt: ts.actualStartAt,
+            actualEndAt: ts.actualEndAt,
+          })),
+        }
+      : {}),
   };
 }

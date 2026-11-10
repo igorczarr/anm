@@ -66,7 +66,7 @@ async function CandidateDetailAdminContent({
 
         <div className="flex flex-wrap items-center gap-3">
           <a
-            href={`/api/resumes/pdf?candidateId=${candidate.id}`}
+            href={`/talentos/api/resumes/pdf?candidateId=${candidate.id}`}
             className="px-5 py-3 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#F7DECA] transition flex items-center gap-2"
           >
             <FileDown className="w-4 h-4" />
@@ -239,7 +239,7 @@ async function CandidateDetailAdminContent({
                   </div>
                 </div>
                 <a
-                  href={`/api/resumes/${r.id}`}
+                  href={`/talentos/api/resumes/${r.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 border border-[#D5C5AA]/40 text-[#F7DECA]"

@@ -74,7 +74,7 @@ async function CandidateDashboardContent() {
             Meu currículo
           </Link>
           <a
-            href="/api/resumes/pdf"
+            href="/talentos/api/resumes/pdf"
             className="px-4 py-2.5 border border-[#57552E] bg-[#030A06] text-[#D5C5AA] text-xs uppercase tracking-[0.18em] hover:text-[#F7DECA] transition flex items-center gap-1.5"
           >
             <FileDown className="w-3.5 h-3.5" />

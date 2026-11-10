@@ -92,8 +92,8 @@ async function AdminAuditAndRbacContent() {
               Links de Cadastro de Recrutador Gerados (Copie e envie ao recrutador):
             </span>
             {invites.map((inv) => {
-              const relativeUrl = `/cadastro?convite=${inv.token}`;
-              const fullLocalUrl = `http://localhost:3000/cadastro?convite=${inv.token}`;
+              const relativeUrl = `/talentos/cadastro?convite=${inv.token}`;
+              const fullProdUrl = `https://anm.vrtice.com.br/talentos/cadastro?convite=${inv.token}`;
               return (
                 <div
                   key={inv.id}
@@ -114,7 +114,7 @@ async function AdminAuditAndRbacContent() {
                       )}
                     </div>
                     <div className="font-mono text-[#F7DECA] bg-[#0A150D] px-3 py-1.5 border border-[#D5C5AA]/20 select-all">
-                      {fullLocalUrl}
+                      {fullProdUrl}
                     </div>
                   </div>
 

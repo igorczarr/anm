@@ -175,7 +175,7 @@ async function JobsCatalogContent({
       {/* Formulário de Pesquisa e Filtros no Servidor (Seção 4.2) */}
       <form
         method="GET"
-        action="/vagas"
+        action="/talentos/vagas"
         className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-6 space-y-4"
       >
         <div className="flex items-center justify-between">

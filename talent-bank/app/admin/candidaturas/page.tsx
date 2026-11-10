@@ -100,7 +100,7 @@ async function AdminApplicationsContent({
 
         <div className="flex flex-wrap items-center gap-3">
           <a
-            href={`/api/admin/export/applications?${
+            href={`/talentos/api/admin/export/applications?${
               jobId ? `jobId=${jobId}&` : ""
             }${status ? `status=${status}` : ""}`}
             className="px-4 py-2.5 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.16em] text-[#F7DECA] flex items-center gap-1.5"
@@ -109,7 +109,7 @@ async function AdminApplicationsContent({
             Exportar CSV
           </a>
           <a
-            href={`/api/admin/reports/applications-pdf${
+            href={`/talentos/api/admin/reports/applications-pdf${
               jobId ? `?jobId=${jobId}` : ""
             }`}
             className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.16em] flex items-center gap-1.5"
@@ -123,7 +123,7 @@ async function AdminApplicationsContent({
       {/* Filtros (Seção 5.4) */}
       <form
         method="GET"
-        action="/admin/candidaturas"
+        action="/talentos/admin/candidaturas"
         className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-5 grid grid-cols-1 sm:grid-cols-4 gap-3"
       >
         <select
@@ -267,7 +267,7 @@ async function AdminApplicationsContent({
                     Perfil Completo
                   </Link>
                   <a
-                    href={`/api/resumes/pdf?candidateId=${selectedApp.candidate.id}`}
+                    href={`/talentos/api/resumes/pdf?candidateId=${selectedApp.candidate.id}`}
                     className="px-3 py-1.5 border border-[#57552E] bg-[#030A06] text-[11px] uppercase tracking-[0.14em] text-[#F7DECA]"
                   >
                     Currículo PDF

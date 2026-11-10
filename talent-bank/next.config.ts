@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  basePath: "/talentos",
   devIndicators: false,
   experimental: {
     serverActions: {
@@ -19,4 +20,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 

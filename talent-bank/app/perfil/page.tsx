@@ -107,7 +107,7 @@ async function ProfileBuilderContent({
             </span>
           </div>
           <a
-            href="/api/resumes/pdf"
+            href="/talentos/api/resumes/pdf"
             className="px-4 py-3 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.18em] text-[#F7DECA] hover:border-[#F7DECA] transition flex items-center gap-2"
           >
             <FileDown className="w-4 h-4" />

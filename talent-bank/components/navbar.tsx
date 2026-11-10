@@ -12,7 +12,7 @@ async function HeaderCenterSection() {
   // e exibe uma barra de pesquisa limpa e corporativa (estilo LinkedIn / Monday)
   if (user) {
     const searchAction =
-      user.role === "CANDIDATE" ? "/vagas" : "/admin/candidatos";
+      user.role === "CANDIDATE" ? "/talentos/vagas" : "/talentos/admin/candidatos";
     const placeholder =
       user.role === "CANDIDATE"
         ? "Pesquisar oportunidades, cargos, empresas ou competências..."
@@ -119,7 +119,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           <img
-            src="/icon.svg"
+            src="/talentos/icon.svg"
             alt="A Nova Moeda"
             className="w-9 h-9 rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-105"
           />

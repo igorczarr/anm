@@ -436,7 +436,7 @@ async function AdminJobsContent({
                         <Eye className="w-3 h-3" />
                       </Link>
                       <a
-                        href={`/api/admin/reports/job-pdf?jobId=${job.id}`}
+                        href={`/talentos/api/admin/reports/job-pdf?jobId=${job.id}`}
                         className="px-2.5 py-1 border border-[#57552E] bg-[#030A06] text-[#F7DECA] flex items-center gap-1"
                         title="Gerar PDF da Vaga"
                       >

@@ -101,16 +101,16 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.redirect(
-      new URL(getDestinationForRole(user.role), req.url)
+      new URL(`/talentos${getDestinationForRole(user.role)}`, req.url)
     );
   }
 
   const existing = await getAuthenticatedUser();
   if (existing) {
     return NextResponse.redirect(
-      new URL(getDestinationForRole(existing.role), req.url)
+      new URL(`/talentos${getDestinationForRole(existing.role)}`, req.url)
     );
   }
 
-  return NextResponse.redirect(new URL("/entrar", req.url));
+  return NextResponse.redirect(new URL("/talentos/entrar", req.url));
 }

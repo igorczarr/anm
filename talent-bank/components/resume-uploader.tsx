@@ -22,7 +22,7 @@ export function ResumeUploader() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/resumes/upload", {
+      const res = await fetch("/talentos/api/resumes/upload", {
         method: "POST",
         body: formData,
       });

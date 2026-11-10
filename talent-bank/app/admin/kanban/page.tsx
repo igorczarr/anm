@@ -64,7 +64,7 @@ async function AdminKanbanContent({
           </p>
         </div>
 
-        <form method="GET" action="/admin/kanban" className="flex items-center gap-2.5">
+        <form method="GET" action="/talentos/admin/kanban" className="flex items-center gap-2.5">
           <Filter className="w-4 h-4 text-[#D5C5AA]/70" />
           <select
             name="jobId"

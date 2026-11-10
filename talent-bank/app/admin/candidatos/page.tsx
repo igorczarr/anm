@@ -111,7 +111,7 @@ async function AdminCandidatesContent({
 
         <div className="flex flex-wrap items-center gap-3">
           <a
-            href={`/api/admin/export/candidates?${queryForExport.toString()}`}
+            href={`/talentos/api/admin/export/candidates?${queryForExport.toString()}`}
             className="px-4 py-2.5 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.18em] text-[#F7DECA] hover:border-[#F7DECA] transition flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
@@ -123,7 +123,7 @@ async function AdminCandidatesContent({
       {/* Pesquisa e Filtros (Seção 5.2) */}
       <form
         method="GET"
-        action="/admin/candidatos"
+        action="/talentos/admin/candidatos"
         className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-6 space-y-4"
       >
         <div className="flex items-center justify-between">
@@ -294,7 +294,7 @@ async function AdminCandidatesContent({
                         Perfil
                       </Link>
                       <a
-                        href={`/api/resumes/pdf?candidateId=${c.id}`}
+                        href={`/talentos/api/resumes/pdf?candidateId=${c.id}`}
                         className="px-2.5 py-1.5 border border-[#57552E] bg-[#030A06] text-[#D5C5AA] hover:text-[#F7DECA] flex items-center gap-1"
                         title="Baixar Currículo em PDF"
                       >

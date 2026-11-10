@@ -116,7 +116,7 @@ async function AdminReportsAnalyticsContent({
         </div>
 
         <a
-          href="/api/admin/reports/general-pdf"
+          href="/talentos/api/admin/reports/general-pdf"
           className="px-5 py-3.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#F7DECA] transition flex items-center gap-2 self-start lg:self-auto"
         >
           <FileDown className="w-4 h-4" />
@@ -139,7 +139,7 @@ async function AdminReportsAnalyticsContent({
             </p>
           </div>
           <a
-            href="/api/admin/reports/general-pdf"
+            href="/talentos/api/admin/reports/general-pdf"
             className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] flex items-center justify-center gap-2"
           >
             <FileDown className="w-4 h-4" />
@@ -161,14 +161,14 @@ async function AdminReportsAnalyticsContent({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <a
-              href="/api/admin/export/candidates?format=csv"
+              href="/talentos/api/admin/export/candidates?format=csv"
               className="px-3 py-2.5 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.16em] text-[#F7DECA] flex items-center justify-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
               CSV
             </a>
             <a
-              href="/api/admin/export/candidates?format=xlsx"
+              href="/talentos/api/admin/export/candidates?format=xlsx"
               className="px-3 py-2.5 border border-[#57552E] bg-[#030A06] text-xs uppercase tracking-[0.16em] text-[#F7DECA] flex items-center justify-center gap-1.5"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -191,20 +191,20 @@ async function AdminReportsAnalyticsContent({
           </div>
           <div className="grid grid-cols-3 gap-2">
             <a
-              href="/api/admin/reports/applications-pdf"
+              href="/talentos/api/admin/reports/applications-pdf"
               className="px-2.5 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-[11px] uppercase tracking-[0.14em] flex items-center justify-center gap-1"
             >
               <FileDown className="w-3.5 h-3.5" />
               PDF
             </a>
             <a
-              href="/api/admin/export/applications?format=csv"
+              href="/talentos/api/admin/export/applications?format=csv"
               className="px-2.5 py-2.5 border border-[#D5C5AA]/40 text-[11px] uppercase tracking-[0.14em] text-[#F7DECA] flex items-center justify-center"
             >
               CSV
             </a>
             <a
-              href="/api/admin/export/applications?format=xlsx"
+              href="/talentos/api/admin/export/applications?format=xlsx"
               className="px-2.5 py-2.5 border border-[#57552E] bg-[#030A06] text-[11px] uppercase tracking-[0.14em] text-[#F7DECA] flex items-center justify-center"
             >
               Excel
@@ -289,7 +289,7 @@ async function AdminReportsAnalyticsContent({
 
             <form
               method="GET"
-              action="/admin/relatorios"
+              action="/talentos/admin/relatorios"
               className="flex flex-wrap items-center gap-2"
             >
               <select
@@ -341,14 +341,14 @@ async function AdminReportsAnalyticsContent({
 
           <div className="flex flex-wrap gap-3">
             <a
-              href={`/api/admin/reports/job-pdf?jobId=${selectedJob.id}`}
+              href={`/talentos/api/admin/reports/job-pdf?jobId=${selectedJob.id}`}
               className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.16em] flex items-center gap-1.5"
             >
               <FileDown className="w-3.5 h-3.5" />
               Baixar PDF desta Vaga
             </a>
             <a
-              href={`/api/admin/reports/applications-pdf?jobId=${selectedJob.id}`}
+              href={`/talentos/api/admin/reports/applications-pdf?jobId=${selectedJob.id}`}
               className="px-4 py-2.5 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.16em] text-[#F7DECA] flex items-center gap-1.5"
             >
               <FileDown className="w-3.5 h-3.5" />
@@ -394,7 +394,7 @@ async function AdminReportsAnalyticsContent({
                   </td>
                   <td className="p-3.5 text-right">
                     <a
-                      href={`/api/resumes/pdf?candidateId=${c.id}`}
+                      href={`/talentos/api/resumes/pdf?candidateId=${c.id}`}
                       className="px-3 py-1.5 border border-[#D5C5AA]/40 text-[#F7DECA] inline-flex items-center gap-1"
                     >
                       <FileDown className="w-3 h-3" />

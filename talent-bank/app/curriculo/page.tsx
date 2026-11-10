@@ -31,7 +31,7 @@ async function ResumeManagerContent() {
         </div>
 
         <a
-          href="/api/resumes/pdf"
+          href="/talentos/api/resumes/pdf"
           className="px-5 py-3.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#F7DECA] transition flex items-center gap-2 self-start md:self-auto"
         >
           <FileDown className="w-4 h-4" />
@@ -117,7 +117,7 @@ async function ResumeManagerContent() {
 
           <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#D5C5AA]/15">
             <a
-              href="/api/resumes/pdf"
+              href="/talentos/api/resumes/pdf"
               className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#F7DECA] transition flex items-center gap-1.5"
             >
               <FileDown className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ async function ResumeManagerContent() {
                     </div>
 
                     <a
-                      href={`/api/resumes/${r.id}`}
+                      href={`/talentos/api/resumes/${r.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3 py-1.5 border border-[#D5C5AA]/40 text-[11px] uppercase tracking-[0.16em] text-[#F7DECA] hover:border-[#F7DECA] flex items-center gap-1 shrink-0"

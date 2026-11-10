@@ -13,11 +13,11 @@ export default function SSOCallbackPage() {
     async function completeRedirect() {
       try {
         await clerk.handleRedirectCallback({
-          signInForceRedirectUrl: "/entrar/sso-sync",
-          signUpForceRedirectUrl: "/entrar/sso-sync",
+          signInForceRedirectUrl: "/talentos/entrar/sso-sync",
+          signUpForceRedirectUrl: "/talentos/entrar/sso-sync",
         });
       } catch {
-        window.location.href = "/entrar/sso-sync";
+        window.location.href = "/talentos/entrar/sso-sync";
       }
     }
 
