@@ -43,56 +43,70 @@
     <!-- Ambient Background & Watermark -->
     <div class="background-watermark"></div>
 
-    <!-- Top Action Bar (Theme Toggle) -->
-    <div style="position: fixed; top: 1.25rem; right: 1.25rem; z-index: 1100;">
-        <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Alternar tema Claro/Escuro" title="Alternar tema Claro/Escuro">
-            <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        </button>
-    </div>
+    <!-- HEADER CORPORATIVO DE LARGURA TOTAL COM INSCREVER-SE (EVEN3) NO TOPO -->
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="projeto.html" class="nav-brand">
+                <img src="/img/logo.png" alt="A Nova Moeda">
+                <div class="nav-brand-text">
+                    <span class="nav-brand-title">A Nova Moeda</span>
+                    <span class="nav-brand-sub">Economia da Solidão · UEFS</span>
+                </div>
+            </a>
 
-    <!-- Conteúdo Principal -->
-    <main class="linkpage-container" style="display: none;">
-        <header class="header-section">
-            <img src="/img/logo.png" alt="A Nova Moeda Logo" class="main-logo">
-            <div class="section-eyebrow" style="margin-bottom: 0.75rem;">
-                <span class="pulse-dot"></span> 17 de Novembro · 19h00 · Auditório 2 UEFS
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Alternar tema Claro/Escuro"></button>
+                <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" class="btn-outline-small">
+                    <span>Inscrever-se</span>
+                </a>
             </div>
-            <h1 class="page-title">A NOVA MOEDA</h1>
-            <p class="page-subtitle">O custo da solidão e as novas relações de consumo</p>
-            <div class="separator"></div>
-        </header>
+        </div>
+    </nav>
 
-        <section class="links-section">
-            <!-- Botão Principal: Página Oficial do Evento & Programação -->
-            <a href="projeto.html" class="link-item link-highlight">
-                <span class="link-text">EXPLORAR O EVENTO & PROGRAMAÇÃO</span>
-            </a>
+    <!-- Conteúdo Principal Focado 100% no Projeto -->
+    <main class="linkpage-container" style="display: none;">
+        <div class="linkpage-center-stage">
+            <header class="header-section">
+                <img src="/img/logo.png" alt="A Nova Moeda Logo" class="main-logo">
+                <div class="section-eyebrow" style="margin-bottom: 0.75rem;">
+                    <span class="pulse-dot"></span> 17 de Novembro · 19h00 às 21h55 · Auditório 2 UEFS
+                </div>
+                <h1 class="page-title">A NOVA MOEDA</h1>
+                <p class="page-subtitle">O custo da solidão e as novas relações de consumo, carreira e negócios</p>
+            </header>
 
-            <!-- Inscrição Oficial Even3 -->
-            <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" class="link-item">
-                <span class="link-text">GARANTIR INSCRIÇÃO NO EVEN3</span>
-            </a>
+            <!-- Destaque Único: Direcionando toda a atenção para o Site do Projeto -->
+            <section class="linkpage-spotlight-card bento-card">
+                <h2 class="linkpage-spotlight-title">
+                    E se a solidão não fosse apenas um problema, mas também um <span class="font-editorial" style="color: var(--brand-primary);">modelo de negócio</span>?
+                </h2>
+                <p class="linkpage-spotlight-desc">
+                    Conheça a investigação completa, os cinco especialistas convidados, a programação oficial das 19h00 às 21h55 e como participar das votações ao vivo na Arena.
+                </p>
 
-            <!-- Banco de Talentos -->
-            <a href="/talentos" class="link-item">
-                <span class="link-text">ACESSAR BANCO DE TALENTOS</span>
-            </a>
+                <a href="projeto.html" class="linkpage-primary-cta">
+                    <span>ACESSAR O SITE OFICIAL DO PROJETO</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
 
-            <!-- Lista VIP WhatsApp -->
-            <a href="https://chat.whatsapp.com/BhSpegEr1vo7XNqijRjXaz" target="_blank" rel="noopener noreferrer" class="link-item">
-                <span class="link-text">ENTRAR NA LISTA VIP (WHATSAPP)</span>
-            </a>
-            
-            <!-- Patrocínio -->
-            <a href="patrocinio.html" class="link-item">
-                <span class="link-text">SEJA UM PATROCINADOR OFICIAL</span>
-            </a>
-        </section>
+                <div class="linkpage-meta-pills">
+                    <span class="linkpage-meta-pill">5 Palestras + Mesa-Redonda</span>
+                    <span class="linkpage-meta-pill">Certificado Oficial</span>
+                    <span class="linkpage-meta-pill">Coffee Break & Sorteios</span>
+                </div>
+            </section>
+        </div>
         
-        <footer class="footer-section" style="margin-top: 3rem; padding: 2rem 0 0; border-top: 1px solid var(--border-subtle); width: 100%; background: transparent;">
-            <img src="/img/logo.png" alt="A Nova Moeda Logo" class="footer-logo">
-            <p style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.08em;">&copy; 2026 A NOVA MOEDA · UEFS. TODOS OS DIREITOS RESERVADOS.</p>
+        <!-- Footer com acesso ao Banco de Talentos -->
+        <footer class="linkpage-footer">
+            <a href="/talentos" class="linkpage-footer-talent">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Acessar Banco de Talentos Oficial →</span>
+            </a>
+            <div style="display: flex; align-items: center; gap: 0.6rem; opacity: 0.85;">
+                <img src="/img/logo.png" alt="A Nova Moeda Logo" style="width: 24px; height: auto; border-radius: 5px;">
+                <p style="font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em;">&copy; 2026 A NOVA MOEDA · UEFS. TODOS OS DIREITOS RESERVADOS.</p>
+            </div>
         </footer>
     </main>
 
