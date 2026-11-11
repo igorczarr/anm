@@ -15,18 +15,29 @@ import {
   removeSkillEvidenceAction,
   addLanguageAction,
   deleteLanguageAction,
+  addAchievementAction,
+  deleteAchievementAction,
 } from "@/app/actions/candidate";
-import { EVIDENCE_BADGES } from "@/lib/passport";
+import {
+  ACHIEVEMENT_CATEGORY_LABELS,
+  EVIDENCE_BADGES,
+  EXPERIENCE_TYPE_LABELS,
+  REGIONAL_SUGGESTED_SKILLS,
+} from "@/lib/passport";
+import { CopyPassportLinkButton } from "@/components/copy-passport-link-button";
 import {
   Award,
   Briefcase,
   Camera,
   CheckCircle2,
+  ExternalLink,
   FileDown,
+  FolderKanban,
   GraduationCap,
   Languages,
   Plus,
   Save,
+  ShieldCheck,
   Trash2,
   Upload,
   User,
@@ -36,13 +47,15 @@ const SAVE_MESSAGES: Record<string, string> = {
   dados: "Suas informações principais, foto de perfil e preferências foram salvas com sucesso!",
   formacao: "Formação acadêmica adicionada ao seu perfil com sucesso!",
   formacao_removida: "Formação acadêmica removida do perfil.",
-  experiencia: "Experiência profissional adicionada ao seu perfil com sucesso!",
-  experiencia_removida: "Experiência profissional removida do perfil.",
-  competencia: "Competência vinculada ao seu perfil com sucesso!",
+  experiencia: "Experiência ou projeto adicionado ao seu Passaporte com sucesso!",
+  experiencia_removida: "Registro de experiência removido do perfil.",
+  competencia: "Competência vinculada ao seu Passaporte com sucesso!",
   competencia_removida: "Competência removida do seu perfil.",
   nivel: "Nível da competência atualizado no seu Passaporte.",
   evidencia: "Evidência anexada! A competência agora consta como Documentada.",
   evidencia_removida: "Evidência removida do seu Passaporte.",
+  portfolio: "Item de portfólio/conquista adicionado ao seu Passaporte de Talentos!",
+  portfolio_removido: "Item removido do seu portfólio.",
   idioma: "Idioma adicionado ao seu perfil com sucesso!",
   idioma_removido: "Idioma removido do seu perfil.",
 };
@@ -62,7 +75,22 @@ async function ProfileBuilderContent({
 
   const savedKey = params?.salvo || "";
   const savedMessage = SAVE_MESSAGES[savedKey] || null;
-  const existingSkillIds = new Set(profile.skills.map((s) => s.skillId));
+  const existingSkillNames = new Set(
+    profile.skills.map((s) => s.skill.name.toLowerCase())
+  );
+
+  // Combina o catálogo do banco com as competências regionais sugeridas no plano do Talent Hub
+  const quickSuggestions = [
+    ...REGIONAL_SUGGESTED_SKILLS,
+    ...catalogSkills
+      .filter(
+        (cs) =>
+          !REGIONAL_SUGGESTED_SKILLS.some(
+            (r) => r.name.toLowerCase() === cs.name.toLowerCase()
+          )
+      )
+      .map((cs) => ({ name: cs.name, category: cs.category || "Geral" })),
+  ].filter((s) => !existingSkillNames.has(s.name.toLowerCase()));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
@@ -90,21 +118,21 @@ async function ProfileBuilderContent({
         </div>
       )}
 
-      {/* Topo do Perfil */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 sm:p-8">
+      {/* Topo do Perfil e Atalho para o Passaporte de Talentos */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 sm:p-8">
         <div>
           <span className="text-[11px] uppercase tracking-[0.24em] text-[#D5C5AA]/70">
-            Construção de Perfil Profissional
+            Passaporte de Talentos & Construção de Perfil
           </span>
           <h1 className="mt-1 font-display text-3xl sm:text-4xl text-[#F7DECA]">
-            Meu Perfil Profissional
+            Meu Passaporte e Perfil Profissional
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-[#D5C5AA]/80">
-            Preencha suas informações para estruturar automaticamente seu currículo e habilitar candidaturas rápidas.
+            Transforme suas competências em evidências demonstráveis, organize seu portfólio e compartilhe seu Passaporte com empresas.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="text-right mr-2">
             <span className="block text-[10px] uppercase tracking-[0.2em] text-[#D5C5AA]/70">
               Completude
@@ -113,12 +141,20 @@ async function ProfileBuilderContent({
               {completeness.percent}%
             </span>
           </div>
+          <Link
+            href={`/passaporte/${profile.id}`}
+            className="px-4 py-2.5 rounded-xl bg-[#14532D] text-white font-semibold text-xs hover:bg-[#166534] transition inline-flex items-center gap-2"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Ver Meu Passaporte</span>
+          </Link>
+          <CopyPassportLinkButton candidateId={profile.id} />
           <a
             href="/talentos/api/resumes/pdf"
-            className="px-4 py-3 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.18em] text-[#F7DECA] hover:border-[#F7DECA] transition flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl border border-[#D5C5AA]/40 text-xs font-semibold text-[#F7DECA] hover:border-[#F7DECA] transition inline-flex items-center gap-2"
           >
             <FileDown className="w-4 h-4" />
-            Gerar Currículo PDF
+            <span>Gerar PDF</span>
           </a>
         </div>
       </div>
@@ -571,52 +607,66 @@ async function ProfileBuilderContent({
           </form>
         </div>
 
-        {/* D. Experiência Profissional */}
+        {/* D. Experiências, Estágios, Projetos & Voluntariado */}
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-6 space-y-6">
           <div className="flex items-center gap-2 pb-3 border-b border-[#D5C5AA]/15">
             <Briefcase className="w-4 h-4 text-[#F7DECA]" />
             <h2 className="font-display text-xl text-[#F7DECA]">
-              D. Experiência Profissional
+              D. Experiências, Estágios, Projetos & Voluntariado
             </h2>
           </div>
 
+          <p className="text-xs text-[#D5C5AA]/75">
+            Mesmo sem emprego formal anterior, registre estágios, programas de
+            aprendizagem, projetos acadêmicos, empresa júnior ou voluntariado.
+          </p>
+
           <div className="space-y-3">
-            {profile.experiences.map((exp) => (
-              <div
-                key={exp.id}
-                className="border border-[#D5C5AA]/20 bg-[#030A06] p-4 flex items-start justify-between gap-3"
-              >
-                <div>
-                  <h3 className="text-sm font-semibold text-[#F7DECA]">
-                    {exp.role} · {exp.company}
-                  </h3>
-                  <p className="text-[11px] text-[#D5C5AA]/65 mt-0.5">
-                    {exp.modality || "PRESENCIAL"} · Início:{" "}
-                    {new Date(exp.startDate).toLocaleDateString("pt-BR")} ·{" "}
-                    {exp.isCurrent
-                      ? "Emprego Atual"
-                      : exp.endDate
-                      ? `Até ${new Date(exp.endDate).toLocaleDateString("pt-BR")}`
-                      : ""}
-                  </p>
-                  {exp.description && (
-                    <p className="text-xs text-[#D5C5AA]/85 mt-2">
-                      {exp.description}
+            {profile.experiences.map((exp) => {
+              const expTypeLabel =
+                EXPERIENCE_TYPE_LABELS[exp.experienceType || "EMPREGO"];
+              return (
+                <div
+                  key={exp.id}
+                  className="border border-[#D5C5AA]/20 bg-[#030A06] p-4 flex items-start justify-between gap-3"
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-900 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                        {expTypeLabel}
+                      </span>
+                      <h3 className="text-sm font-semibold text-[#F7DECA]">
+                        {exp.role} · {exp.company}
+                      </h3>
+                    </div>
+                    <p className="text-[11px] text-[#D5C5AA]/65 mt-1">
+                      {exp.modality || "PRESENCIAL"} · Início:{" "}
+                      {new Date(exp.startDate).toLocaleDateString("pt-BR")} ·{" "}
+                      {exp.isCurrent
+                        ? "Em andamento"
+                        : exp.endDate
+                        ? `Até ${new Date(exp.endDate).toLocaleDateString("pt-BR")}`
+                        : ""}
                     </p>
-                  )}
+                    {exp.description && (
+                      <p className="text-xs text-[#D5C5AA]/85 mt-2">
+                        {exp.description}
+                      </p>
+                    )}
+                  </div>
+                  <form action={deleteExperienceAction}>
+                    <input type="hidden" name="id" value={exp.id} />
+                    <button
+                      type="submit"
+                      className="p-1.5 text-[#D5C5AA]/60 hover:text-red-400 transition cursor-pointer"
+                      title="Remover experiência"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
                 </div>
-                <form action={deleteExperienceAction}>
-                  <input type="hidden" name="id" value={exp.id} />
-                  <button
-                    type="submit"
-                    className="p-1.5 text-[#D5C5AA]/60 hover:text-red-400 transition cursor-pointer"
-                    title="Remover experiência"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </form>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <form
@@ -624,21 +674,35 @@ async function ProfileBuilderContent({
             className="border-t border-[#D5C5AA]/15 pt-5 space-y-4"
           >
             <span className="text-xs uppercase tracking-[0.18em] text-[#F7DECA] block">
-              + Adicionar Experiência
+              + Adicionar Experiência, Estágio ou Projeto
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <select
+                name="experienceType"
+                defaultValue="EMPREGO"
+                className="sm:col-span-2 bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
+              >
+                <option value="EMPREGO">Emprego Formal</option>
+                <option value="ESTAGIO">Estágio</option>
+                <option value="APRENDIZAGEM">Jovem Aprendiz / Aprendizagem</option>
+                <option value="PROJETO_ACADEMICO">
+                  Projeto Acadêmico / Extensão / Empresa Júnior
+                </option>
+                <option value="VOLUNTARIADO">Voluntariado / Ação Social</option>
+                <option value="FREELANCE">Freelance / Autônomo</option>
+              </select>
               <input
                 type="text"
                 name="company"
                 required
-                placeholder="Empresa *"
+                placeholder="Empresa, Instituição ou Projeto *"
                 className="bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
               />
               <input
                 type="text"
                 name="role"
                 required
-                placeholder="Cargo *"
+                placeholder="Cargo, Função ou Papel *"
                 className="bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
               />
               <select
@@ -655,7 +719,7 @@ async function ProfileBuilderContent({
                   name="isCurrent"
                   className="accent-[#D5C5AA]"
                 />
-                <span>Trabalho atualmente aqui</span>
+                <span>Atuo atualmente aqui</span>
               </label>
               <div>
                 <label className="block text-[10px] uppercase text-[#D5C5AA]/70 mb-1">
@@ -681,7 +745,7 @@ async function ProfileBuilderContent({
               <textarea
                 name="description"
                 rows={2}
-                placeholder="Principais atividades, responsabilidades e resultados alcançados..."
+                placeholder="Principais atividades, responsabilidades e entregas realizadas..."
                 className="sm:col-span-2 bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
               />
             </div>
@@ -690,7 +754,7 @@ async function ProfileBuilderContent({
               className="px-4 py-2 border border-[#D5C5AA]/40 text-xs uppercase tracking-[0.18em] text-[#F7DECA] hover:border-[#F7DECA] transition flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              Adicionar Experiência
+              Adicionar Registro
             </button>
           </form>
         </div>
@@ -700,18 +764,27 @@ async function ProfileBuilderContent({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* E. Competências */}
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-6 space-y-6">
-          <div className="flex items-center gap-2 pb-3 border-b border-[#D5C5AA]/15">
-            <Award className="w-4 h-4 text-[#F7DECA]" />
-            <h2 className="font-display text-xl text-[#F7DECA]">
-              E. Competências
-            </h2>
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#D5C5AA]/15">
+            <div className="flex items-center gap-2">
+              <Award className="w-4 h-4 text-[#F7DECA]" />
+              <h2 className="font-display text-xl text-[#F7DECA]">
+                E. Competências & Evidências
+              </h2>
+            </div>
+            <Link
+              href={`/passaporte/${profile.id}`}
+              className="text-[11px] font-semibold text-[#14532D] hover:underline flex items-center gap-1"
+            >
+              Ver no Passaporte
+              <ExternalLink className="w-3 h-3" />
+            </Link>
           </div>
 
           {/* Passaporte de Talentos: competências com nível e evidências */}
           <div id="passaporte" className="space-y-3">
             {profile.skills.length === 0 ? (
               <p className="text-xs text-slate-600">
-                Nenhuma competência adicionada ainda.
+                Nenhuma competência adicionada ainda. Adicione competências abaixo e anexe um link, certificado ou trabalho para evoluir de <strong>Declarada</strong> para <strong>Documentada</strong>.
               </p>
             ) : (
               profile.skills.map((cs) => {
@@ -732,6 +805,11 @@ async function ProfileBuilderContent({
                         >
                           {badge.label}
                         </span>
+                        {cs.validatedByName && (
+                          <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            Avaliador: {cs.validatedByName}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <form
@@ -824,7 +902,7 @@ async function ProfileBuilderContent({
                         type="text"
                         name="title"
                         required
-                        placeholder="Título da evidência"
+                        placeholder="Título da evidência (ex: Planilha de DRE)"
                         className="bg-white border border-slate-300 px-3 py-2 text-xs text-slate-900"
                       />
                       <input
@@ -845,35 +923,32 @@ async function ProfileBuilderContent({
               })
             )}
             <p className="text-[11px] text-slate-600">
-              Declarada: informada por você · Documentada: com evidência · Demonstrada: comprovada em desafio · Validada: reconhecida por avaliador identificado.
+              Declarada: informada por você · Documentada: com evidência anexada · Demonstrada: comprovada em desafio prático · Validada: reconhecida por avaliador identificado.
             </p>
           </div>
 
-
-          {/* Sugestões rápidas do Briefing */}
+          {/* Sugestões rápidas */}
           <div>
             <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600 block mb-2.5">
-              Adicionar em 1 clique:
+              Adicionar em 1 clique (competências valorizadas na região):
             </span>
             <div className="flex flex-wrap gap-2">
-              {catalogSkills
-                .filter((s) => !existingSkillIds.has(s.id))
-                .map((skill) => (
-                  <form key={skill.id} action={addSkillAction}>
-                    <input type="hidden" name="skillName" value={skill.name} />
-                    <input
-                      type="hidden"
-                      name="category"
-                      value={skill.category || "Geral"}
-                    />
-                    <button
-                      type="submit"
-                      className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-800 hover:border-[#14532D] hover:bg-[#ECFDF5] hover:text-[#14532D] shadow-xs transition cursor-pointer"
-                    >
-                      + {skill.name}
-                    </button>
-                  </form>
-                ))}
+              {quickSuggestions.map((skill) => (
+                <form key={skill.name} action={addSkillAction}>
+                  <input type="hidden" name="skillName" value={skill.name} />
+                  <input
+                    type="hidden"
+                    name="category"
+                    value={skill.category || "Geral"}
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-800 hover:border-[#14532D] hover:bg-[#ECFDF5] hover:text-[#14532D] shadow-xs transition cursor-pointer"
+                  >
+                    + {skill.name}
+                  </button>
+                </form>
+              ))}
             </div>
           </div>
 
@@ -889,6 +964,15 @@ async function ProfileBuilderContent({
               placeholder="Ou digite qualquer competência personalizada..."
               className="flex-1 bg-white border border-slate-300 px-3.5 py-2.5 text-xs text-slate-900"
             />
+            <select
+              name="level"
+              defaultValue="INTERMEDIARIO"
+              className="bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            >
+              <option value="BASICO">Nível Básico</option>
+              <option value="INTERMEDIARIO">Nível Intermediário</option>
+              <option value="AVANCADO">Nível Avançado</option>
+            </select>
             <button
               type="submit"
               className="px-5 py-2.5 bg-[#14532D] text-white font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#166534] transition cursor-pointer shrink-0"
@@ -965,19 +1049,184 @@ async function ProfileBuilderContent({
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-[#D5C5AA]/15 pt-6">
+      {/* G. Portfólio, Trabalhos & Conquistas Relevantes */}
+      <div
+        id="portfolio"
+        className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-6 sm:p-8 space-y-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#D5C5AA]/15">
+          <div className="flex items-center gap-2">
+            <FolderKanban className="w-4 h-4 text-[#F7DECA]" />
+            <h2 className="font-display text-xl text-[#F7DECA]">
+              G. Portfólio, Trabalhos & Conquistas Relevantes
+            </h2>
+          </div>
+          <span className="text-xs text-[#D5C5AA]/75">
+            {profile.achievements.length} item(ns) no portfólio
+          </span>
+        </div>
+
+        <p className="text-xs text-[#D5C5AA]/80 max-w-3xl">
+          Anexe entregas reais que demonstram sua capacidade prática: planilhas
+          financeiras, relatórios analíticos, apresentações, projetos concluídos,
+          certificações, premiações ou conquistas acadêmicas. Esses itens aparecem
+          em destaque no seu <strong>Passaporte de Talentos</strong>.
+        </p>
+
+        {profile.achievements.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {profile.achievements.map((item) => {
+              const catLabel = ACHIEVEMENT_CATEGORY_LABELS[item.category];
+              return (
+                <div
+                  key={item.id}
+                  className="border border-slate-200 bg-white p-4 rounded-xl flex items-start justify-between gap-3"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-900 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                        {catLabel}
+                      </span>
+                      {item.achievedAt && (
+                        <span className="text-[11px] text-slate-500">
+                          {new Date(item.achievedAt).toLocaleDateString("pt-BR")}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      {item.title}
+                    </h3>
+                    {item.issuerOrContext && (
+                      <p className="text-xs text-slate-600">
+                        Instituição / Contexto: {item.issuerOrContext}
+                      </p>
+                    )}
+                    {item.description && (
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {item.description}
+                      </p>
+                    )}
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#14532D] hover:underline pt-1"
+                      >
+                        Abrir evidência / arquivo
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                  <form action={deleteAchievementAction}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <button
+                      type="submit"
+                      className="p-1.5 text-slate-500 hover:text-red-600 transition cursor-pointer"
+                      title="Remover item do portfólio"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <form
+          action={addAchievementAction}
+          className="border-t border-[#D5C5AA]/15 pt-5 space-y-4"
+        >
+          <span className="text-xs uppercase tracking-[0.18em] text-[#F7DECA] block">
+            + Adicionar Trabalho, Projeto, Certificação ou Conquista
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <select
+              name="category"
+              defaultValue="PORTFOLIO_PLANILHA"
+              className="bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            >
+              <option value="PORTFOLIO_PLANILHA">
+                Planilha / Controle Financeiro ou Operacional
+              </option>
+              <option value="PORTFOLIO_RELATORIO">
+                Relatório Analítico / Estudo de Caso
+              </option>
+              <option value="PORTFOLIO_APRESENTACAO">
+                Apresentação / Pitch / Material Visual
+              </option>
+              <option value="PORTFOLIO_PROJETO">
+                Projeto Prático / Sistema / Repositório
+              </option>
+              <option value="CERTIFICACAO">
+                Certificação / Curso Concluído
+              </option>
+              <option value="PREMIACAO">
+                Premiação / Destaque / Hackathon
+              </option>
+              <option value="CONQUISTA_ACADEMICA">
+                Conquista Acadêmica / Iniciação Científica / TCC
+              </option>
+            </select>
+            <input
+              type="text"
+              name="title"
+              required
+              placeholder="Título da entrega ou conquista * (ex: Planilha de Fluxo de Caixa)"
+              className="lg:col-span-2 bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            />
+            <input
+              type="text"
+              name="issuerOrContext"
+              placeholder="Instituição, Curso ou Empresa (ex: UEFS, SENAI, Projeto Pessoal)"
+              className="bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            />
+            <input
+              type="text"
+              name="url"
+              placeholder="Link para visualizar (Google Drive, GitHub, PDF, Canva...)"
+              className="lg:col-span-2 bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            />
+            <textarea
+              name="description"
+              rows={2}
+              placeholder="Explique brevemente o que você construiu, quais ferramentas usou e qual problema resolveu..."
+              className="sm:col-span-2 lg:col-span-3 bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-900"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-5 py-2.5 bg-[#14532D] text-white font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#166534] transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Adicionar ao Passaporte
+          </button>
+        </form>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#D5C5AA]/15 pt-6">
         <Link
           href="/painel"
           className="text-xs uppercase tracking-[0.18em] text-[#D5C5AA] hover:text-[#F7DECA]"
         >
           ← Voltar ao Painel do Candidato
         </Link>
-        <Link
-          href="/curriculo"
-          className="px-5 py-3 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#F7DECA] transition"
-        >
-          Avançar para Gestão de Currículo →
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={`/passaporte/${profile.id}`}
+            className="px-5 py-3 bg-[#14532D] text-white font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#166534] transition flex items-center gap-2 rounded-lg"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Abrir Passaporte de Talentos
+          </Link>
+          <Link
+            href="/curriculo"
+            className="px-5 py-3 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#F7DECA] transition"
+          >
+            Avançar para Gestão de Currículo →
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -115,6 +115,8 @@ export async function getArenaSyncSnapshot(options?: {
     activeTopic,
     activeStep,
     allOperationalSteps,
+    allMacroBlocks,
+    allSpeakers,
     activePoll,
     selectedQuestionRaw,
     activeScreenMessage,
@@ -154,6 +156,20 @@ export async function getArenaSyncSnapshot(options?: {
         },
       },
     }),
+    prisma.scheduleStep.findMany({
+      where: { eventId: event.id, isMacroBlock: true },
+      orderBy: { macroOrder: "asc" },
+      include: {
+        speaker: true,
+        topic: {
+          include: { mainSpeaker: true },
+        },
+      },
+    }),
+    prisma.speaker.findMany({
+      where: { eventId: event.id },
+      orderBy: { displayOrder: "asc" },
+    }),
     liveState.activePollId
       ? prisma.poll.findUnique({
           where: { id: liveState.activePollId },
@@ -161,12 +177,19 @@ export async function getArenaSyncSnapshot(options?: {
             options: { orderBy: { optionOrder: "asc" } },
           },
         })
-      : null,
+      : prisma.poll.findFirst({
+          where: { eventId: event.id },
+          orderBy: { number: "asc" },
+          include: {
+            options: { orderBy: { optionOrder: "asc" } },
+          },
+        }),
     liveState.selectedQuestionId
       ? prisma.question.findUnique({
           where: { id: liveState.selectedQuestionId },
           include: {
             topic: { select: { number: true, title: true } },
+            moderatedBy: { select: { fullName: true } },
           },
         })
       : null,
@@ -181,10 +204,13 @@ export async function getArenaSyncSnapshot(options?: {
         lastSeenAt: { gte: activeCutoff },
       },
     }),
-    prisma.question.count({ where: { eventId: event.id } }),
+    prisma.question.count({
+      where: { eventId: event.id, isMediationReserve: false },
+    }),
     prisma.question.count({
       where: {
         eventId: event.id,
+        isMediationReserve: false,
         status: { in: ["RECEIVED", "ANALYZING"] },
       },
     }),
@@ -232,7 +258,7 @@ export async function getArenaSyncSnapshot(options?: {
     nextStep = allOperationalSteps[0] ?? null;
   }
 
-  // Regra inegociável §5.6 e §10.2: perguntas não aprovadas NUNCA saem para exibição pública
+  // Regra inegociável: perguntas não aprovadas NUNCA saem para exibição pública
   const safeSelectedQuestion =
     selectedQuestionRaw &&
     ["APPROVED", "SELECTED", "DISPLAYED", "ANSWERED"].includes(
@@ -242,12 +268,17 @@ export async function getArenaSyncSnapshot(options?: {
           id: selectedQuestionRaw.id,
           text: selectedQuestionRaw.text,
           status: selectedQuestionRaw.status,
+          isMediationReserve: selectedQuestionRaw.isMediationReserve,
+          originLabel: selectedQuestionRaw.isMediationReserve
+            ? "Pergunta da Mediação"
+            : "Pergunta da Plateia",
+          moderatorName: selectedQuestionRaw.moderatedBy?.fullName ?? null,
           topicNumber: selectedQuestionRaw.topic.number,
           topicTitle: selectedQuestionRaw.topic.title,
         }
       : null;
 
-  // Regra inegociável §6.2: Não exibir resultados públicos antes do fechamento da votação
+  // Regra inegociável: Não exibir resultados públicos antes do fechamento da votação
   const showPollResultsPublicly =
     activePoll &&
     (activePoll.status === "CLOSED" ||
@@ -261,6 +292,20 @@ export async function getArenaSyncSnapshot(options?: {
         question: activePoll.question,
         status: activePoll.status,
         durationSec: activePoll.durationSec,
+        isTieBreak: activePoll.isTieBreak,
+        tieBreakOptionIds: activePoll.tieBreakOptionIds ?? [],
+        tieBreakJustification: activePoll.tieBreakJustification ?? null,
+        winningOptionId:
+          showPollResultsPublicly || options?.includeAdminStats
+            ? activePoll.winningOptionId
+            : null,
+        winningQuestionText:
+          showPollResultsPublicly ||
+          options?.includeAdminStats ||
+          liveState.arenaMode === "ROUNDTABLE" ||
+          liveState.arenaMode === "POLL_RESULTS"
+            ? activePoll.winningQuestionText
+            : null,
         totalVotes:
           showPollResultsPublicly || options?.includeAdminStats
             ? activePoll.totalVotes
@@ -268,7 +313,9 @@ export async function getArenaSyncSnapshot(options?: {
         options: activePoll.options.map((opt) => ({
           id: opt.id,
           optionOrder: opt.optionOrder,
+          themeLabel: opt.themeLabel ?? `Questão ${opt.optionOrder}`,
           label: opt.label,
+          isWinner: activePoll.winningOptionId === opt.id,
           votesCount:
             showPollResultsPublicly || options?.includeAdminStats
               ? opt.votesCount
@@ -302,6 +349,10 @@ export async function getArenaSyncSnapshot(options?: {
       institution: event.institution,
       estimatedAudience: event.estimatedAudience,
       programmedDurationMin: event.programmedDurationMin,
+      certifiedHours: event.certifiedHours,
+      scheduleLocked: event.scheduleLocked,
+      requireCredential: event.requireCredential,
+      requireAccessCode: event.requireAccessCode,
       scheduledStartAt: event.scheduledStartAt,
       actualStartAt: event.actualStartAt,
       actualEndAt: event.actualEndAt,
@@ -330,6 +381,27 @@ export async function getArenaSyncSnapshot(options?: {
       timerStatus: liveState.timerStatus,
     },
     timer: timerSnapshot,
+    speakers: allSpeakers.map((sp) => ({
+      id: sp.id,
+      slug: sp.slug,
+      name: sp.name,
+      roleTitle: sp.roleTitle,
+      photoUrl: sp.photoUrl,
+      displayOrder: sp.displayOrder,
+    })),
+    macroBlocks: allMacroBlocks.map((mb) => ({
+      id: mb.id,
+      code: mb.code,
+      macroOrder: mb.macroOrder,
+      title: mb.title,
+      stepType: mb.stepType,
+      arenaMode: mb.arenaMode,
+      durationSec: mb.durationSec,
+      actualDurationSec: mb.actualDurationSec,
+      status: mb.status,
+      responsibleName: mb.responsibleName,
+      topicNumber: mb.topic?.number ?? null,
+    })),
     activeTopic: activeTopic
       ? {
           id: activeTopic.id,
@@ -361,14 +433,40 @@ export async function getArenaSyncSnapshot(options?: {
           stepType: activeStep.stepType,
           arenaMode: activeStep.arenaMode,
           sequenceOrder: activeStep.sequenceOrder,
+          macroOrder: activeStep.macroOrder,
           durationSec: activeStep.durationSec,
           actualDurationSec: activeStep.actualDurationSec,
           status: activeStep.status,
+          phaseLabel:
+            activeStep.stepType === "EXPOSITION"
+              ? "Exposição (15 min)"
+              : activeStep.stepType === "AUDIENCE_VOICE"
+                ? "Pergunta e Resposta (5 min)"
+                : activeStep.stepType === "INTRODUCTION"
+                  ? "Introdução e Contexto (10 min)"
+                  : activeStep.stepType === "ROUNDTABLE"
+                    ? "Mesa-Redonda (20 min)"
+                    : activeStep.title,
           responsibleName:
             activeStep.responsibleName ||
             activeStep.speaker?.name ||
             activeStep.topic?.mainSpeaker.name ||
             "Organização",
+          speaker: activeStep.speaker
+            ? {
+                id: activeStep.speaker.id,
+                name: activeStep.speaker.name,
+                photoUrl: activeStep.speaker.photoUrl,
+                roleTitle: activeStep.speaker.roleTitle,
+              }
+            : activeStep.topic?.mainSpeaker
+              ? {
+                  id: activeStep.topic.mainSpeaker.id,
+                  name: activeStep.topic.mainSpeaker.name,
+                  photoUrl: activeStep.topic.mainSpeaker.photoUrl,
+                  roleTitle: activeStep.topic.mainSpeaker.roleTitle,
+                }
+              : null,
           topicNumber: activeStep.topic?.number ?? null,
         }
       : null,
@@ -380,6 +478,7 @@ export async function getArenaSyncSnapshot(options?: {
           stepType: prevStep.stepType,
           sequenceOrder: prevStep.sequenceOrder,
           durationSec: prevStep.durationSec,
+          status: prevStep.status,
           responsibleName:
             prevStep.responsibleName ||
             prevStep.speaker?.name ||
@@ -396,6 +495,7 @@ export async function getArenaSyncSnapshot(options?: {
           stepType: nextStep.stepType,
           sequenceOrder: nextStep.sequenceOrder,
           durationSec: nextStep.durationSec,
+          status: nextStep.status,
           responsibleName:
             nextStep.responsibleName ||
             nextStep.speaker?.name ||

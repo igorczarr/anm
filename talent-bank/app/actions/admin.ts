@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdminUser, logAdminAction } from "@/lib/admin-auth";
 import { sendApplicationStatusEmail } from "@/lib/email";
+import { evaluateJobTransparency } from "@/lib/transparency";
 import {
   ApplicationStatus,
   ContractType,
@@ -23,7 +25,7 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-// 5.3. Criar ou atualizar vaga
+// Fase 2 — Oportunidades Transparentes: Criar ou atualizar vaga com padrão obrigatório de qualidade
 export async function saveJobAdminAction(formData: FormData) {
   const admin = await getCurrentAdminUser();
   if (
@@ -37,14 +39,22 @@ export async function saveJobAdminAction(formData: FormData) {
   const jobId = String(formData.get("jobId") || "").trim();
   const title = String(formData.get("title") || "").trim();
   const companyName = String(formData.get("companyName") || "").trim();
+  const companyIdentifier =
+    String(formData.get("companyIdentifier") || "").trim() || null;
+  const companyVerifiedInput = formData.get("companyVerified") === "on";
+  const canVerifyCompany =
+    admin.role === "ADMIN" || admin.role === "JOB_MANAGER";
+
   const professionalArea = String(formData.get("professionalArea") || "").trim();
   const location = String(formData.get("location") || "").trim();
-  const modality = (String(formData.get("modality") || "HIBRIDO") as WorkModality);
+  const modality = (String(
+    formData.get("modality") || "PRESENCIAL"
+  ) as WorkModality);
   const contractType = (String(
     formData.get("contractType") || "CLT"
   ) as ContractType);
   const experienceLevel = (String(
-    formData.get("experienceLevel") || "PLENO"
+    formData.get("experienceLevel") || "JUNIOR"
   ) as ExperienceLevel);
   const requiredEducationRaw = String(formData.get("requiredEducation") || "");
   const requiredEducation = (requiredEducationRaw
@@ -52,17 +62,37 @@ export async function saveJobAdminAction(formData: FormData) {
     : null) as EducationLevel | null;
 
   const salaryRange = String(formData.get("salaryRange") || "").trim() || null;
+  const workSchedule =
+    String(formData.get("workSchedule") || "").trim() || null;
   const description = String(formData.get("description") || "").trim();
-  const responsibilities = String(formData.get("responsibilities") || "").trim();
+  const responsibilities = String(
+    formData.get("responsibilities") || ""
+  ).trim();
   const requirements = String(formData.get("requirements") || "").trim();
-  const differentials = String(formData.get("differentials") || "").trim() || null;
+  const differentials =
+    String(formData.get("differentials") || "").trim() || null;
   const benefits = String(formData.get("benefits") || "").trim() || null;
+  const growthPossibility =
+    String(formData.get("growthPossibility") || "").trim() || null;
 
   const desiredSkillsRaw = String(formData.get("desiredSkills") || "");
   const desiredSkills = desiredSkillsRaw
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+
+  const selectionStagesRaw = String(formData.get("selectionStages") || "");
+  const selectionStages = selectionStagesRaw
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const feedbackSlaDays = Math.max(
+    1,
+    Number(formData.get("feedbackSlaDays") || 7)
+  );
+  const feedbackEstimate =
+    String(formData.get("feedbackEstimate") || "").trim() || null;
 
   const customQuestionsRaw = String(formData.get("customQuestions") || "");
   const customQuestions = customQuestionsRaw
@@ -74,7 +104,9 @@ export async function saveJobAdminAction(formData: FormData) {
     1,
     Number(formData.get("vacanciesCount") || 1)
   );
-  const status = (String(formData.get("status") || "PUBLISHED") as JobStatus);
+  const requestedStatus = (String(
+    formData.get("status") || "PUBLISHED"
+  ) as JobStatus);
   const deadlineRaw = String(formData.get("applicationDeadline") || "").trim();
   const applicationDeadline = deadlineRaw ? new Date(deadlineRaw) : null;
 
@@ -82,15 +114,58 @@ export async function saveJobAdminAction(formData: FormData) {
     return;
   }
 
+  const transparency = evaluateJobTransparency({
+    title,
+    companyName,
+    companyIdentifier,
+    companyVerified: canVerifyCompany ? companyVerifiedInput : false,
+    professionalArea,
+    location,
+    modality,
+    contractType,
+    salaryRange,
+    workSchedule,
+    description,
+    responsibilities,
+    requirements,
+    differentials,
+    benefits,
+    growthPossibility,
+    desiredSkills,
+    selectionStages,
+    feedbackSlaDays,
+    feedbackEstimate,
+    applicationDeadline,
+  });
+
+  // Guardrail Fase 2: bloqueia publicação se faltarem itens obrigatórios do Padrão de Transparência
+  const blockedPublish =
+    requestedStatus === "PUBLISHED" && !transparency.isTransparentStandard;
+  const status: JobStatus = blockedPublish ? "DRAFT" : requestedStatus;
+
+  let savedId = jobId;
+
   if (jobId) {
     const existing = await prisma.job.findUnique({ where: { id: jobId } });
     if (!existing) return;
+
+    const nextCompanyVerified = canVerifyCompany
+      ? companyVerifiedInput
+      : existing.companyVerified;
 
     const updated = await prisma.job.update({
       where: { id: jobId },
       data: {
         title,
         companyName,
+        companyIdentifier,
+        companyVerified: nextCompanyVerified,
+        companyVerifiedByName: nextCompanyVerified
+          ? existing.companyVerifiedByName || admin.fullName
+          : null,
+        companyVerifiedAt: nextCompanyVerified
+          ? existing.companyVerifiedAt || new Date()
+          : null,
         professionalArea,
         location,
         modality,
@@ -98,12 +173,17 @@ export async function saveJobAdminAction(formData: FormData) {
         experienceLevel,
         requiredEducation,
         salaryRange,
+        workSchedule,
         description,
         responsibilities,
         requirements,
         differentials,
         benefits,
+        growthPossibility,
         desiredSkills,
+        selectionStages,
+        feedbackSlaDays,
+        feedbackEstimate,
         customQuestions,
         vacanciesCount,
         status,
@@ -114,23 +194,35 @@ export async function saveJobAdminAction(formData: FormData) {
         applicationDeadline,
       },
     });
+    savedId = updated.id;
 
     await logAdminAction({
       userId: admin.id,
       action: "UPDATE_JOB",
       entityType: "Job",
       entityId: updated.id,
-      metadata: { title: updated.title, status: updated.status },
+      metadata: {
+        title: updated.title,
+        status: updated.status,
+        transparencyScore: transparency.score,
+        companyVerified: updated.companyVerified,
+      },
     });
   } else {
     const baseSlug = slugify(`${title}-${companyName}`);
     const uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const nextCompanyVerified = canVerifyCompany ? companyVerifiedInput : false;
 
     const created = await prisma.job.create({
       data: {
         slug: uniqueSlug,
         title,
         companyName,
+        companyIdentifier,
+        companyVerified: nextCompanyVerified,
+        companyVerifiedByName: nextCompanyVerified ? admin.fullName : null,
+        companyVerifiedAt: nextCompanyVerified ? new Date() : null,
         professionalArea,
         location,
         modality,
@@ -138,12 +230,17 @@ export async function saveJobAdminAction(formData: FormData) {
         experienceLevel,
         requiredEducation,
         salaryRange,
+        workSchedule,
         description,
         responsibilities,
         requirements,
         differentials,
         benefits,
+        growthPossibility,
         desiredSkills,
+        selectionStages,
+        feedbackSlaDays,
+        feedbackEstimate,
         customQuestions,
         vacanciesCount,
         status,
@@ -152,13 +249,19 @@ export async function saveJobAdminAction(formData: FormData) {
         ownerId: admin.id,
       },
     });
+    savedId = created.id;
 
     await logAdminAction({
       userId: admin.id,
       action: "CREATE_JOB",
       entityType: "Job",
       entityId: created.id,
-      metadata: { title: created.title, status: created.status },
+      metadata: {
+        title: created.title,
+        status: created.status,
+        transparencyScore: transparency.score,
+        companyVerified: created.companyVerified,
+      },
     });
   }
 
@@ -166,9 +269,14 @@ export async function saveJobAdminAction(formData: FormData) {
   revalidatePath("/admin/vagas");
   revalidatePath("/vagas");
   revalidatePath("/");
+
+  if (blockedPublish) {
+    redirect(`/admin/vagas?edit=${savedId}&aviso=incompleta`);
+  }
+  redirect(`/admin/vagas?salvo=${status === "PUBLISHED" ? "publicada" : "salva"}`);
 }
 
-// 5.3. Alterar status da vaga (Publicar, Pausar, Encerrar, Reabrir, Arquivar)
+// Fase 2: Alterar status da vaga (com guardrail contra publicar vaga incompleta)
 export async function updateJobStatusAdminAction(formData: FormData) {
   const admin = await getCurrentAdminUser();
   if (
@@ -182,6 +290,16 @@ export async function updateJobStatusAdminAction(formData: FormData) {
   const status = String(formData.get("status") || "") as JobStatus;
 
   if (!jobId || !status) return;
+
+  const existing = await prisma.job.findUnique({ where: { id: jobId } });
+  if (!existing) return;
+
+  if (status === "PUBLISHED") {
+    const transparency = evaluateJobTransparency(existing);
+    if (!transparency.isTransparentStandard) {
+      redirect(`/admin/vagas?edit=${existing.id}&aviso=incompleta`);
+    }
+  }
 
   const job = await prisma.job.update({
     where: { id: jobId },
@@ -203,6 +321,47 @@ export async function updateJobStatusAdminAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/vagas");
   revalidatePath("/vagas");
+  revalidatePath("/");
+}
+
+// Fase 2: Verificar / remover verificação de empresa na oportunidade
+export async function toggleVerifyJobCompanyAdminAction(formData: FormData) {
+  const admin = await getCurrentAdminUser();
+  if (admin.role !== "ADMIN" && admin.role !== "JOB_MANAGER") return;
+
+  const jobId = String(formData.get("jobId") || "");
+  if (!jobId) return;
+
+  const existing = await prisma.job.findUnique({ where: { id: jobId } });
+  if (!existing) return;
+
+  const nextVerified = !existing.companyVerified;
+
+  const updated = await prisma.job.update({
+    where: { id: jobId },
+    data: {
+      companyVerified: nextVerified,
+      companyVerifiedByName: nextVerified ? admin.fullName : null,
+      companyVerifiedAt: nextVerified ? new Date() : null,
+    },
+  });
+
+  await logAdminAction({
+    userId: admin.id,
+    action: nextVerified ? "VERIFY_JOB_COMPANY" : "UNVERIFY_JOB_COMPANY",
+    entityType: "Job",
+    entityId: updated.id,
+    metadata: {
+      companyName: updated.companyName,
+      companyIdentifier: updated.companyIdentifier,
+      verified: nextVerified,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/vagas");
+  revalidatePath("/vagas");
+  revalidatePath(`/vagas/${updated.slug}`);
   revalidatePath("/");
 }
 
@@ -364,12 +523,24 @@ export async function setSkillEvidenceStatusAdminAction(formData: FormData) {
   });
   if (!current) return;
 
-  const isValidated = status === "VALIDADA";
+  const isValidated = status === "VALIDADA" || status === "DEMONSTRADA";
+  const customEvaluator = String(formData.get("validatedByName") || "").trim();
+  const evaluatorLabel =
+    customEvaluator ||
+    (admin.companyName
+      ? `${admin.fullName} · ${admin.companyName}`
+      : `${admin.fullName} · Equipe Talent Hub`);
+
   await prisma.candidateSkill.update({
     where: { id: candidateSkillId },
     data: {
-      evidenceStatus: status as "DECLARADA" | "DOCUMENTADA" | "DEMONSTRADA" | "VALIDADA",
+      evidenceStatus: status as
+        | "DECLARADA"
+        | "DOCUMENTADA"
+        | "DEMONSTRADA"
+        | "VALIDADA",
       validatedById: isValidated ? admin.id : null,
+      validatedByName: isValidated ? evaluatorLabel : null,
       validatedAt: isValidated ? new Date() : null,
     },
   });
@@ -383,9 +554,11 @@ export async function setSkillEvidenceStatusAdminAction(formData: FormData) {
       skill: current.skill.name,
       from: current.evidenceStatus,
       to: status,
+      evaluator: evaluatorLabel,
     },
   });
 
   revalidatePath(`/admin/candidatos/${current.candidateId}`);
+  revalidatePath(`/passaporte/${current.candidateId}`);
   revalidatePath("/perfil");
 }

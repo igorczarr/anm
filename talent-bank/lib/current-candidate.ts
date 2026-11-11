@@ -20,6 +20,7 @@ export async function getOrCreateCurrentCandidate() {
       skills: {
         include: { skill: true, evidences: { orderBy: { createdAt: "desc" } } },
       },
+      achievements: { orderBy: { createdAt: "desc" } },
       languages: { orderBy: { createdAt: "asc" } },
       resumes: { orderBy: { updatedAt: "desc" } },
       applications: {
@@ -39,14 +40,20 @@ export async function getOrCreateCurrentCandidate() {
         fullName: user.fullName,
         email: user.email,
         photoUrl: user.avatarUrl,
+        city: "Feira de Santana",
+        state: "BA",
         completionPercent: 20,
       },
       include: {
         educations: { orderBy: { startDate: "desc" } },
         experiences: { orderBy: { startDate: "desc" } },
         skills: {
-        include: { skill: true, evidences: { orderBy: { createdAt: "desc" } } },
-      },
+          include: {
+            skill: true,
+            evidences: { orderBy: { createdAt: "desc" } },
+          },
+        },
+        achievements: { orderBy: { createdAt: "desc" } },
         languages: { orderBy: { createdAt: "asc" } },
         resumes: { orderBy: { updatedAt: "desc" } },
         applications: {
@@ -59,6 +66,11 @@ export async function getOrCreateCurrentCandidate() {
       },
     });
   }
+
+  const evidencesCount = profile.skills.reduce(
+    (acc, cs) => acc + cs.evidences.length,
+    0
+  );
 
   const completeness = calculateProfileCompleteness({
     fullName: profile.fullName,
@@ -74,12 +86,15 @@ export async function getOrCreateCurrentCandidate() {
     educationsCount: profile.educations.length,
     experiencesCount: profile.experiences.length,
     skillsCount: profile.skills.length,
+    evidencesCount,
+    achievementsCount: profile.achievements.length,
     languagesCount: profile.languages.length,
     preferredModality: profile.preferredModality,
     desiredRolesCount: profile.desiredRoles.length,
     hasResume:
       profile.resumes.some((r) => r.isActive) ||
-      (profile.educations.length > 0 && profile.experiences.length > 0),
+      (profile.educations.length > 0 &&
+        (profile.experiences.length > 0 || evidencesCount > 0)),
   });
 
   if (completeness.percent !== profile.completionPercent) {

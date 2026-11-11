@@ -31,20 +31,12 @@ export default function RootLayout({
             className="w-6 h-6 rounded-md"
           />
           <span className="font-semibold text-[#F7DECA]">
-            A Nova Moeda · Economia da Solidão
+            A Nova Moeda
           </span>
           <span>· UEFS · Arena Operacional</span>
         </div>
-        <div className="flex items-center gap-6 font-medium">
-          <a href="/participar" className="hover:text-[#F7DECA] transition">
-            Interface Interação (Mobile)
-          </a>
-          <a href="/arena" className="hover:text-[#F7DECA] transition">
-            Telão ARENA (16:9)
-          </a>
-          <a href="/admin" className="hover:text-[#F7DECA] transition">
-            Central ADMIN
-          </a>
+        <div className="flex items-center gap-6 font-medium text-[11px] text-[#D5C5AA]/50">
+          <span>Ambiente Oficial de Transmissão e Interação</span>
         </div>
       </div>
     </footer>

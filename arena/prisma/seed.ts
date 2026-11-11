@@ -4,6 +4,7 @@ import {
   ArenaMode,
   StepType,
   StepStatus,
+  QuestionStatus,
 } from "@prisma/client";
 import crypto from "crypto";
 
@@ -21,9 +22,9 @@ function hashPassword(password: string): string {
 }
 
 async function main() {
-  console.log("🌱 Iniciando seed da Arena A Nova Moeda — Economia da Solidão (UEFS)...");
+  console.log("🌱 Iniciando seed v2.0 da Arena A Nova Moeda — Economia da Solidão (UEFS)...");
 
-  // 1. Perfis de permissão administrativa (RBAC)
+  // 1. Perfis de permissão administrativa (RBAC v2.0 + aliases de compatibilidade)
   const rolesData: Array<{
     code: AdminRoleType;
     name: string;
@@ -37,8 +38,9 @@ async function main() {
   }> = [
     {
       code: "ADMIN",
-      name: "Administrador Geral",
-      description: "Controle total sobre configuração, operação ao vivo, curadoria, votações, relatórios e acessos.",
+      name: "Administrador",
+      description:
+        "Configura o evento, cadastra especialistas, pautas, programação e questões da votação; gerencia perfis de acesso e credenciais; autoriza ações excepcionais com justificativa registrada.",
       canOperateTimer: true,
       canModerateQuestions: true,
       canManagePolls: true,
@@ -47,20 +49,22 @@ async function main() {
       canExportReports: true,
     },
     {
-      code: "OPERATOR",
-      name: "Operador de Palco & Cronômetro",
-      description: "Controla o motor de fluxo, cronômetros, transições de etapa, telão ARENA e abertura/fechamento de votações.",
+      code: "PRODUCER",
+      name: "Produtor",
+      description:
+        "Inicia, pausa, retoma e encerra etapas; controla o cronômetro de exposição (15m) e de pergunta e resposta (5m); abre e encerra a votação da mesa-redonda.",
       canOperateTimer: true,
-      canModerateQuestions: true,
+      canModerateQuestions: false,
       canManagePolls: true,
-      canEditSchedule: true,
-      canExportReports: true,
+      canEditSchedule: false,
       canManageAccess: false,
+      canExportReports: true,
     },
     {
-      code: "CURATOR",
-      name: "Equipe de Curadoria",
-      description: "Recebe, analisa, aprova, rejeita e seleciona perguntas principais e reservas para cada pauta.",
+      code: "MODERATOR",
+      name: "Moderador",
+      description:
+        "Analisa as perguntas enviadas pela plateia; seleciona 1 pergunta principal por pauta; aciona pergunta de reserva da mediação quando necessário.",
       canOperateTimer: false,
       canModerateQuestions: true,
       canManagePolls: false,
@@ -69,10 +73,22 @@ async function main() {
       canExportReports: true,
     },
     {
-      code: "MODERATOR",
-      name: "Mediador de Debate",
-      description: "Visualiza perguntas selecionadas e reservas, acompanha cronômetro e resultados de votações.",
+      code: "AUDIOVISUAL",
+      name: "Operador Audiovisual",
+      description:
+        "Acompanha a exibição da Arena; controla o modo tela cheia e a tela de contingência técnica.",
       canOperateTimer: false,
+      canModerateQuestions: false,
+      canManagePolls: false,
+      canEditSchedule: false,
+      canManageAccess: false,
+      canExportReports: true,
+    },
+    {
+      code: "OPERATOR",
+      name: "Operador (Legado / Produtor)",
+      description: "Perfil equivalente ao Produtor para compatibilidade.",
+      canOperateTimer: true,
       canModerateQuestions: true,
       canManagePolls: true,
       canEditSchedule: false,
@@ -80,9 +96,20 @@ async function main() {
       canExportReports: true,
     },
     {
+      code: "CURATOR",
+      name: "Curador (Legado / Moderador)",
+      description: "Perfil equivalente ao Moderador para compatibilidade.",
+      canOperateTimer: false,
+      canModerateQuestions: true,
+      canManagePolls: false,
+      canEditSchedule: false,
+      canManageAccess: false,
+      canExportReports: true,
+    },
+    {
       code: "OBSERVER",
-      name: "Observador / Apoio",
-      description: "Acompanha o dashboard em tempo real e exporta relatórios pós-evento sem alterar o estado ao vivo.",
+      name: "Observador (Legado / Audiovisual)",
+      description: "Perfil equivalente ao Operador Audiovisual para compatibilidade.",
       canOperateTimer: false,
       canModerateQuestions: false,
       canManagePolls: false,
@@ -102,25 +129,40 @@ async function main() {
     roleMap[r.code] = saved.id;
   }
 
-  // 2. Usuários Administrativos iniciais
+  // 2. Usuários Administrativos iniciais (4 perfis oficiais)
   const defaultPassword = process.env.ADMIN_MASTER_PASSWORD || "ANM@Arena2026!";
   const defaultHash = hashPassword(defaultPassword);
 
   const adminUsers = [
     {
       email: "admin@anovamoeda.com.br",
-      fullName: "Direção Operacional · A Nova Moeda",
+      fullName: "Coordenação Geral · Administrador",
       roleCode: AdminRoleType.ADMIN,
+    },
+    {
+      email: "produtor@anovamoeda.com.br",
+      fullName: "Produção de Palco · Produtor",
+      roleCode: AdminRoleType.PRODUCER,
+    },
+    {
+      email: "moderador@anovamoeda.com.br",
+      fullName: "Mediação & Curadoria · Moderador",
+      roleCode: AdminRoleType.MODERATOR,
+    },
+    {
+      email: "audiovisual@anovamoeda.com.br",
+      fullName: "Equipe de Projeção · Operador Audiovisual",
+      roleCode: AdminRoleType.AUDIOVISUAL,
     },
     {
       email: "operacao@anovamoeda.com.br",
       fullName: "Mesa de Operação · Arena UEFS",
-      roleCode: AdminRoleType.OPERATOR,
+      roleCode: AdminRoleType.PRODUCER,
     },
     {
       email: "curadoria@anovamoeda.com.br",
       fullName: "Curadoria de Perguntas · Arena UEFS",
-      roleCode: AdminRoleType.CURATOR,
+      roleCode: AdminRoleType.MODERATOR,
     },
   ];
 
@@ -144,76 +186,97 @@ async function main() {
     });
   }
 
-  // 3. Configuração Inicial do Evento (§2.1)
+  // 3. Configuração Inicial do Evento v2.0 (145 min / 2h25 · 4h certificadas)
   const event = await prisma.event.upsert({
     where: { slug: "a-nova-moeda-2026" },
     update: {
       name: "A Nova Moeda",
       theme: "Economia da Solidão",
       institution: "Universidade Estadual de Feira de Santana (UEFS)",
-      estimatedAudience: 150,
-      programmedDurationMin: 131,
+      estimatedAudience: 250,
+      programmedDurationMin: 145,
+      certifiedHours: 4,
+      scheduleLocked: false,
+      maxQuestionsPerTopic: 1,
+      minQuestionIntervalSec: 10,
       formatDescription:
-        "Apresentação, provocação, réplica, votação e participação da plateia",
+        "Introdução contextual, cinco exposições individuais (15 min + 5 min P&R), votação do público e mesa-redonda definida por votação",
     },
     create: {
       slug: "a-nova-moeda-2026",
       name: "A Nova Moeda",
       theme: "Economia da Solidão",
       institution: "Universidade Estadual de Feira de Santana (UEFS)",
-      estimatedAudience: 150,
-      programmedDurationMin: 131,
+      estimatedAudience: 250,
+      programmedDurationMin: 145,
+      certifiedHours: 4,
+      scheduleLocked: false,
       formatDescription:
-        "Apresentação, provocação, réplica, votação e participação da plateia",
+        "Introdução contextual, cinco exposições individuais (15 min + 5 min P&R), votação do público e mesa-redonda definida por votação",
       status: "WAITING",
       questionCharLimit: 400,
-      maxQuestionsPerTopic: 2,
-      minQuestionIntervalSec: 15,
+      maxQuestionsPerTopic: 1,
+      minQuestionIntervalSec: 10,
+      requireAccessCode: false,
+      requireCredential: false,
       soundAlertsEnabled: true,
       showTimerOnArena: true,
     },
   });
 
-  // 4. Cadastro dos 5 Palestrantes Recorrentes (§2.1 e §2.2)
+  // Limpa dados antigos de cronograma/pautas/votações para garantir fidelidade 100% ao formato v2.0
+  await prisma.timerSession.deleteMany({ where: { eventId: event.id } });
+  await prisma.scheduleStep.deleteMany({ where: { eventId: event.id } });
+  await prisma.voteHistory.deleteMany({
+    where: { poll: { eventId: event.id } },
+  });
+  await prisma.vote.deleteMany({
+    where: { poll: { eventId: event.id } },
+  });
+  await prisma.poll.deleteMany({ where: { eventId: event.id } });
+  await prisma.question.deleteMany({ where: { eventId: event.id } });
+  await prisma.topic.deleteMany({ where: { eventId: event.id } });
+
+  // 4. Cadastro dos 5 Especialistas Oficiais (Paula, Daniel, Janaína, Denilson Carneiro, Sérgio Passos)
   const speakersInput = [
+    {
+      slug: "paula",
+      name: "Paula",
+      roleTitle: "Especialista · Introdução & Mesa-Redonda",
+      bio: "Contextualiza a economia da solidão, apresenta o problema central do encontro e integra a mesa-redonda final.",
+      photoUrl: "/img/Dulcila.jpeg",
+      displayOrder: 1,
+    },
     {
       slug: "daniel",
       name: "Daniel",
-      roleTitle: "Palestrante · Pautas 1 e 6",
-      bio: "Responsável pela abertura temática sobre hiperconexão e pela síntese de transformação em uma economia da conexão.",
+      roleTitle: "Especialista · Pauta 1 & Mesa-Redonda",
+      bio: "Conduz a Pauta 1 sobre a solidão na era da hiperconexão e participa da mesa-redonda.",
       photoUrl: "/img/Daniel.jpeg",
-      displayOrder: 1,
+      displayOrder: 2,
     },
     {
       slug: "janaina",
       name: "Janaína",
-      roleTitle: "Palestrante · Pauta 2",
-      bio: "Conduz a reflexão sobre a mercantilização das relações humanas quando a solidão vira mercado.",
+      roleTitle: "Especialista · Pautas 2 e 5 & Mesa-Redonda",
+      bio: "Conduz a Pauta 2 sobre quando a solidão vira mercado, a Pauta 5 sobre a construção de uma economia da conexão e integra a mesa-redonda.",
       photoUrl: "/img/Janaina.jpeg",
-      displayOrder: 2,
+      displayOrder: 3,
     },
     {
       slug: "denilson-carneiro",
       name: "Denilson Carneiro",
-      roleTitle: "Palestrante · Pauta 3",
-      bio: "Explora o paradoxo do pertencimento nas organizações e comunidades contemporâneas.",
+      roleTitle: "Especialista · Pauta 3 & Mesa-Redonda",
+      bio: "Explora por que podemos estar cercados de pessoas e ainda não pertencer a lugar nenhum na Pauta 3 e participa da mesa-redonda.",
       photoUrl: "/img/Denilson.png",
-      displayOrder: 3,
+      displayOrder: 4,
     },
     {
       slug: "sergio-passos",
       name: "Sérgio Passos",
-      roleTitle: "Palestrante · Pauta 4",
-      bio: "Analisa o futuro do trabalho entre a promessa de autonomia e o risco do isolamento profissional.",
+      roleTitle: "Especialista · Pauta 4 & Mesa-Redonda",
+      bio: "Analisa o futuro do trabalho entre aproximação e isolamento profissional na Pauta 4 e participa da mesa-redonda.",
       photoUrl: "/img/Sergio.jpeg",
-      displayOrder: 4,
-    },
-    {
-      slug: "dulcila",
-      name: "Dulcila",
-      roleTitle: "Palestrante · Pauta 5",
-      bio: "Debate os fundamentos éticos e práticos para construir uma verdadeira economia da conexão.",
-      photoUrl: "/img/Dulcila.jpeg",
       displayOrder: 5,
     },
   ];
@@ -236,58 +299,55 @@ async function main() {
     speakerMap[sp.slug] = { id: saved.id, name: saved.name };
   }
 
-  // 5. Cadastro das 6 Pautas (§2.2 — numeradas estritamente de 1 a 6, sem 3A ou 3B)
+  // 5. Cadastro das 5 Pautas Oficiais (20 min cada = 15 min Exposição + 5 min Pergunta e Resposta)
   const topicsInput = [
     {
       number: 1,
       title: "A solidão na era da hiperconexão",
-      durationSec: 19 * 60, // 19:00
+      description: "15 minutos de exposição + 5 minutos de pergunta e resposta.",
+      durationSec: 20 * 60, // 1200s
       mainSpeakerSlug: "daniel",
-      provokerSlug: "janaina",
-      provokerLabel: "Janaína",
+      mediationReserveQuestion:
+        "De que maneira a arquitetura das redes digitais transforma a busca por vínculo humano em consumo contínuo de atenção?",
     },
     {
       number: 2,
       title: "Quando a solidão vira mercado",
-      durationSec: 19 * 60, // 19:00
+      description: "15 minutos de exposição + 5 minutos de pergunta e resposta.",
+      durationSec: 20 * 60,
       mainSpeakerSlug: "janaina",
-      provokerSlug: "dulcila",
-      provokerLabel: "Dulcila",
+      mediationReserveQuestion:
+        "Onde está a fronteira ética entre oferecer serviços de acolhimento legítimos e lucrar com a manutenção da vulnerabilidade emocional?",
     },
     {
       number: 3,
       title:
         "Por que podemos estar cercados de pessoas e ainda não pertencer a lugar nenhum?",
-      durationSec: 19 * 60, // 19:00
+      description: "15 minutos de exposição + 5 minutos de pergunta e resposta.",
+      durationSec: 20 * 60,
       mainSpeakerSlug: "denilson-carneiro",
-      provokerSlug: "sergio-passos",
-      provokerLabel: "Sérgio Passos",
+      mediationReserveQuestion:
+        "Quais práticas cotidianas nas instituições e universidades destroem silenciosamente o senso de pertencimento mesmo em ambientes cheios?",
     },
     {
       number: 4,
       title:
         "O futuro do trabalho vai nos aproximar ou nos tornar profissionais cada vez mais isolados?",
-      durationSec: 19 * 60, // 19:00
+      description: "15 minutos de exposição + 5 minutos de pergunta e resposta.",
+      durationSec: 20 * 60,
       mainSpeakerSlug: "sergio-passos",
-      provokerSlug: "denilson-carneiro",
-      provokerLabel: "Denilson Carneiro",
+      mediationReserveQuestion:
+        "Como conciliar a flexibilidade e autonomia das novas formas de trabalho com a construção de comunidades profissionais solidárias?",
     },
     {
       number: 5,
       title: "Podemos construir uma economia da conexão?",
-      durationSec: 19 * 60, // 19:00
-      mainSpeakerSlug: "dulcila",
-      provokerSlug: "daniel",
-      provokerLabel: "Daniel",
-    },
-    {
-      number: 6,
-      title:
-        "Como transformar a economia da solidão em uma economia da conexão?",
-      durationSec: 18 * 60, // 18:00
-      mainSpeakerSlug: "daniel",
-      provokerSlug: null,
-      provokerLabel: "Participação coletiva",
+      description:
+        "15 minutos de exposição + 5 minutos de pergunta e resposta. A votação da mesa-redonda ocorre durante esta pauta.",
+      durationSec: 20 * 60,
+      mainSpeakerSlug: "janaina",
+      mediationReserveQuestion:
+        "Qual é o primeiro passo concreto para que organizações e comunidades locais substituam a lógica da transação isolada por uma economia da conexão?",
     },
   ];
 
@@ -299,39 +359,44 @@ async function main() {
       title: string;
       mainSpeakerId: string;
       mainSpeakerName: string;
-      provokerId: string | null;
-      provokerLabel: string;
       durationSec: number;
     }
   > = {};
 
   for (const t of topicsInput) {
     const mainSp = speakerMap[t.mainSpeakerSlug];
-    const provSp = t.provokerSlug ? speakerMap[t.provokerSlug] : null;
-    const saved = await prisma.topic.upsert({
-      where: {
-        eventId_number: {
-          eventId: event.id,
-          number: t.number,
-        },
-      },
-      update: {
-        title: t.title,
-        durationSec: t.durationSec,
-        mainSpeakerId: mainSp.id,
-        provokerId: provSp?.id ?? null,
-        provokerLabel: t.provokerLabel,
-      },
-      create: {
+    const saved = await prisma.topic.create({
+      data: {
         eventId: event.id,
         number: t.number,
         title: t.title,
+        description: t.description,
         durationSec: t.durationSec,
         mainSpeakerId: mainSp.id,
-        provokerId: provSp?.id ?? null,
-        provokerLabel: t.provokerLabel,
+        provokerId: null,
+        provokerLabel: "Pergunta da Plateia (5 min)",
         status: StepStatus.PENDING,
       },
+    });
+
+    // Cria a Pergunta de Reserva da Mediação pré-cadastrada para cada pauta
+    const reserveQ = await prisma.question.create({
+      data: {
+        eventId: event.id,
+        topicId: saved.id,
+        sessionId: null,
+        clientRequestId: `mediation-reserve-topic-${t.number}`,
+        text: t.mediationReserveQuestion,
+        status: QuestionStatus.APPROVED,
+        isPrimary: false,
+        isReserve: true,
+        isMediationReserve: true,
+      },
+    });
+
+    await prisma.topic.update({
+      where: { id: saved.id },
+      data: { reserveQuestionId: reserveQ.id },
     });
 
     topicMap[t.number] = {
@@ -340,129 +405,129 @@ async function main() {
       title: saved.title,
       mainSpeakerId: mainSp.id,
       mainSpeakerName: mainSp.name,
-      provokerId: provSp?.id ?? null,
-      provokerLabel: t.provokerLabel,
       durationSec: saved.durationSec,
     };
   }
 
-  // 6. Cronograma-base (§2.3 — 9 blocos macro totalizando 131:00) e Etapas Operacionais (§9.1 e §9.2)
+  // 6. Programação Oficial v2.0 — 10 Blocos Macro (totalizando 145 minutos = 2h25)
   const macroBlocks = [
     {
       code: "MACRO_1",
       macroOrder: 1,
-      title: "Abertura e explicação da dinâmica",
+      title: "1. Abertura",
       stepType: StepType.OPENING,
       arenaMode: ArenaMode.OPENING,
-      durationSec: 8 * 60,
+      durationSec: 5 * 60, // 5 min
       topicId: null,
-      responsibleName: "Mediação & Organização",
+      speakerId: null,
+      responsibleName: "Organização",
     },
     {
       code: "MACRO_2",
       macroOrder: 2,
-      title: "Pauta 1 — A solidão na era da hiperconexão",
-      stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.TOPIC_OVERVIEW,
-      durationSec: 19 * 60,
-      topicId: topicMap[1].id,
-      responsibleName: "Daniel (Provocação: Janaína)",
+      title: "2. Introdução e contexto",
+      stepType: StepType.INTRODUCTION,
+      arenaMode: ArenaMode.INTRODUCTION,
+      durationSec: 10 * 60, // 10 min
+      topicId: null,
+      speakerId: speakerMap["paula"].id,
+      responsibleName: "Paula",
     },
     {
       code: "MACRO_3",
       macroOrder: 3,
-      title: "Pauta 2 — Quando a solidão vira mercado",
+      title: "3. Pauta 1 — A solidão na era da hiperconexão",
       stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.TOPIC_OVERVIEW,
-      durationSec: 19 * 60,
-      topicId: topicMap[2].id,
-      responsibleName: "Janaína (Provocação: Dulcila)",
+      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
+      durationSec: 20 * 60, // 15m exposição + 5m P&R
+      topicId: topicMap[1].id,
+      speakerId: speakerMap["daniel"].id,
+      responsibleName: "Daniel (15m Exposição + 5m P&R)",
     },
     {
       code: "MACRO_4",
       macroOrder: 4,
-      title:
-        "Pauta 3 — Por que podemos estar cercados de pessoas e ainda não pertencer a lugar nenhum?",
+      title: "4. Pauta 2 — Quando a solidão vira mercado",
       stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.TOPIC_OVERVIEW,
-      durationSec: 19 * 60,
-      topicId: topicMap[3].id,
-      responsibleName: "Denilson Carneiro (Provocação: Sérgio Passos)",
+      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
+      durationSec: 20 * 60, // 15m exposição + 5m P&R
+      topicId: topicMap[2].id,
+      speakerId: speakerMap["janaina"].id,
+      responsibleName: "Janaína (15m Exposição + 5m P&R)",
     },
     {
       code: "MACRO_5",
       macroOrder: 5,
-      title: "Intervalo",
-      stepType: StepType.INTERVAL,
-      arenaMode: ArenaMode.INTERVAL,
-      durationSec: 5 * 60,
-      topicId: null,
-      responsibleName: "Organização",
+      title:
+        "5. Pauta 3 — Por que podemos estar cercados de pessoas e ainda não pertencer a lugar nenhum?",
+      stepType: StepType.TOPIC_BLOCK,
+      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
+      durationSec: 20 * 60, // 15m exposição + 5m P&R
+      topicId: topicMap[3].id,
+      speakerId: speakerMap["denilson-carneiro"].id,
+      responsibleName: "Denilson Carneiro (15m Exposição + 5m P&R)",
     },
     {
       code: "MACRO_6",
       macroOrder: 6,
       title:
-        "Pauta 4 — O futuro do trabalho vai nos aproximar ou nos tornar profissionais cada vez mais isolados?",
+        "6. Pauta 4 — O futuro do trabalho vai nos aproximar ou nos tornar profissionais cada vez mais isolados?",
       stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.TOPIC_OVERVIEW,
-      durationSec: 19 * 60,
+      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
+      durationSec: 20 * 60, // 15m exposição + 5m P&R
       topicId: topicMap[4].id,
-      responsibleName: "Sérgio Passos (Provocação: Denilson Carneiro)",
+      speakerId: speakerMap["sergio-passos"].id,
+      responsibleName: "Sérgio Passos (15m Exposição + 5m P&R)",
     },
     {
       code: "MACRO_7",
       macroOrder: 7,
-      title: "Pauta 5 — Podemos construir uma economia da conexão?",
+      title: "7. Pauta 5 — Podemos construir uma economia da conexão?",
       stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.TOPIC_OVERVIEW,
-      durationSec: 19 * 60,
+      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
+      durationSec: 20 * 60, // 15m exposição + 5m P&R (Votação ocorre durante a Pauta 5)
       topicId: topicMap[5].id,
-      responsibleName: "Dulcila (Provocação: Daniel)",
+      speakerId: speakerMap["janaina"].id,
+      responsibleName: "Janaína (15m Exposição + 5m P&R · Votação aberta)",
     },
     {
       code: "MACRO_8",
       macroOrder: 8,
-      title:
-        "Pauta 6 — Como transformar a economia da solidão em uma economia da conexão?",
-      stepType: StepType.TOPIC_BLOCK,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 18 * 60,
-      topicId: topicMap[6].id,
-      responsibleName: "Daniel & Participação Coletiva",
+      title: "8. Transição e anúncio do resultado da votação",
+      stepType: StepType.TRANSITION,
+      arenaMode: ArenaMode.POLL_RESULTS,
+      durationSec: 5 * 60, // 5 min
+      topicId: null,
+      speakerId: null,
+      responsibleName: "Organização / Mediação",
     },
     {
       code: "MACRO_9",
       macroOrder: 9,
-      title: "Encerramento",
+      title: "9. Mesa-redonda",
+      stepType: StepType.ROUNDTABLE,
+      arenaMode: ArenaMode.ROUNDTABLE,
+      durationSec: 20 * 60, // 20 min
+      topicId: null,
+      speakerId: null,
+      responsibleName: "Paula, Daniel, Janaína, Denilson e Sérgio · Mediação",
+    },
+    {
+      code: "MACRO_10",
+      macroOrder: 10,
+      title: "10. Encerramento",
       stepType: StepType.CLOSING,
       arenaMode: ArenaMode.CLOSING,
-      durationSec: 5 * 60,
+      durationSec: 5 * 60, // 5 min
       topicId: null,
-      responsibleName: "Mediação & Organização",
+      speakerId: null,
+      responsibleName: "Organização",
     },
   ];
 
   for (const mb of macroBlocks) {
-    await prisma.scheduleStep.upsert({
-      where: {
-        eventId_code: {
-          eventId: event.id,
-          code: mb.code,
-        },
-      },
-      update: {
-        title: mb.title,
-        stepType: mb.stepType,
-        arenaMode: mb.arenaMode,
-        sequenceOrder: mb.macroOrder,
-        macroOrder: mb.macroOrder,
-        isMacroBlock: true,
-        durationSec: mb.durationSec,
-        topicId: mb.topicId,
-        responsibleName: mb.responsibleName,
-      },
-      create: {
+    await prisma.scheduleStep.create({
+      data: {
         eventId: event.id,
         code: mb.code,
         title: mb.title,
@@ -473,12 +538,13 @@ async function main() {
         isMacroBlock: true,
         durationSec: mb.durationSec,
         topicId: mb.topicId,
+        speakerId: mb.speakerId,
         responsibleName: mb.responsibleName,
       },
     });
   }
 
-  // Etapas operacionais detalhadas (Motor de Fluxo §9.1 e §9.2)
+  // 7. Etapas Operacionais Detalhadas (15 etapas operacionais = 145 min)
   interface OperationalStepInput {
     code: string;
     title: string;
@@ -491,231 +557,102 @@ async function main() {
     macroOrder: number;
   }
 
-  const operationalSteps: OperationalStepInput[] = [];
+  const operationalSteps: OperationalStepInput[] = [
+    {
+      code: "OP_01_ABERTURA",
+      title: "Abertura — Apresentação do evento e orientações ao público",
+      stepType: StepType.OPENING,
+      arenaMode: ArenaMode.OPENING,
+      durationSec: 5 * 60, // 05:00
+      topicId: null,
+      speakerId: null,
+      responsibleName: "Organização",
+      macroOrder: 1,
+    },
+    {
+      code: "OP_02_INTRODUCAO_PAULA",
+      title: "Introdução e contexto — A economia da solidão",
+      stepType: StepType.INTRODUCTION,
+      arenaMode: ArenaMode.INTRODUCTION,
+      durationSec: 10 * 60, // 10:00
+      topicId: null,
+      speakerId: speakerMap["paula"].id,
+      responsibleName: "Paula",
+      macroOrder: 2,
+    },
+  ];
 
-  // Ordem 1: Abertura (08:00)
-  operationalSteps.push({
-    code: "OP_OPENING",
-    title: "Abertura e explicação da dinâmica",
-    stepType: StepType.OPENING,
-    arenaMode: ArenaMode.OPENING,
-    durationSec: 8 * 60,
-    topicId: null,
-    speakerId: null,
-    responsibleName: "Mediação & Organização",
-    macroOrder: 1,
-  });
-
-  // Helper para adicionar as 6 etapas das Pautas 1 a 5 (§9.1)
-  function addStandardTopicStages(topicNum: number, macroOrd: number) {
+  // Pautas 1 a 5: cada uma possui exatamente 2 fases operacionais (Exposição 15:00 + Pergunta e Resposta 05:00)
+  for (let topicNum = 1; topicNum <= 5; topicNum++) {
     const t = topicMap[topicNum];
+    const macroOrd = topicNum + 2; // Macro 3..7
     operationalSteps.push(
       {
-        code: `T${topicNum}_1_EXPOSICAO`,
-        title: `Pauta ${topicNum} · Exposição`,
+        code: `T${topicNum}_EXPOSICAO`,
+        title: `Pauta ${topicNum} · Exposição — ${t.title}`,
         stepType: StepType.EXPOSITION,
         arenaMode: ArenaMode.SPEAKER_EXPOSITION,
-        durationSec: 10 * 60,
+        durationSec: 15 * 60, // 15:00
         topicId: t.id,
         speakerId: t.mainSpeakerId,
         responsibleName: t.mainSpeakerName,
         macroOrder: macroOrd,
       },
       {
-        code: `T${topicNum}_2_PROVOCACAO`,
-        title: `Pauta ${topicNum} · Provocação`,
-        stepType: StepType.PROVOCATION,
-        arenaMode: ArenaMode.PROVOCATION,
-        durationSec: 2 * 60,
-        topicId: t.id,
-        speakerId: t.provokerId,
-        responsibleName: t.provokerLabel,
-        macroOrder: macroOrd,
-      },
-      {
-        code: `T${topicNum}_3_REPLICA`,
-        title: `Pauta ${topicNum} · Réplica`,
-        stepType: StepType.REBUTTAL,
-        arenaMode: ArenaMode.REBUTTAL,
-        durationSec: 2 * 60,
-        topicId: t.id,
-        speakerId: t.mainSpeakerId,
-        responsibleName: t.mainSpeakerName,
-        macroOrder: macroOrd,
-      },
-      {
-        code: `T${topicNum}_4_VOTACAO`,
-        title: `Pauta ${topicNum} · Votação`,
-        stepType: StepType.POLL,
-        arenaMode: ArenaMode.POLL_OPEN,
-        durationSec: 1 * 60,
-        topicId: t.id,
-        speakerId: null,
-        responsibleName: "Plateia & Mediação",
-        macroOrder: macroOrd,
-      },
-      {
-        code: `T${topicNum}_5_VOZ_PLATEIA`,
-        title: `Pauta ${topicNum} · Voz da plateia`,
+        code: `T${topicNum}_PERGUNTA_RESPOSTA`,
+        title: `Pauta ${topicNum} · Pergunta e Resposta — ${t.title}`,
         stepType: StepType.AUDIENCE_VOICE,
         arenaMode: ArenaMode.SELECTED_QUESTION,
-        durationSec: 3 * 60,
+        durationSec: 5 * 60, // 05:00
         topicId: t.id,
         speakerId: t.mainSpeakerId,
         responsibleName: `${t.mainSpeakerName} & Mediação`,
-        macroOrder: macroOrd,
-      },
-      {
-        code: `T${topicNum}_6_TRANSICAO`,
-        title: `Pauta ${topicNum} · Transição`,
-        stepType: StepType.TRANSITION,
-        arenaMode: ArenaMode.TOPIC_OVERVIEW,
-        durationSec: 1 * 60,
-        topicId: t.id,
-        speakerId: null,
-        responsibleName: "Organização",
         macroOrder: macroOrd,
       }
     );
   }
 
-  addStandardTopicStages(1, 2);
-  addStandardTopicStages(2, 3);
-  addStandardTopicStages(3, 4);
-
-  // Ordem 5: Intervalo (05:00)
-  operationalSteps.push({
-    code: "OP_INTERVAL",
-    title: "Intervalo",
-    stepType: StepType.INTERVAL,
-    arenaMode: ArenaMode.INTERVAL,
-    durationSec: 5 * 60,
-    topicId: null,
-    speakerId: null,
-    responsibleName: "Organização",
-    macroOrder: 5,
-  });
-
-  addStandardTopicStages(4, 6);
-  addStandardTopicStages(5, 7);
-
-  // Ordem 8: Pauta 6 — Fluxo específico de 7 etapas (§9.2, total 18:00)
-  const t6 = topicMap[6];
+  // Transição e Resultado da Votação (5 min), Mesa-Redonda (20 min) e Encerramento (5 min)
   operationalSteps.push(
     {
-      code: "T6_1_EXPOSICAO_DANIEL",
-      title: "Pauta 6 · Exposição de Daniel",
-      stepType: StepType.EXPOSITION,
-      arenaMode: ArenaMode.SPEAKER_EXPOSITION,
-      durationSec: 10 * 60,
-      topicId: t6.id,
-      speakerId: speakerMap["daniel"].id,
-      responsibleName: "Daniel",
-      macroOrder: 8,
-    },
-    {
-      code: "T6_2_JANAINA",
-      title: "Pauta 6 · Contribuição: Janaína",
-      stepType: StepType.COLLECTIVE_CONTRIBUTION,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 45,
-      topicId: t6.id,
-      speakerId: speakerMap["janaina"].id,
-      responsibleName: "Janaína",
-      macroOrder: 8,
-    },
-    {
-      code: "T6_3_DENILSON",
-      title: "Pauta 6 · Contribuição: Denilson Carneiro",
-      stepType: StepType.COLLECTIVE_CONTRIBUTION,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 45,
-      topicId: t6.id,
-      speakerId: speakerMap["denilson-carneiro"].id,
-      responsibleName: "Denilson Carneiro",
-      macroOrder: 8,
-    },
-    {
-      code: "T6_4_SERGIO",
-      title: "Pauta 6 · Contribuição: Sérgio Passos",
-      stepType: StepType.COLLECTIVE_CONTRIBUTION,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 45,
-      topicId: t6.id,
-      speakerId: speakerMap["sergio-passos"].id,
-      responsibleName: "Sérgio Passos",
-      macroOrder: 8,
-    },
-    {
-      code: "T6_5_DULCILA",
-      title: "Pauta 6 · Contribuição: Dulcila",
-      stepType: StepType.COLLECTIVE_CONTRIBUTION,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 45,
-      topicId: t6.id,
-      speakerId: speakerMap["dulcila"].id,
-      responsibleName: "Dulcila",
-      macroOrder: 8,
-    },
-    {
-      code: "T6_6_VOTACAO_FINAL",
-      title: "Pauta 6 · Votação final",
-      stepType: StepType.POLL,
-      arenaMode: ArenaMode.POLL_OPEN,
-      durationSec: 2 * 60,
-      topicId: t6.id,
+      code: "OP_08_TRANSICAO_RESULTADO",
+      title: "Transição e anúncio do resultado da votação",
+      stepType: StepType.TRANSITION,
+      arenaMode: ArenaMode.POLL_RESULTS,
+      durationSec: 5 * 60, // 05:00
+      topicId: null,
       speakerId: null,
-      responsibleName: "Plateia & Mediação",
+      responsibleName: "Organização / Mediação",
       macroOrder: 8,
     },
     {
-      code: "T6_7_SINTESE_DANIEL",
-      title: "Pauta 6 · Síntese de Daniel",
-      stepType: StepType.SYNTHESIS,
-      arenaMode: ArenaMode.COLLECTIVE_BUILDING,
-      durationSec: 3 * 60,
-      topicId: t6.id,
-      speakerId: speakerMap["daniel"].id,
-      responsibleName: "Daniel",
-      macroOrder: 8,
+      code: "OP_09_MESA_REDONDA",
+      title: "Mesa-redonda — Debate da questão escolhida pelo público",
+      stepType: StepType.ROUNDTABLE,
+      arenaMode: ArenaMode.ROUNDTABLE,
+      durationSec: 20 * 60, // 20:00
+      topicId: null,
+      speakerId: null,
+      responsibleName: "Paula, Daniel, Janaína, Denilson e Sérgio · Mediação",
+      macroOrder: 9,
+    },
+    {
+      code: "OP_10_ENCERRAMENTO",
+      title: "Encerramento — Síntese, agradecimentos e orientações finais",
+      stepType: StepType.CLOSING,
+      arenaMode: ArenaMode.CLOSING,
+      durationSec: 5 * 60, // 05:00
+      topicId: null,
+      speakerId: null,
+      responsibleName: "Organização",
+      macroOrder: 10,
     }
   );
 
-  // Ordem 9: Encerramento (05:00)
-  operationalSteps.push({
-    code: "OP_CLOSING",
-    title: "Encerramento",
-    stepType: StepType.CLOSING,
-    arenaMode: ArenaMode.CLOSING,
-    durationSec: 5 * 60,
-    topicId: null,
-    speakerId: null,
-    responsibleName: "Mediação & Organização",
-    macroOrder: 9,
-  });
-
   for (let idx = 0; idx < operationalSteps.length; idx++) {
     const st = operationalSteps[idx];
-    await prisma.scheduleStep.upsert({
-      where: {
-        eventId_code: {
-          eventId: event.id,
-          code: st.code,
-        },
-      },
-      update: {
-        title: st.title,
-        stepType: st.stepType,
-        arenaMode: st.arenaMode,
-        sequenceOrder: idx + 1,
-        macroOrder: st.macroOrder,
-        isMacroBlock: false,
-        durationSec: st.durationSec,
-        topicId: st.topicId,
-        speakerId: st.speakerId,
-        responsibleName: st.responsibleName,
-      },
-      create: {
+    await prisma.scheduleStep.create({
+      data: {
         eventId: event.id,
         code: st.code,
         title: st.title,
@@ -732,139 +669,101 @@ async function main() {
     });
   }
 
-  // 7. Cadastro das 6 Votações e Alternativas (§6.1)
-  const pollsInput = [
-    {
+  // 8. Votação Única Oficial da Mesa-Redonda (vinculada à Pauta 5, aberta durante a Pauta 5)
+  const roundtablePoll = await prisma.poll.create({
+    data: {
+      eventId: event.id,
+      topicId: topicMap[5].id,
       number: 1,
-      durationSec: 60,
-      question:
-        "As conexões digitais estão diminuindo a solidão ou apenas ampliando a sensação de estarmos conectados?",
-      options: [
-        "Estão diminuindo a solidão.",
-        "Estão ampliando a sensação de conexão, mas não necessariamente os vínculos.",
-        "Depende da qualidade das relações construídas.",
-      ],
+      question: "Qual questão deve orientar a mesa-redonda?",
+      durationSec: 15 * 60,
+      status: "DRAFT",
+    },
+  });
+
+  const pollOptions = [
+    {
+      optionOrder: 1,
+      themeLabel: "Questão 1 — Tecnologia e responsabilidade",
+      label:
+        "Se as plataformas digitais lucram com o tempo de atenção, como criar soluções tecnológicas que combatam a solidão sem repetir o mesmo modelo de dependência?",
     },
     {
-      number: 2,
-      durationSec: 60,
-      question:
-        "É possível construir negócios rentáveis oferecendo conexões humanas genuínas sem explorar a solidão?",
-      options: [
-        "Sim, é possível.",
-        "Não, existe uma contradição inevitável.",
-        "Depende de como o negócio é estruturado.",
-      ],
+      optionOrder: 2,
+      themeLabel: "Questão 2 — Mercado e relações humanas",
+      label:
+        "Quando experiências de convivência, acolhimento e pertencimento passam a ser vendidas, o mercado está resolvendo a solidão ou transformando vínculos humanos em produto?",
     },
     {
-      number: 3,
-      durationSec: 60,
-      question:
-        "O que mais contribui para que uma pessoa se sinta parte de uma organização?",
-      options: [
-        "Reconhecimento e valorização.",
-        "Relações interpessoais e convivência.",
-        "Propósito e objetivos compartilhados.",
-        "Confiança e segurança nas relações.",
-      ],
-    },
-    {
-      number: 4,
-      durationSec: 60,
-      question:
-        "As novas formas de trabalho tendem a produzir mais autonomia ou mais isolamento profissional?",
-      options: [
-        "Mais autonomia.",
-        "Mais isolamento.",
-        "Os dois ao mesmo tempo.",
-        "Depende da estrutura e da cultura de cada organização.",
-      ],
-    },
-    {
-      number: 5,
-      durationSec: 60,
-      question:
-        "Qual deveria ser o principal compromisso de uma economia da conexão?",
-      options: [
-        "Promover relações humanas mais significativas.",
-        "Desenvolver negócios com responsabilidade social.",
-        "Valorizar o pertencimento e a confiança.",
-        "Criar inovação sem explorar vulnerabilidades humanas.",
-      ],
-    },
-    {
-      number: 6,
-      durationSec: 120,
-      question:
-        "Qual transformação deveria ser prioridade para construir uma economia da conexão?",
-      options: [
-        "Relações humanas mais significativas.",
-        "Organizações com maior pertencimento e reconhecimento.",
-        "Modelos de negócio mais responsáveis.",
-        "Novas formas de trabalho que conciliem autonomia e conexão.",
-        "Uso da tecnologia que valorize relações, e não apenas atenção.",
-      ],
+      optionOrder: 3,
+      themeLabel: "Questão 3 — Trabalho e sociedade",
+      label:
+        "Diante da hiperconexão e das novas formas de trabalho, o isolamento contemporâneo é uma escolha individual ou o resultado de como organizamos a vida econômica e profissional?",
     },
   ];
 
-  for (const p of pollsInput) {
-    const topic = topicMap[p.number];
-    const savedPoll = await prisma.poll.upsert({
-      where: {
-        eventId_number: {
-          eventId: event.id,
-          number: p.number,
-        },
-      },
-      update: {
-        question: p.question,
-        durationSec: p.durationSec,
-        topicId: topic.id,
-      },
-      create: {
-        eventId: event.id,
-        topicId: topic.id,
-        number: p.number,
-        question: p.question,
-        durationSec: p.durationSec,
-        status: "DRAFT",
+  for (const opt of pollOptions) {
+    await prisma.pollOption.create({
+      data: {
+        pollId: roundtablePoll.id,
+        optionOrder: opt.optionOrder,
+        themeLabel: opt.themeLabel,
+        label: opt.label,
+        votesCount: 0,
       },
     });
-
-    for (let i = 0; i < p.options.length; i++) {
-      await prisma.pollOption.upsert({
-        where: {
-          pollId_optionOrder: {
-            pollId: savedPoll.id,
-            optionOrder: i + 1,
-          },
-        },
-        update: {
-          label: p.options[i],
-        },
-        create: {
-          pollId: savedPoll.id,
-          optionOrder: i + 1,
-          label: p.options[i],
-          votesCount: 0,
-        },
-      });
-    }
   }
 
-  // 8. Estado ao vivo inicial (LiveState singleton)
+  // 9. Lote inicial de 250 Credenciais Individuais para Check-in (ANM-001 a ANM-250)
+  const existingCredentialsCount = await prisma.participantCredential.count({
+    where: { eventId: event.id },
+  });
+  if (existingCredentialsCount < 250) {
+    const credentialsBatch = [];
+    for (let i = 1; i <= 250; i++) {
+      const code = `ANM-${String(i).padStart(3, "0")}`;
+      credentialsBatch.push({
+        eventId: event.id,
+        code,
+        label: `Credencial Participante #${String(i).padStart(3, "0")}`,
+        isUsed: false,
+      });
+    }
+    await prisma.participantCredential.createMany({
+      data: credentialsBatch,
+      skipDuplicates: true,
+    });
+  }
+
+  // 10. Estado ao vivo inicial (LiveState singleton)
   const firstStep = await prisma.scheduleStep.findUnique({
     where: {
       eventId_code: {
         eventId: event.id,
-        code: "OP_OPENING",
+        code: "OP_01_ABERTURA",
       },
     },
   });
 
   await prisma.liveState.upsert({
     where: { eventId: event.id },
-    update: {},
+    update: {
+      status: "WAITING",
+      arenaMode: "WAITING",
+      activeStepId: firstStep?.id ?? null,
+      activeTopicId: null,
+      activePollId: roundtablePoll.id,
+      selectedQuestionId: null,
+      questionsOpen: false,
+      timerStatus: "IDLE",
+      timerDurationMs: (firstStep?.durationSec ?? 300) * 1000,
+      timerStartedAt: null,
+      timerPausedAt: null,
+      timerAccumulatedPauseMs: 0,
+      timerAdjustmentMs: 0,
+      emergencyActive: false,
+      emergencyMessage: null,
+    },
     create: {
       eventId: event.id,
       seq: 1,
@@ -872,14 +771,17 @@ async function main() {
       status: "WAITING",
       arenaMode: "WAITING",
       activeStepId: firstStep?.id ?? null,
+      activePollId: roundtablePoll.id,
       timerStatus: "IDLE",
-      timerDurationMs: (firstStep?.durationSec ?? 480) * 1000,
+      timerDurationMs: (firstStep?.durationSec ?? 300) * 1000,
       showTimerOnArena: true,
       soundAlertsEnabled: true,
     },
   });
 
-  console.log("✅ Seed concluído! Evento, 5 palestrantes, 6 pautas, 9 blocos macro (131:00), 40 etapas operacionais e 6 votações prontos.");
+  console.log(
+    "✅ Seed v2.0 concluído! Evento (145 min / 4h certificadas), 5 especialistas (Paula, Daniel, Janaína, Denilson, Sérgio), 5 pautas (15m + 5m), 10 blocos macro, 15 etapas operacionais, 1 votação oficial da mesa-redonda e 250 credenciais prontos."
+  );
 }
 
 main()

@@ -21,10 +21,24 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const rawClerkKey =
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    "pk_test_c3RpcnJlZC1qYWd1YXItMTgzNi5jbGVyay5hY2NvdW50cy5kZXYk";
+  const clerkPublishableKey = rawClerkKey
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .trim();
+
   return (
     <html lang="pt-BR" data-theme="light" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-[#030A06] text-[#D5C5AA]">
-        <ClerkProvider>
+        <ClerkProvider
+          publishableKey={clerkPublishableKey}
+          signInUrl="/talentos/entrar"
+          signUpUrl="/talentos/cadastro"
+          signInFallbackRedirectUrl="/talentos/painel"
+          signUpFallbackRedirectUrl="/talentos/painel"
+        >
           <Navbar />
           <div className="flex-1">{children}</div>
           <footer className="border-t border-[#D5C5AA]/15 bg-[#0A150D] py-8 mt-16">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { Prisma, EducationLevel } from "@prisma/client";
+import { Prisma, EducationLevel, EvidenceStatus } from "@prisma/client";
 import { toggleArchiveCandidateAction } from "@/app/actions/admin";
 import {
   Archive,
@@ -10,6 +10,7 @@ import {
   Filter,
   Search,
   Download,
+  ShieldCheck,
 } from "lucide-react";
 
 interface CandidateFilters {
@@ -18,6 +19,7 @@ interface CandidateFilters {
   education?: string;
   city?: string;
   skill?: string;
+  evidence?: string;
   sort?: string;
   archived?: string;
 }
@@ -34,6 +36,7 @@ async function AdminCandidatesContent({
   const education = (params.education || "").trim();
   const city = (params.city || "").trim();
   const skill = (params.skill || "").trim();
+  const evidence = (params.evidence || "").trim();
   const sort = params.sort === "asc" ? "asc" : "desc";
   const showArchived = params.archived === "1";
 
@@ -63,14 +66,27 @@ async function AdminCandidatesContent({
     };
   }
 
+  const skillSomeFilter: Prisma.CandidateSkillWhereInput = {};
   if (skill) {
-    where.skills = {
-      some: {
-        skill: {
-          name: { contains: skill, mode: "insensitive" },
-        },
-      },
+    skillSomeFilter.skill = {
+      name: { contains: skill, mode: "insensitive" },
     };
+  }
+  if (evidence === "COM_EVIDENCIA") {
+    skillSomeFilter.evidenceStatus = {
+      in: ["DOCUMENTADA", "DEMONSTRADA", "VALIDADA"],
+    };
+  } else if (
+    evidence === "DOCUMENTADA" ||
+    evidence === "DEMONSTRADA" ||
+    evidence === "VALIDADA" ||
+    evidence === "DECLARADA"
+  ) {
+    skillSomeFilter.evidenceStatus = evidence as EvidenceStatus;
+  }
+
+  if (Object.keys(skillSomeFilter).length > 0) {
+    where.skills = { some: skillSomeFilter };
   }
 
   const [candidates, allSkills] = await Promise.all([
@@ -80,6 +96,7 @@ async function AdminCandidatesContent({
         educations: { orderBy: { startDate: "desc" } },
         experiences: { orderBy: { startDate: "desc" } },
         skills: { include: { skill: true } },
+        achievements: true,
         resumes: { where: { isActive: true } },
       },
       orderBy: { createdAt: sort },
@@ -99,13 +116,13 @@ async function AdminCandidatesContent({
       <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <span className="text-[11px] uppercase tracking-[0.26em] text-[#D5C5AA]/70">
-            Gestão de Talentos
+            Gestão de Talentos · Passaporte de Competências
           </span>
           <h1 className="mt-1 font-display text-3xl sm:text-4xl text-[#F7DECA]">
-            Base de Candidatos Cadastrados
+            Base de Talentos & Evidências
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-[#D5C5AA]/80">
-            Pesquise, filtre por área, formação, cidade e competências, exporte dados e consulte perfis completos.
+            Pesquise por área, formação, cidade, competências e maturidade de evidências (Documentada, Demonstrada ou Validada).
           </p>
         </div>
 
@@ -120,7 +137,7 @@ async function AdminCandidatesContent({
         </div>
       </div>
 
-      {/* Pesquisa e Filtros (Seção 5.2) */}
+      {/* Pesquisa e Filtros */}
       <form
         method="GET"
         action="/talentos/admin/candidatos"
@@ -129,7 +146,7 @@ async function AdminCandidatesContent({
         <div className="flex items-center justify-between">
           <span className="text-xs uppercase tracking-[0.2em] text-[#F7DECA] flex items-center gap-2 font-semibold">
             <Filter className="w-4 h-4" />
-            Filtros Avançados de Talentos
+            Filtros Avançados de Talentos & Evidências
           </span>
           <Link
             href="/admin/candidatos"
@@ -155,7 +172,7 @@ async function AdminCandidatesContent({
             type="text"
             name="area"
             defaultValue={area}
-            placeholder="Área profissional (ex: Dados)"
+            placeholder="Área profissional (ex: Finanças)"
             className="bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
           />
 
@@ -163,7 +180,7 @@ async function AdminCandidatesContent({
             type="text"
             name="city"
             defaultValue={city}
-            placeholder="Cidade (ex: São Paulo)"
+            placeholder="Cidade (ex: Feira de Santana)"
             className="bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
           />
 
@@ -195,12 +212,18 @@ async function AdminCandidatesContent({
           </select>
 
           <select
-            name="sort"
-            defaultValue={sort}
+            name="evidence"
+            defaultValue={evidence}
             className="bg-[#030A06] border border-[#D5C5AA]/30 px-3 py-2 text-xs text-[#F7DECA]"
           >
-            <option value="desc">Mais recentes primeiro</option>
-            <option value="asc">Mais antigos primeiro</option>
+            <option value="">Qualquer estágio de evidência</option>
+            <option value="COM_EVIDENCIA">
+              Com evidência (Documentada, Demonstrada ou Validada)
+            </option>
+            <option value="VALIDADA">Validada por avaliador</option>
+            <option value="DEMONSTRADA">Demonstrada em desafio</option>
+            <option value="DOCUMENTADA">Documentada com link/anexo</option>
+            <option value="DECLARADA">Apenas declarada</option>
           </select>
 
           <div className="flex items-center gap-2">
@@ -222,7 +245,7 @@ async function AdminCandidatesContent({
         </div>
       </form>
 
-      {/* Tabela de Candidatos (Seção 5.2) */}
+      {/* Tabela de Candidatos */}
       <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/70 overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
@@ -230,9 +253,9 @@ async function AdminCandidatesContent({
               <th className="p-4">Candidato / E-mail</th>
               <th className="p-4">Cidade</th>
               <th className="p-4">Área Profissional</th>
-              <th className="p-4">Formação & Experiência</th>
+              <th className="p-4">Formação & Trajetória</th>
+              <th className="p-4">Passaporte & Evidências</th>
               <th className="p-4">Preenchimento</th>
-              <th className="p-4">Cadastro / Atualização</th>
               <th className="p-4 text-right">Ações</th>
             </tr>
           </thead>
@@ -240,6 +263,16 @@ async function AdminCandidatesContent({
             {candidates.map((c) => {
               const latestEdu = c.educations[0];
               const latestExp = c.experiences[0];
+              const valCount = c.skills.filter(
+                (s) => s.evidenceStatus === "VALIDADA"
+              ).length;
+              const demCount = c.skills.filter(
+                (s) => s.evidenceStatus === "DEMONSTRADA"
+              ).length;
+              const docCount = c.skills.filter(
+                (s) => s.evidenceStatus === "DOCUMENTADA"
+              ).length;
+
               return (
                 <tr key={c.id} className="hover:bg-[#030A06]/60 transition">
                   <td className="p-4">
@@ -271,27 +304,56 @@ async function AdminCandidatesContent({
                     </div>
                   </td>
                   <td className="p-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      {valCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-900 border border-emerald-300">
+                          {valCount} Validada(s)
+                        </span>
+                      )}
+                      {demCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                          {demCount} Demonstrada(s)
+                        </span>
+                      )}
+                      {docCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-900 border border-sky-200">
+                          {docCount} Documentada(s)
+                        </span>
+                      )}
+                      {valCount === 0 && demCount === 0 && docCount === 0 && (
+                        <span className="text-[11px] text-slate-500">
+                          {c.skills.length} declarada(s)
+                        </span>
+                      )}
+                    </div>
+                    {c.achievements.length > 0 && (
+                      <div className="text-[11px] text-slate-500 mt-1">
+                        {c.achievements.length} item(ns) no portfólio
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
                     <span className="font-semibold text-[#F7DECA]">
                       {c.completionPercent}%
                     </span>
                   </td>
-                  <td className="p-4 text-[#D5C5AA]/75">
-                    <div>
-                      Cad: {new Date(c.createdAt).toLocaleDateString("pt-BR")}
-                    </div>
-                    <div>
-                      Atu: {new Date(c.updatedAt).toLocaleDateString("pt-BR")}
-                    </div>
-                  </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
+                        href={`/passaporte/${c.id}`}
+                        className="px-2.5 py-1.5 bg-[#ECFDF5] border border-emerald-300 text-[#14532D] font-semibold hover:bg-emerald-100 flex items-center gap-1 rounded-md"
+                        title="Abrir Passaporte de Talentos"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        Passaporte
+                      </Link>
+                      <Link
                         href={`/admin/candidatos/${c.id}`}
                         className="px-2.5 py-1.5 border border-[#D5C5AA]/35 text-[#F7DECA] hover:border-[#F7DECA] flex items-center gap-1"
-                        title="Visualizar perfil completo"
+                        title="Avaliar competências e perfil completo"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        Perfil
+                        Avaliar
                       </Link>
                       <a
                         href={`/talentos/api/resumes/pdf?candidateId=${c.id}`}

@@ -41,6 +41,11 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
 });
 
+// Evitar queda do processo em desconexões ociosas do pooler (Neon)
+pool.on('error', (err) => {
+    console.warn('Aviso no pool PostgreSQL (conexão ociosa reiniciada):', err.message);
+});
+
 // Testar a conexão com o banco de dados
 pool.connect((err, client, release) => {
     if (err) {
@@ -92,6 +97,21 @@ app.use((req, res) => {
 });
 
 // Iniciar o servidor
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Servidor rodando na porta http://localhost:${port}`);
 });
+
+server.on('error', (err) => {
+    console.error('Erro no servidor HTTP:', err);
+});
+
+process.on('uncaughtException', (err) => {
+    console.warn('Exceção capturada (mantendo servidor ativo):', err.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.warn('Rejeição não tratada (mantendo servidor ativo):', reason);
+});
+
+// Manter o event loop ativo em subshells sem stdin
+setInterval(() => {}, 1000 * 60 * 60);

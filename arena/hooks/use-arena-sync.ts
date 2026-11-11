@@ -46,8 +46,38 @@ export interface SyncStepInfo {
   durationSec: number;
   actualDurationSec?: number | null;
   status?: StepStatus;
+  phaseLabel?: string;
   responsibleName: string;
+  speaker?: {
+    id: string;
+    name: string;
+    photoUrl: string | null;
+    roleTitle: string | null;
+  } | null;
   topicNumber: number | null;
+}
+
+export interface SyncMacroBlockInfo {
+  id: string;
+  code: string;
+  macroOrder: number | null;
+  title: string;
+  stepType: StepType;
+  arenaMode: ArenaMode;
+  durationSec: number;
+  actualDurationSec?: number | null;
+  status: StepStatus;
+  responsibleName: string | null;
+  topicNumber: number | null;
+}
+
+export interface SyncSpeakerInfo {
+  id: string;
+  slug: string;
+  name: string;
+  roleTitle: string | null;
+  photoUrl: string | null;
+  displayOrder: number;
 }
 
 export interface SyncTimerSessionRecord {
@@ -70,15 +100,22 @@ export interface SyncTimerSessionRecord {
 export interface SyncPollInfo {
   id: string;
   number: number;
-  topicId: string;
+  topicId: string | null;
   question: string;
   status: PollStatus;
   durationSec: number;
+  isTieBreak?: boolean;
+  tieBreakOptionIds?: string[];
+  tieBreakJustification?: string | null;
+  winningOptionId?: string | null;
+  winningQuestionText?: string | null;
   totalVotes: number | null;
   options: Array<{
     id: string;
     optionOrder: number;
+    themeLabel?: string;
     label: string;
+    isWinner?: boolean;
     votesCount: number | null;
     percentage: number | null;
   }>;
@@ -99,6 +136,10 @@ export interface ArenaFullSnapshot {
     institution: string;
     estimatedAudience: number;
     programmedDurationMin: number;
+    certifiedHours?: number;
+    scheduleLocked?: boolean;
+    requireCredential?: boolean;
+    requireAccessCode?: boolean;
     scheduledStartAt: string | null;
     actualStartAt?: string | null;
     actualEndAt?: string | null;
@@ -127,6 +168,8 @@ export interface ArenaFullSnapshot {
     timerStatus: TimerStatus;
   };
   timer: ComputedTimerSnapshot;
+  speakers?: SyncSpeakerInfo[];
+  macroBlocks?: SyncMacroBlockInfo[];
   activeTopic: SyncTopicInfo | null;
   activeStep: SyncStepInfo | null;
   prevStep?: SyncStepInfo | null;
@@ -136,6 +179,9 @@ export interface ArenaFullSnapshot {
     id: string;
     text: string;
     status: QuestionStatus;
+    isMediationReserve?: boolean;
+    originLabel?: string;
+    moderatorName?: string | null;
     topicNumber: number;
     topicTitle: string;
   } | null;

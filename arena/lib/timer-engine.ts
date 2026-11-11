@@ -12,6 +12,7 @@ export interface AdjustmentLogEntry {
   at: string;
   deltaSec: number;
   operatorName: string;
+  justification?: string;
 }
 
 /**
@@ -122,7 +123,39 @@ export async function closeActiveTimerSession({
     },
   });
 
-  // Se a etapa pertence a uma pauta, consolida o tempo total realizado da pauta e o tempo de exposição
+  // Se o bloco macro correspondente tiver todas as etapas concluídas, marca-o como COMPLETED
+  if (step.macroOrder) {
+    const siblingSteps = await prisma.scheduleStep.findMany({
+      where: {
+        eventId,
+        macroOrder: step.macroOrder,
+        isMacroBlock: false,
+      },
+    });
+    const allCompleted = siblingSteps.every(
+      (s) => s.status === "COMPLETED" || s.status === "SKIPPED"
+    );
+    if (allCompleted) {
+      const totalMacroActual = siblingSteps.reduce(
+        (acc, s) => acc + (s.actualDurationSec || 0),
+        0
+      );
+      await prisma.scheduleStep.updateMany({
+        where: {
+          eventId,
+          macroOrder: step.macroOrder,
+          isMacroBlock: true,
+        },
+        data: {
+          status: "COMPLETED",
+          actualEndAt: now,
+          actualDurationSec: totalMacroActual,
+        },
+      });
+    }
+  }
+
+  // Se a etapa pertence a uma pauta, consolida o tempo total realizado, tempo de exposição (15m) e tempo de P&R (5m)
   if (step.topicId) {
     const topicSteps = await prisma.scheduleStep.findMany({
       where: { eventId, topicId: step.topicId, isMacroBlock: false },
@@ -133,12 +166,18 @@ export async function closeActiveTimerSession({
       0
     );
     const expositionStep = topicSteps.find((s) => s.stepType === "EXPOSITION");
+    const qaStep = topicSteps.find((s) => s.stepType === "AUDIENCE_VOICE");
+    const allTopicStepsCompleted = topicSteps.every(
+      (s) => s.status === "COMPLETED" || s.status === "SKIPPED"
+    );
 
     await prisma.topic.update({
       where: { id: step.topicId },
       data: {
         actualDurationSec: totalTopicActual,
         expositionDurationSec: expositionStep?.actualDurationSec ?? null,
+        qaDurationSec: qaStep?.actualDurationSec ?? null,
+        ...(allTopicStepsCompleted ? { status: "COMPLETED" } : {}),
       },
     });
   }
@@ -175,6 +214,20 @@ export async function startNewTimerSessionForStep({
       alertZeroFired: false,
     },
   });
+
+  if (step.macroOrder) {
+    await prisma.scheduleStep.updateMany({
+      where: {
+        eventId,
+        macroOrder: step.macroOrder,
+        isMacroBlock: true,
+      },
+      data: {
+        status: autoRun ? "ACTIVE" : "PAUSED",
+        actualStartAt: now,
+      },
+    });
+  }
 
   if (step.topicId) {
     await prisma.topic.update({

@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPrimaryEvent } from "@/lib/live-state";
-import { getParticipantSession, toPublicQuestionStatus } from "@/lib/participant";
+import {
+  getParticipantSession,
+  toPublicQuestionStatus,
+} from "@/lib/participant";
 
 export const dynamic = "force-dynamic";
 
-/** Participações do próprio dispositivo: perguntas (com status público), voto(s) e cota. */
+/** Participações do próprio dispositivo: perguntas (com status público e capacidade de edição), voto(s) e cota. */
 export async function GET() {
   try {
     const session = await getParticipantSession();
@@ -25,8 +28,8 @@ export async function GET() {
 
     const [questions, votes, usedOnActiveTopic] = await Promise.all([
       prisma.question.findMany({
-        where: { sessionId: session.id },
-        include: { topic: { select: { number: true, title: true } } },
+        where: { sessionId: session.id, isMediationReserve: false },
+        include: { topic: { select: { id: true, number: true, title: true } } },
         orderBy: { createdAt: "desc" },
         take: 50,
       }),
@@ -34,12 +37,18 @@ export async function GET() {
         where: { sessionId: session.id },
         include: {
           poll: { select: { number: true, status: true, question: true } },
-          option: { select: { label: true, optionOrder: true } },
+          option: {
+            select: { label: true, optionOrder: true, themeLabel: true },
+          },
         },
       }),
       topicId
         ? prisma.question.count({
-            where: { sessionId: session.id, topicId },
+            where: {
+              sessionId: session.id,
+              topicId,
+              isMediationReserve: false,
+            },
           })
         : Promise.resolve(0),
       prisma.participantSession.update({
@@ -62,18 +71,47 @@ export async function GET() {
       }
     }
 
+    const questionsOpen = event?.liveState?.questionsOpen ?? false;
+
+    const mappedQuestions = questions.map((q) => {
+      const isSelectedOrDone =
+        q.isPrimary ||
+        ["SELECTED", "DISPLAYED", "ANSWERED", "REJECTED", "DUPLICATE"].includes(
+          q.status
+        );
+      const canEdit =
+        !isSelectedOrDone &&
+        q.topicId === topicId &&
+        Boolean(questionsOpen);
+
+      return {
+        id: q.id,
+        topicId: q.topicId,
+        text: q.text,
+        topicNumber: q.topic.number,
+        topicTitle: q.topic.title,
+        status: toPublicQuestionStatus(q.status),
+        rawStatus: q.status,
+        editCount: q.editCount,
+        canEdit,
+        createdAt: q.createdAt,
+        updatedAt: q.updatedAt,
+      };
+    });
+
+    const activeTopicQuestion =
+      mappedQuestions.find((q) => q.topicId === topicId) ?? null;
+
     return NextResponse.json(
       {
         authenticated: true,
         code: session.anonymousCode,
-        questions: questions.map((q) => ({
-          id: q.id,
-          text: q.text,
-          topicNumber: q.topic.number,
-          topicTitle: q.topic.title,
-          status: toPublicQuestionStatus(q.status),
-          createdAt: q.createdAt,
-        })),
+        name: session.name ?? null,
+        email: session.email ?? null,
+        credentialCode: session.credentialCode ?? null,
+        requireCredential: event?.requireCredential ?? false,
+        questions: mappedQuestions,
+        activeTopicQuestion,
         votes: votes.map((v) => ({
           pollId: v.pollId,
           pollNumber: v.poll.number,
@@ -81,12 +119,13 @@ export async function GET() {
           pollStatus: v.poll.status,
           optionId: v.optionId,
           optionLabel: v.option.label,
+          optionThemeLabel: v.option.themeLabel,
           optionOrder: v.option.optionOrder,
         })),
         quota: {
           topicId,
           used: usedOnActiveTopic,
-          max: event?.maxQuestionsPerTopic ?? 2,
+          max: event?.maxQuestionsPerTopic ?? 1,
           charLimit: event?.questionCharLimit ?? 400,
         },
       },

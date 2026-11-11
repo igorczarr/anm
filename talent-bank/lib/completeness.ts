@@ -12,6 +12,8 @@ export interface ProfileCompletenessInput {
   educationsCount: number;
   experiencesCount: number;
   skillsCount: number;
+  evidencesCount?: number;
+  achievementsCount?: number;
   languagesCount: number;
   preferredModality?: string | null;
   desiredRolesCount: number;
@@ -19,8 +21,9 @@ export interface ProfileCompletenessInput {
 }
 
 /**
- * Calcula o percentual de preenchimento do perfil (0 a 100%).
- * Considera-se "Perfil Completo" nos indicadores quando >= 80%.
+ * Calcula o percentual de preenchimento do Passaporte de Talentos (0 a 100%).
+ * Valoriza tanto experiências formais quanto evidências práticas, projetos acadêmicos e portfólio,
+ * permitindo que jovens talentos em início de carreira atinjam 100% de completude.
  */
 export function calculateProfileCompleteness(input: ProfileCompletenessInput): {
   percent: number;
@@ -29,6 +32,9 @@ export function calculateProfileCompleteness(input: ProfileCompletenessInput): {
 } {
   let score = 0;
   const missingSteps: string[] = [];
+
+  const totalEvidences =
+    (input.evidencesCount || 0) + (input.achievementsCount || 0);
 
   // A. Dados pessoais (20%)
   if (input.fullName && input.email && input.phone && input.city && input.state) {
@@ -51,43 +57,43 @@ export function calculateProfileCompleteness(input: ProfileCompletenessInput): {
     missingSteps.push("Formação acadêmica");
   }
 
-  // D. Experiência profissional (15%)
-  if (input.experiencesCount > 0) {
+  // D. Experiência (emprego, estágio, voluntariado ou projeto acadêmico) OU Portfólio (15%)
+  if (input.experiencesCount > 0 || (input.achievementsCount || 0) > 0) {
     score += 15;
   } else {
-    missingSteps.push("Experiência profissional");
+    missingSteps.push("Experiência, estágio, projeto acadêmico ou conquista");
   }
 
-  // E. Competências (15%)
+  // E. Competências no Passaporte (15%)
   if (input.skillsCount >= 3) {
     score += 15;
   } else {
-    missingSteps.push("Competências (mínimo 3)");
+    missingSteps.push("Competências no Passaporte (mínimo 3)");
   }
 
-  // F. Idiomas (5%)
-  if (input.languagesCount > 0) {
-    score += 5;
-  } else {
-    missingSteps.push("Idiomas");
-  }
-
-  // G. Preferências profissionais (10%)
-  if (input.preferredModality && input.desiredRolesCount > 0) {
+  // F. Evidências práticas documentadas (10%)
+  if (totalEvidences >= 1) {
     score += 10;
   } else {
-    missingSteps.push("Preferências profissionais");
+    missingSteps.push("Apresentar pelo menos 1 evidência ou portfólio no Passaporte");
   }
 
-  // H. Currículo anexado ou estruturado (5%)
-  if (input.hasResume) {
+  // G. Preferências profissionais (5%)
+  if (input.preferredModality && input.desiredRolesCount > 0) {
     score += 5;
   } else {
-    missingSteps.push("Currículo em PDF/DOCX");
+    missingSteps.push("Preferências profissionais e disponibilidade");
+  }
+
+  // H. Idiomas ou Currículo (5%)
+  if (input.languagesCount > 0 || input.hasResume) {
+    score += 5;
+  } else {
+    missingSteps.push("Idioma ou currículo em PDF");
   }
 
   return {
-    percent: score,
+    percent: Math.min(100, score),
     isComplete: score >= 80,
     missingSteps,
   };

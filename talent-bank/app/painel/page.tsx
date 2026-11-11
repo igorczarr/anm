@@ -12,6 +12,8 @@ import {
   Settings,
   UserCheck,
   AlertCircle,
+  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -42,24 +44,44 @@ async function CandidateDashboardContent() {
       a.status !== "CANCELADA_PELO_CANDIDATO" && a.status !== "NAO_SELECIONADO"
   ).length;
 
+  const validatedSkillsCount = profile.skills.filter(
+    (s) => s.evidenceStatus === "VALIDADA"
+  ).length;
+  const demonstratedSkillsCount = profile.skills.filter(
+    (s) => s.evidenceStatus === "DEMONSTRADA"
+  ).length;
+  const documentedSkillsCount = profile.skills.filter(
+    (s) => s.evidenceStatus === "DOCUMENTADA"
+  ).length;
+  const declaredSkillsCount = profile.skills.filter(
+    (s) => s.evidenceStatus === "DECLARADA"
+  ).length;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Cabeçalho com saudação e atalhos rápidos */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 sm:p-8">
         <div>
           <span className="text-[11px] uppercase tracking-[0.26em] text-[#D5C5AA]/70">
-            Painel do Candidato · A Nova Moeda
+            Painel do Candidato · Talent Hub
           </span>
           <h1 className="mt-2 font-display text-3xl sm:text-4xl text-[#F7DECA]">
             Olá, {profile.fullName}
           </h1>
           <p className="mt-2 text-sm text-[#D5C5AA]/80">
             {profile.professionalTitle ||
-              "Complete seu perfil profissional para ampliar sua visibilidade nas oportunidades do evento."}
+              "Construa seu Passaporte de Talentos com competências e evidências reais para se aproximar de empresas."}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={`/passaporte/${profile.id}`}
+            className="px-4 py-2.5 bg-[#14532D] text-white font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#166534] transition flex items-center gap-1.5 rounded-lg"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Passaporte de Talentos
+          </Link>
           <Link
             href="/perfil"
             className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs uppercase tracking-[0.18em] hover:bg-[#F7DECA] transition"
@@ -80,6 +102,98 @@ async function CandidateDashboardContent() {
             <FileDown className="w-3.5 h-3.5" />
             Baixar PDF
           </a>
+        </div>
+      </div>
+
+      {/* Card Passaporte de Talentos — Maturidade de Evidências */}
+      <div className="border border-emerald-200 bg-[#ECFDF5]/60 p-6 rounded-2xl space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#14532D]">
+              <ShieldCheck className="w-4 h-4" />
+              Diferencial 1 · Passaporte de Talentos
+            </span>
+            <h2 className="font-display text-2xl text-slate-900 mt-1">
+              Suas competências organizadas por evidências
+            </h2>
+            <p className="text-xs text-slate-600 mt-1">
+              Empresas parceiras visualizam o que você já sabe fazer na prática,
+              mesmo que você esteja em início de carreira.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/perfil#passaporte"
+              className="px-3.5 py-2 border border-slate-300 bg-white text-slate-800 text-xs font-semibold rounded-lg hover:border-[#14532D] transition"
+            >
+              + Anexar evidências
+            </Link>
+            <Link
+              href={`/passaporte/${profile.id}`}
+              className="px-4 py-2 bg-[#14532D] text-white text-xs font-semibold rounded-lg hover:bg-[#166534] transition flex items-center gap-1.5"
+            >
+              Ver Passaporte Compartilhável
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="bg-white border border-emerald-200 rounded-xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-900 block">
+              Validadas
+            </span>
+            <p className="font-display text-2xl font-bold text-emerald-950 mt-1">
+              {validatedSkillsCount}
+            </p>
+            <span className="text-[11px] text-emerald-800/80">
+              Por avaliador
+            </span>
+          </div>
+          <div className="bg-white border border-amber-200 rounded-xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-900 block">
+              Demonstradas
+            </span>
+            <p className="font-display text-2xl font-bold text-amber-950 mt-1">
+              {demonstratedSkillsCount}
+            </p>
+            <span className="text-[11px] text-amber-800/80">
+              Em desafio prático
+            </span>
+          </div>
+          <div className="bg-white border border-sky-200 rounded-xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-900 block">
+              Documentadas
+            </span>
+            <p className="font-display text-2xl font-bold text-sky-950 mt-1">
+              {documentedSkillsCount}
+            </p>
+            <span className="text-[11px] text-sky-800/80">
+              Com anexo / link
+            </span>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600 block">
+              Declaradas
+            </span>
+            <p className="font-display text-2xl font-bold text-slate-900 mt-1">
+              {declaredSkillsCount}
+            </p>
+            <span className="text-[11px] text-slate-500">
+              Informadas no perfil
+            </span>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5 col-span-2 sm:col-span-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-700 block">
+              Portfólio
+            </span>
+            <p className="font-display text-2xl font-bold text-slate-900 mt-1">
+              {profile.achievements.length}
+            </p>
+            <span className="text-[11px] text-slate-500">
+              Trabalhos & conquistas
+            </span>
+          </div>
         </div>
       </div>
 

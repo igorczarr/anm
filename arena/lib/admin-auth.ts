@@ -19,6 +19,16 @@ export type PermissionKey =
   | "canManageAccess"
   | "canExportReports";
 
+export const OFFICIAL_ROLE_LABELS: Record<AdminRoleType, string> = {
+  ADMIN: "Administrador",
+  PRODUCER: "Produtor",
+  MODERATOR: "Moderador",
+  AUDIOVISUAL: "Operador Audiovisual",
+  OPERATOR: "Produtor (Legado)",
+  CURATOR: "Moderador (Legado)",
+  OBSERVER: "Operador Audiovisual (Legado)",
+};
+
 export function createSignedAdminToken(
   userId: string,
   email: string,
@@ -43,7 +53,6 @@ export function hasAdminPermission(
   if (user.roleCode === "ADMIN") return true;
   if (user.role && user.role[permission]) return true;
 
-  // Fallback matrix by roleCode when role record is not linked
   const matrix: Record<AdminRoleType, PermissionKey[]> = {
     ADMIN: [
       "canOperateTimer",
@@ -53,15 +62,16 @@ export function hasAdminPermission(
       "canManageAccess",
       "canExportReports",
     ],
+    PRODUCER: ["canOperateTimer", "canManagePolls", "canExportReports"],
+    MODERATOR: ["canModerateQuestions", "canExportReports"],
+    AUDIOVISUAL: ["canExportReports"],
     OPERATOR: [
       "canOperateTimer",
       "canManagePolls",
       "canModerateQuestions",
-      "canEditSchedule",
       "canExportReports",
     ],
     CURATOR: ["canModerateQuestions", "canExportReports"],
-    MODERATOR: ["canModerateQuestions", "canManagePolls"],
     OBSERVER: ["canExportReports"],
   };
 
@@ -76,12 +86,31 @@ export async function requireAdminPermission(permission: PermissionKey) {
   return user;
 }
 
+export async function requireAudiovisualOrOperator() {
+  const user = await getCurrentAdminUser();
+  if (!user || user.status !== "ACTIVE") {
+    throw new Error("Acesso negado.");
+  }
+  const allowed: AdminRoleType[] = [
+    "ADMIN",
+    "PRODUCER",
+    "OPERATOR",
+    "AUDIOVISUAL",
+    "OBSERVER",
+  ];
+  if (!allowed.includes(user.roleCode)) {
+    throw new Error("Permissão insuficiente para operação audiovisual.");
+  }
+  return user;
+}
+
 export async function logAdminAction({
   eventId,
   userId,
   action,
   entityType,
   entityId,
+  justification,
   metadata,
 }: {
   eventId?: string | null;
@@ -89,6 +118,7 @@ export async function logAdminAction({
   action: string;
   entityType: string;
   entityId?: string | null;
+  justification?: string | null;
   metadata?: Record<string, unknown>;
 }) {
   try {
@@ -99,6 +129,7 @@ export async function logAdminAction({
         action,
         entityType,
         entityId: entityId || null,
+        justification: justification || null,
         metadata: metadata
           ? (metadata as Prisma.InputJsonValue)
           : Prisma.JsonNull,

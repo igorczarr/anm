@@ -19,35 +19,51 @@ export async function GET() {
 
   const sections: PdfSection[] = [
     {
-      title: "1. Indicadores Gerais do Evento (§15.1)",
+      title: "1. Indicadores Gerais do Evento (Formato Oficial v2.0)",
       lines: [
         `Evento: ${report.name} — ${report.theme}`,
         `Instituicao: ${report.institution}`,
         `Inicio Programado: ${report.scheduledStartAt ? new Date(report.scheduledStartAt).toLocaleString("pt-BR") : "Nao configurado"}`,
         `Inicio Efetivo: ${report.actualStartAt ? new Date(report.actualStartAt).toLocaleString("pt-BR") : "Aguardando / Ao Vivo"}`,
         `Encerramento Efetivo: ${report.actualEndAt ? new Date(report.actualEndAt).toLocaleString("pt-BR") : "Em andamento"}`,
-        `Duracao Total Prevista: ${report.durationPlannedMin} minutos`,
+        `Duracao Total Prevista: ${report.durationPlannedMin} minutos (2h25) | Carga Horaria Certificada: ${report.certifiedHours}h`,
         `Duracao Total Realizada: ${report.durationActualMin} minutos`,
-        `Sessoes de Participantes: ${report.totalSessionsCount} dispositivos (estimativa tecnica)`,
+        `Sessoes de Participantes: ${report.totalSessionsCount} dispositivos | Credenciais Validadas: ${report.validatedCredentialsCount}`,
         `Pico de Conexoes Simultaneas: ${report.peakConnections} dispositivos`,
-        `Perguntas Recebidas: ${report.questionsTotal} | Aprovadas: ${report.questionsApproved}`,
-        `Perguntas Selecionadas para o Debate: ${report.questionsSelected}`,
-        `Perguntas Respondidas no Palco: ${report.questionsAnswered}`,
-        `Total Geral de Votos Computados: ${report.totalVotes} votos`,
+        `Perguntas Recebidas da Plateia: ${report.questionsTotal} | Aprovadas: ${report.questionsApproved}`,
+        `Perguntas Respondidas: ${report.questionsAnswered} (Reserva da Mediacao acionada: ${report.mediationReserveUsedCount})`,
+        `Total de Votos na Mesa-Redonda: ${report.totalVotes} votos | Alteracoes de Voto: ${report.voteChangesCount}`,
+      ],
+    },
+    {
+      title: "2. Votacao da Mesa-Redonda (20 Minutos — 5 Especialistas)",
+      lines: [
+        `Pergunta da Enquete: ${report.roundtablePoll.question}`,
+        `Questao Vencedora Debatida: ${report.roundtablePoll.winningQuestionText || "Ainda nao encerrada"}`,
+        ...(report.roundtablePoll.tieBreakJustification
+          ? [
+              `Justificativa de Desempate / Sintese: ${report.roundtablePoll.tieBreakJustification}`,
+            ]
+          : []),
+        ...report.roundtablePoll.options.map(
+          (opt) =>
+            `  [${opt.themeLabel}] ${opt.label} -> ${opt.percentage}% (${opt.votesCount} votos)${opt.isWinner ? " [VENCEDORA]" : ""}`
+        ),
       ],
     },
   ];
 
   for (const t of report.topics) {
     const lines = [
-      `Palestrante Principal: ${t.speakerName} | Provocador: ${t.provokerLabel}`,
-      `Tempo de Exposicao Efetivo: ${formatSecondsMMSS(t.expositionDurationSec)}`,
-      `Tempo Efetivo da Rodada: ${formatSecondsMMSS(t.actualDurationSec)} (Previsto: ${formatSecondsMMSS(t.plannedDurationSec)})`,
-      `Perguntas: ${t.questionsReceived} recebidas, ${t.questionsApproved} aprovadas, ${t.questionsAnswered} respondidas`,
-      `Votacao (${t.totalVotes} votos): ${t.pollQuestion}`,
-      ...t.optionsDistribution.map(
-        (opt) => `  [Alternativa ${opt.order}] ${opt.label} -> ${opt.percentage}% (${opt.votesCount} votos)`
-      ),
+      `Especialista Responsavel: ${t.speakerName}`,
+      `Tempo de Exposicao Efetivo: ${formatSecondsMMSS(t.expositionDurationSec)} | Tempo P&R (5m): ${formatSecondsMMSS(t.qaDurationSec)}`,
+      `Tempo Efetivo da Pauta: ${formatSecondsMMSS(t.actualDurationSec)} (Previsto: ${formatSecondsMMSS(t.plannedDurationSec)})`,
+      `Perguntas da Plateia: ${t.questionsReceived} recebidas, ${t.questionsApproved} aprovadas, ${t.questionsAnswered} respondidas`,
+      ...(t.answeredQuestionText
+        ? [
+            `Pergunta Respondida (${t.answeredQuestionOrigin}): "${t.answeredQuestionText}"`,
+          ]
+        : []),
     ];
 
     sections.push({
@@ -57,7 +73,7 @@ export async function GET() {
   }
 
   sections.push({
-    title: "Conformidade LGPD e Auditoria (§12.4)",
+    title: "Conformidade LGPD e Auditoria",
     lines: [
       "Relatorio emitido exclusivamente com dados estatisticos agregados.",
       "Identificadores de rede, hashes e sessoes anonimas preservam a privacidade dos participantes.",
@@ -67,7 +83,7 @@ export async function GET() {
 
   const pdfBuffer = generateArenaReportPdf({
     documentTitle: "Relatorio Consolidado Pos-Evento — Arena A Nova Moeda",
-    subtitle: `${report.institution} · ${report.theme} · 131 Minutos`,
+    subtitle: `${report.institution} · ${report.theme} · ${report.durationPlannedMin} Minutos (${report.certifiedHours}h Certificadas)`,
     sections,
   });
 

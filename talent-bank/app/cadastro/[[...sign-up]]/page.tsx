@@ -20,6 +20,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   email_ja_cadastrado: "Este e-mail já possui cadastro. Acesse sua conta pelo login.",
   convite_invalido_ou_expirado:
     "O link de convite de recrutador é inválido, já foi utilizado ou expirou.",
+  erro_interno:
+    "Não foi possível concluir o cadastro agora. Verifique os dados e tente novamente em instantes.",
 };
 
 async function UnifiedSignUpForm({
@@ -27,14 +29,21 @@ async function UnifiedSignUpForm({
 }: {
   searchParamsPromise: Promise<{ convite?: string; error?: string }>;
 }) {
-  const { convite, error } = await searchParamsPromise;
+  const resolvedParams = (await searchParamsPromise) || {};
+  const convite = resolvedParams.convite;
+  const error = resolvedParams.error;
   const inviteToken = (convite || "").trim();
 
-  const invite = inviteToken
-    ? await prisma.recruiterInvite.findUnique({
+  let invite = null;
+  if (inviteToken) {
+    try {
+      invite = await prisma.recruiterInvite.findUnique({
         where: { token: inviteToken },
-      })
-    : null;
+      });
+    } catch {
+      invite = null;
+    }
+  }
 
   const isValidRecruiterInvite = Boolean(
     invite && !invite.usedAt && new Date(invite.expiresAt) >= new Date()

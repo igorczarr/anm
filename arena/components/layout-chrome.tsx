@@ -13,8 +13,10 @@ export function LayoutChrome({
 }) {
   const pathname = usePathname();
   const isArenaScreen = pathname?.startsWith("/arena");
+  const isParticiparScreen = pathname?.startsWith("/participar");
 
-  if (isArenaScreen) {
+  // O Telão ARENA e a tela do Participante rodam em modo imersivo e cego (sem header global nem rodapé de navegação cruzada)
+  if (isArenaScreen || isParticiparScreen) {
     return <div className="min-h-screen w-full bg-[#030A06]">{children}</div>;
   }
 

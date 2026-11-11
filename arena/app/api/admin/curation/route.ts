@@ -13,10 +13,13 @@ export async function GET() {
 
   const event = await getPrimaryEvent();
   if (!event) {
-    return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Evento não encontrado" },
+      { status: 404 }
+    );
   }
 
-  const [topics, questions, polls] = await Promise.all([
+  const [topics, questions, polls, voteHistoryCount] = await Promise.all([
     prisma.topic.findMany({
       where: { eventId: event.id },
       include: { mainSpeaker: true, provoker: true },
@@ -26,7 +29,7 @@ export async function GET() {
       where: { eventId: event.id },
       include: {
         topic: { select: { id: true, number: true, title: true } },
-        session: { select: { anonymousCode: true } },
+        session: { select: { anonymousCode: true, credentialCode: true } },
         moderatedBy: { select: { fullName: true } },
         history: {
           orderBy: { createdAt: "desc" },
@@ -43,6 +46,9 @@ export async function GET() {
       },
       orderBy: { number: "asc" },
     }),
+    prisma.voteHistory.count({
+      where: { poll: { eventId: event.id } },
+    }),
   ]);
 
   return NextResponse.json(
@@ -51,6 +57,7 @@ export async function GET() {
       activeTopicId: event.liveState?.activeTopicId ?? null,
       selectedQuestionId: event.liveState?.selectedQuestionId ?? null,
       questionsOpen: event.liveState?.questionsOpen ?? false,
+      voteHistoryCount,
       topics,
       questions,
       polls,

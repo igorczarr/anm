@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Clock,
   MapPin,
+  ShieldCheck,
   XCircle,
 } from "lucide-react";
 
@@ -91,6 +92,12 @@ async function MyApplicationsContent() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#D5C5AA]/15 pb-5">
                   <div>
                     <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-[#D5C5AA]/75">
+                      {app.job.companyVerified && (
+                        <span className="px-2 py-0.5 rounded-full border border-emerald-400 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          Empresa Verificada
+                        </span>
+                      )}
                       <span>{app.job.professionalArea}</span>
                       <span>·</span>
                       <span>{app.job.modality}</span>
@@ -114,6 +121,11 @@ async function MyApplicationsContent() {
                         <Calendar className="w-3.5 h-3.5 text-[#D5C5AA]" />
                         Candidatura em{" "}
                         {new Date(app.appliedAt).toLocaleString("pt-BR")}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[#14532D] font-semibold">
+                        <Clock className="w-3.5 h-3.5" />
+                        {app.job.feedbackEstimate ||
+                          `Previsão de retorno: até ${app.job.feedbackSlaDays || 7} dias`}
                       </span>
                     </div>
                   </div>

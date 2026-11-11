@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Nova Moeda - O Projeto</title>
+    <title>A Nova Moeda — Economia da Solidão | O Projeto & Programação Oficial</title>
+    <meta name="description" content="E se a solidão não fosse apenas um problema, mas também um modelo de negócio? Confira a programação oficial, participação em tempo real pelo celular, Banco de Talentos, Certificado e Coffee Break.">
     <link rel="icon" type="image/png" href="/img/logo.png">
-    
+
     <link rel="stylesheet" href="/style.css">
-    <!-- Animação AOS (Animate on Scroll) para dar dinamismo sem pesar -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body class="page-content">
 
+    <!-- Barra de Progresso de Leitura -->
+    <div class="scroll-progress-bar"></div>
+
+    <!-- Preloader Ágil -->
     <div id="preloader">
         <div class="loader-content">
             <svg id="Camada_2" class="preloader-svg" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 119.67 203.43">
@@ -31,240 +35,1052 @@
 
     <div class="background-watermark"></div>
 
-    <!-- HEADER FLUTUANTE -->
+    <!-- HEADER CORPORATIVO DE LARGURA TOTAL (PADRÃO BANCO DE TALENTOS) -->
     <nav class="top-nav">
-        <a href="index.html" class="nav-logo">
-            <img src="/img/logo.png" alt="A Nova Moeda">
-        </a>
-        <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" class="btn-outline-small">INSCREVER-SE</a>
+        <div class="top-nav-inner">
+            <a href="index.html" class="nav-brand">
+                <img src="/img/logo.png" alt="A Nova Moeda">
+                <div class="nav-brand-text">
+                    <span class="nav-brand-title">A Nova Moeda</span>
+                    <span class="nav-brand-sub">Economia da Solidão · UEFS</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="#tese" class="nav-link">O Paradoxo</a>
+                <a href="#investigacao" class="nav-link">Especialistas & Pautas</a>
+                <a href="#programacao" class="nav-link">Programação</a>
+                <a href="#beneficios" class="nav-link">Benefícios</a>
+                <a href="patrocinio.html" class="nav-link">Patrocínio</a>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Alternar tema claro/escuro"></button>
+                <a href="/talentos" class="nav-talent-btn">Banco de Talentos</a>
+                <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" class="btn-outline-small">
+                    <span>Inscrever-se</span>
+                </a>
+            </div>
+        </div>
     </nav>
 
+    <!-- HERO SECTION FULL BLEED (100VW × 100VH COM IMAGEM DO AUDITÓRIO DESFOCADA) -->
+    <header class="hero-section">
+        <div class="hero-bg-media"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span>Arena Acadêmica & Executiva · UEFS Auditório 2</span>
+            </div>
 
-        <section class="hero-section" data-aos="fade-up" data-aos-duration="1500">
-            <div class="hero-bg-media"></div>
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1 class="hero-title">E se a solidão não fosse apenas um problema, mas também um modelo de negócio?</h1>
-                <h2 class="hero-subtitle">Quem lucra quando você não consegue sair da tela?</h2>
-                <div class="hero-details">
-                    <span class="detail-item">17 DE NOVEMBRO · 19H</span>
-                    <span class="detail-divider">|</span>
-                    <span class="detail-item">UEFS · AUDITÓRIO 2</span>
-                </div>
+            <h1 class="hero-title">
+                E se a solidão não fosse apenas um problema, mas também um <span class="editorial-accent">modelo de negócio</span>?
+            </h1>
+
+            <h2 class="hero-subtitle">
+                Quem lucra quando você não consegue sair da tela?
+            </h2>
+
+            <div class="hero-pills">
+                <span class="hero-pill">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    17 de Novembro · 19h00 às 21h55
+                </span>
+                <span class="hero-pill">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    UEFS · Auditório 2
+                </span>
+                <span class="hero-pill">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Banco de Talentos + Coffee Break & Sorteios
+                </span>
             </div>
-            <div class="scroll-indicator">
-                <span>DESCUBRA</span>
-                <div class="line-down"></div>
+
+            <div class="hero-actions">
+                <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" class="btn-solid-gold">
+                    <span>RESERVAR MINHA PARTICIPAÇÃO</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+                <a href="#programacao" class="btn-outline">
+                    <span>VER PROGRAMAÇÃO OFICIAL</span>
+                </a>
+                <a href="/talentos" class="btn-emerald">
+                    <span>ACESSAR BANCO DE TALENTOS</span>
+                </a>
             </div>
-        </section>
+        </div>
+
+        <a href="#tese" class="scroll-indicator">
+            <span>EXPLORAR A INVESTIGAÇÃO</span>
+            <div class="line-down"></div>
+        </a>
+    </header>
 
     <main class="projeto-container">
 
-        <!-- A REALIDADE / O PROBLEMA -->
-        <section class="dynamic-section problem-section">
-            <div class="text-block" data-aos="fade-up">
-                <p class="elegant-text big">Vivemos no momento mais conectado da história.</p>
-                <div class="stats-grid">
-                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="100">
+        <!-- 1. O PARADOXO CONTEMPORÂNEO (DIAGNÓSTICO DO PROBLEMA NO DIA A DIA) -->
+        <section class="dynamic-section" id="tese">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-eyebrow">O Paradoxo Contemporâneo</span>
+                <h3 class="section-title">Vivemos no momento mais conectado da história.</h3>
+                <p class="section-subtitle">
+                    Uma tela capaz de colocar milhares de pessoas a poucos centímetros de nós. Mas, na prática do dia a dia, substituímos a convivência real pela ilusão de presença constante:
+                </p>
+            </div>
+
+            <div class="paradox-bento-grid" data-aos="fade-up" data-aos-delay="100">
+                <div class="paradox-card">
+                    <div class="paradox-card-top">
                         <span class="stat-number">+100</span>
                         <span class="stat-label">Seguidores</span>
                     </div>
-                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="200">
+                    <div>
+                        <h4 class="paradox-daily-title">Vitrine constante, escuta ausente</h4>
+                        <p class="paradox-daily-desc">
+                            Dezenas de pessoas visualizam cada rotina publicada em segundos — mas quase ninguém está disponível para uma conversa honesta quando a tela se apaga.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="paradox-card">
+                    <div class="paradox-card-top">
                         <span class="stat-number">+10</span>
                         <span class="stat-label">Grupos</span>
                     </div>
-                    <div class="stat-box" data-aos="zoom-in" data-aos-delay="300">
+                    <div>
+                        <h4 class="paradox-daily-title">Estar inserido sem pertencer</h4>
+                        <p class="paradox-daily-desc">
+                            Grupos de faculdade, trabalho e projetos que não param de vibrar o dia inteiro, mas onde o contato se resume a cobranças, prazos e interações superficiais.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="paradox-card">
+                    <div class="paradox-card-top">
                         <span class="stat-number">∞</span>
                         <span class="stat-label">Mensagens</span>
                     </div>
+                    <div>
+                        <h4 class="paradox-daily-title">Comunicação ininterrupta, isolamento real</h4>
+                        <p class="paradox-daily-desc">
+                            Áudios acelerados, respostas automáticas e notificações até a madrugada que ocupam cada minuto livre, mas nos deixam exaustos e sozinhos no mesmo ambiente.
+                        </p>
+                    </div>
                 </div>
-                <p class="elegant-text">Uma tela capaz de colocar milhares de pessoas a poucos centímetros de nós.</p>
-                <p class="elegant-text highlight-gold">Ainda assim, alguma coisa parece estar faltando.</p>
-                <h2 class="massive-word" data-aos="fade-in">CONEXÃO.</h2>
+            </div>
+
+            <div class="paradox-contrast-bar" data-aos="fade-up" data-aos-delay="150">
+                <div class="paradox-contrast-col">
+                    <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">
+                        O QUE PARECE CONEXÃO NO COTIDIANO
+                    </span>
+                    <p style="font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
+                        Almoçar olhando para o feed ao lado de colegas em silêncio, trabalhar cercado de telas sem conhecer quem senta ao lado e confundir engajamento digital com rede de apoio profissional e humana.
+                    </p>
+                </div>
+                <div class="paradox-contrast-col symptom">
+                    <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-primary); display: block; margin-bottom: 0.4rem;">
+                        O QUE REALMENTE ESTÁ EM JOGO
+                    </span>
+                    <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.6;">
+                        A hiperconexão entregou velocidade e alcance, mas esvaziou a presença, a confiança e o pertencimento — exatamente os pilares que sustentam relações humanas, carreiras e organizações sólidas.
+                    </p>
+                </div>
+            </div>
+
+            <div class="massive-banner" data-aos="zoom-in">
+                <p class="elegant-text highlight-gold" style="margin-bottom: 0.4rem; font-size: 1.15rem;">
+                    Ainda assim, alguma coisa parece estar faltando.
+                </p>
+                <h2 class="massive-word">CONEXÃO.</h2>
+                <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 640px; margin: 0.5rem auto 0 auto;">
+                    Não o contato medido por cliques ou visualizações — mas o vínculo real capaz de gerar confiança, pertencimento, colaboração e valor duradouro.
+                </p>
             </div>
         </section>
 
-        <!-- DADOS E GRÁFICOS SIMULADOS -->
-        <section class="dynamic-section data-section">
+        <!-- 2. DADOS GLOBAIS (OMS / OCDE) -->
+        <section class="dynamic-section">
             <div class="split-layout">
-                <div class="split-text" data-aos="fade-right">
-                    <p class="elegant-text">E isso não é apenas uma questão pessoal. Está mudando a forma como consumimos, trabalhamos, construímos carreiras e fazemos negócios.</p>
+                <div class="bento-card" data-aos="fade-right">
+                    <span class="section-eyebrow">Evidência Global</span>
+                    <h3 class="section-title" style="font-size: 1.75rem; margin-top: 0.5rem;">
+                        Uma transformação silenciosa na sociedade e nos mercados
+                    </h3>
+                    <p class="elegant-text">
+                        E isso não é apenas uma questão pessoal. Está mudando a forma como consumimos, trabalhamos, construímos carreiras e fazemos negócios.
+                    </p>
                     <div class="quote-box">
                         <p>“Por que estamos tão conectados e tão sozinhos?”</p>
                     </div>
-                    <p class="elegant-text">A Organização Mundial da Saúde estima que <strong>1 em cada 6 pessoas</strong> experimente solidão. Entre jovens, a proporção é ainda maior: <strong>21%</strong>.</p>
+                    <p class="elegant-text" style="margin-bottom: 0;">
+                        A Organização Mundial da Saúde estima que <strong>1 em cada 6 pessoas</strong> experimente solidão. Entre jovens, a proporção é ainda maior: <strong>21%</strong>.
+                    </p>
                 </div>
-                <div class="split-visual" data-aos="fade-left">
-                    <!-- Dados Monumentais em Tipografia -->
-                    <div class="luxury-stats-container">
-                        <div class="luxury-stat">
-                            <span class="lux-number">1 / 6</span>
-                            <span class="lux-desc">EXPERIMENTAM SOLIDÃO</span>
+
+                <div class="luxury-stats-container" data-aos="fade-left">
+                    <div class="luxury-stat">
+                        <span class="lux-number">1 / 6</span>
+                        <span class="lux-desc">PESSOAS NO MUNDO EXPERIMENTAM SOLIDÃO (OMS)</span>
+                    </div>
+                    <div class="luxury-stat">
+                        <span class="lux-number">21%</span>
+                        <span class="lux-desc">DOS JOVENS E ADOLESCENTES RELATAM ISOLAMENTO</span>
+                    </div>
+                    <div class="luxury-stat">
+                        <span class="lux-number">+ / −</span>
+                        <span class="lux-desc">O CONTATO DIGITAL AUMENTOU, O PRESENCIAL CAIU (OCDE)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. A GRANDE PERGUNTA & O CONCEITO -->
+        <section class="dynamic-section">
+            <div class="monumental-quote-card" data-aos="fade-up">
+                <span class="section-eyebrow">A Questão Central</span>
+                <h2 class="monumental-quote">
+                    O QUE ACONTECE COM A ECONOMIA QUANDO A CONEXÃO SE TORNA UM ATIVO ESCASSO?
+                </h2>
+            </div>
+
+            <div class="split-layout" style="margin-top: 2.5rem;">
+                <div class="bento-card" data-aos="fade-up">
+                    <span class="section-eyebrow">O Conceito</span>
+                    <h3 class="section-title" style="font-size: 1.65rem;">O QUE É A NOVA MOEDA?</h3>
+                    <p class="elegant-text">
+                        Antes de uma venda existe atenção. Antes de uma parceria existe confiança. Antes de uma inovação existe troca.
+                    </p>
+                    <p class="elegant-text highlight-gold">
+                        E antes de tudo isso existe conexão.
+                    </p>
+                    <p class="elegant-text" style="margin-bottom: 0;">
+                        <strong>A Nova Moeda</strong> é uma experiência para investigar esse território. Quem será capaz de criar valor em uma economia que começa a desejar conexão?
+                    </p>
+                </div>
+
+                <div class="bento-card" data-aos="fade-up" data-aos-delay="100" style="border-color: var(--border-emerald);">
+                    <span class="section-eyebrow">Nosso Manifesto</span>
+                    <h3 class="section-title" style="font-size: 1.65rem;">ISTO NÃO É MAIS UM EVENTO UNIVERSITÁRIO</h3>
+                    <p class="elegant-text">
+                        Uma palestra. Um slide atrás do outro. Ninguém mais lembra no dia seguinte.
+                    </p>
+                    <p class="elegant-text" style="margin-bottom: 0;">
+                        Aqui, não queremos apenas especialistas num palco. Queremos <strong>ideias em conflito</strong>, <strong>pessoas na mesma sala</strong> e <strong>perguntas difíceis em circulação</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. PARTICIPAÇÃO EM TEMPO REAL PELO CELULAR (INTERAÇÃO AO VIVO) -->
+        <section class="dynamic-section" id="interacao-ao-vivo">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-eyebrow">Dinâmica Interativa da Arena</span>
+                <h3 class="section-title">Acompanhe em tempo real pelo seu próprio celular e participe ativamente</h3>
+                <p class="section-subtitle">
+                    Sem precisar baixar aplicativo. Ao acessar pelo QR Code no auditório, você acompanha cada pauta ao vivo, envia perguntas aos especialistas e vota para decidir o tema da Mesa-Redonda.
+                </p>
+            </div>
+
+            <div class="live-interactive-grid">
+                <div data-aos="fade-right">
+                    <div class="feature-steps">
+                        <div class="feature-step-card">
+                            <div class="feature-step-icon">01</div>
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">
+                                    Acompanhamento Sincronizado com o Palco
+                                </h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Veja no seu smartphone o tema em debate, o especialista no palco e o andamento de cada momento da noite em tempo real.
+                                </p>
+                            </div>
                         </div>
-                        <div class="luxury-divider"></div>
-                        <div class="luxury-stat">
-                            <span class="lux-number">21%</span>
-                            <span class="lux-desc">DOS ADOLESCENTES</span>
+
+                        <div class="feature-step-card">
+                            <div class="feature-step-icon">02</div>
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">
+                                    Envie Perguntas para os Especialistas
+                                </h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Durante cada exposição, envie sua pergunta diretamente pelo celular. Ao final de cada fala, uma questão da plateia é respondida ao vivo no palco.
+                                </p>
+                            </div>
                         </div>
-                        <div class="luxury-divider"></div>
-                        <div class="luxury-stat gold">
-                            <span class="lux-number">+</span>
-                            <span class="lux-desc">O CONTATO DIGITAL AUMENTOU, O PRESENCIAL CAIU (OCDE)</span>
+
+                        <div class="feature-step-card">
+                            <div class="feature-step-icon">03</div>
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">
+                                    Você Escolhe o Tema da Mesa-Redonda (20h40)
+                                </h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Durante a Pauta 5, a votação oficial abre no seu celular com três grandes questões. A mais votada pelo público conduz o debate coletivo das 21h00.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="feature-step-card">
+                            <div class="feature-step-icon">04</div>
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">
+                                    Acesso Direto ao Banco de Talentos
+                                </h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Pelo mesmo celular, acesse o <a href="/talentos" style="color: var(--brand-primary); font-weight: 700; text-decoration: underline;">Banco de Talentos</a>, cadastre seu perfil profissional e conecte-se com as empresas parceiras.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulador Interativo do Celular do Participante -->
+                <div data-aos="fade-left">
+                    <div class="phone-mockup">
+                        <div class="phone-notch">
+                            <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
+                            <span style="font-size: 0.6rem; color: #10B981; font-weight: 700;">AO VIVO · ARENA</span>
+                        </div>
+
+                        <div class="phone-screen">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(213,197,170,0.12); padding-bottom: 0.75rem;">
+                                <div>
+                                    <span style="font-size: 0.65rem; color: #10B981; font-weight: 700; display: block;">SIMULADOR DO PARTICIPANTE</span>
+                                    <strong style="font-size: 0.9rem; color: #F7DECA;">A Nova Moeda · Mobile</strong>
+                                </div>
+                                <span style="font-family: monospace; font-size: 0.8rem; font-weight: 700; background: rgba(16,185,129,0.15); color: #10B981; padding: 0.25rem 0.6rem; border-radius: 8px;">
+                                    AO VIVO
+                                </span>
+                            </div>
+
+                            <!-- Abas interativas do simulador -->
+                            <div class="phone-tabs">
+                                <button type="button" class="phone-tab active" data-phone-tab="votacao">Votação (20h40)</button>
+                                <button type="button" class="phone-tab" data-phone-tab="pergunta">Enviar Pergunta</button>
+                                <button type="button" class="phone-tab" data-phone-tab="status">Sincronia</button>
+                            </div>
+
+                            <!-- Painel 1: Simulador de Votação da Mesa-Redonda -->
+                            <div data-phone-panel="votacao" style="display: block;">
+                                <p style="font-size: 0.75rem; font-weight: 700; color: #F7DECA; margin-bottom: 0.6rem;">
+                                    Qual questão deve orientar a Mesa-Redonda das 21h00? (Toque para testar):
+                                </p>
+                                <button type="button" class="poll-option-btn selected">
+                                    <strong style="color: #10B981; display: block; font-size: 0.68rem;">QUESTÃO 1 · TECNOLOGIA E RESPONSABILIDADE</strong>
+                                    Como criar soluções tecnológicas que combatam a solidão sem repetir o modelo de dependência?
+                                </button>
+                                <button type="button" class="poll-option-btn">
+                                    <strong style="color: #D5C5AA; display: block; font-size: 0.68rem;">QUESTÃO 2 · MERCADO E RELAÇÕES HUMANAS</strong>
+                                    Quando convivência e acolhimento são vendidos, o mercado resolve a solidão ou transforma vínculo em produto?
+                                </button>
+                                <button type="button" class="poll-option-btn">
+                                    <strong style="color: #D5C5AA; display: block; font-size: 0.68rem;">QUESTÃO 3 · TRABALHO E SOCIEDADE</strong>
+                                    O isolamento contemporâneo é escolha individual ou resultado de como organizamos a vida profissional?
+                                </button>
+                                <p id="sim-poll-feedback" style="font-size: 0.7rem; color: #10B981; font-weight: 600; margin-top: 0.5rem;">
+                                    ✓ Experimente tocar nas opções acima como fará no dia do evento.
+                                </p>
+                            </div>
+
+                            <!-- Painel 2: Simulador de Pergunta -->
+                            <div data-phone-panel="pergunta" style="display: none;">
+                                <p style="font-size: 0.74rem; color: #D5C5AA; margin-bottom: 0.5rem;">
+                                    Envie sua pergunta pelo celular para ser respondida ao vivo pelo especialista no palco:
+                                </p>
+                                <textarea id="sim-question-input" rows="3" placeholder="Ex: Como equilibrar produtividade remota e pertencimento na equipe?" style="width: 100%; border-radius: 10px; background: #030A06; border: 1px solid rgba(213,197,170,0.25); color: #F7DECA; padding: 0.65rem; font-size: 0.75rem; font-family: inherit; resize: none;"></textarea>
+                                <button type="button" id="sim-question-submit" style="margin-top: 0.5rem; width: 100%; padding: 0.65rem; border-radius: 10px; background: #14532D; color: #FFF; font-weight: 700; font-size: 0.75rem; border: 1px solid #10B981; cursor: pointer;">
+                                    Enviar Pergunta ao Palco
+                                </button>
+                                <p id="sim-question-feedback" style="display: none; font-size: 0.7rem; margin-top: 0.5rem; font-weight: 600;"></p>
+                            </div>
+
+                            <!-- Painel 3: Status Ao Vivo -->
+                            <div data-phone-panel="status" style="display: none;">
+                                <div style="background: #030A06; border: 1px solid rgba(213,197,170,0.18); border-radius: 12px; padding: 0.85rem;">
+                                    <span style="font-size: 0.65rem; color: #10B981; font-weight: 700;"> PARTICIPAÇÃO EM TEMPO REAL</span>
+                                    <h5 style="font-size: 0.85rem; color: #F7DECA; margin: 0.25rem 0;">Palco + Telão + Seu Smartphone</h5>
+                                    <p style="font-size: 0.72rem; color: rgba(213,197,170,0.75);">
+                                        Cada pauta combina a exposição do especialista com a participação direta do público presente no Auditório 2.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- A GRANDE PERGUNTA -->
-        <section class="dynamic-section question-section" data-aos="fade-up">
-            <h2 class="monumental-quote">O QUE ACONTECE COM A ECONOMIA QUANDO A CONEXÃO SE TORNA UM ATIVO ESCASSO?</h2>
-            <div class="separator-center"></div>
-        </section>
-
-        <!-- O QUE É A NOVA MOEDA -->
-        <section class="dynamic-section concept-section">
-            <div class="text-block" data-aos="fade-up">
-                <h3 class="section-title">O QUE É A NOVA MOEDA?</h3>
-                <p class="elegant-text">Antes de uma venda existe atenção. Antes de uma parceria existe confiança. Antes de uma inovação existe troca.</p>
-                <p class="elegant-text highlight-gold">E antes de tudo isso existe conexão.</p>
-                <p class="elegant-text"><strong>A Nova Moeda</strong> é uma experiência para investigar esse território. Quem será capaz de criar valor em uma economia que começa a desejar conexão?</p>
+        <!-- 5. A INVESTIGAÇÃO: ESPECIALISTAS & PAUTAS -->
+        <section class="dynamic-section" id="investigacao">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-eyebrow">Cinco Pautas + Mesa-Redonda Coletiva</span>
+                <h3 class="section-title">SEIS PERGUNTAS. UMA MESMA ECONOMIA.</h3>
+                <p class="section-subtitle">
+                    Não são palestras desconectadas. É uma investigação progressiva conduzida por cinco especialistas seguida por uma Mesa-Redonda pautada pelo voto do público.
+                </p>
             </div>
-            
-            <div class="manifesto-box" data-aos="flip-up">
-                <h4>ISTO NÃO É MAIS UM EVENTO UNIVERSITÁRIO</h4>
-                <p>Uma palestra. Um slide atrás do outro. Ninguém mais lembra no dia seguinte.</p>
-                <p>Aqui, não queremos apenas especialistas num palco. Queremos ideias em conflito, pessoas na mesma sala e perguntas difíceis em circulação.</p>
-            </div>
-        </section>
 
-                <!-- A INVESTIGAÇÃO / PAUTAS (COM CONTAGEM REGRESSIVA) -->
-        <section class="dynamic-section speakers-section" id="investigacao">
-            <h3 class="section-title" data-aos="fade-up">SEIS PERGUNTAS.<br>UMA MESMA ECONOMIA.</h3>
-            <p class="elegant-text text-center" data-aos="fade-up">Não são palestras desconectadas. É uma investigação.</p>
-            
             <div class="speakers-grid">
                 <!-- Pauta 01 -->
                 <div class="speaker-card" data-aos="fade-up">
-                    <div class="speaker-frame" style="background-image: url('/img/Daniel.jpeg'); background-size: cover; background-position: top center;">
+                    <div class="speaker-frame" style="background-image: url('/img/Daniel.jpeg');">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">19h15 – 19h35</span>
+                            <span class="speaker-role-pill">Pauta 01</span>
+                        </div>
                     </div>
                     <div class="speaker-info">
-                        <span class="speaker-number">01 · DANIEL DUARTE</span>
-                        <h4 class="speaker-theme">A SOLIDÃO NA ERA DA HIPERCONEXÃO</h4>
-                        <p class="speaker-desc">Estar conectado significa estar acompanhado? Uma reflexão sobre tecnologia, redes sociais e as novas formas de relacionamento.</p>
+                        <div>
+                            <span class="speaker-number">01 · DANIEL DUARTE</span>
+                            <h4 class="speaker-theme">A SOLIDÃO NA ERA DA HIPERCONEXÃO</h4>
+                            <p class="speaker-desc">
+                                Estar conectado significa estar acompanhado? Uma reflexão sobre tecnologia, redes sociais e as novas formas de relacionamento.
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Exposição + Pergunta da Plateia</span>
+                            <span style="color: var(--brand-primary);">Professor e Administrador</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Pauta 02 -->
-                <div class="speaker-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="speaker-frame" style="background-image: url('/img/Janaina.jpeg'); background-size: cover; background-position: top center;">
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="50">
+                    <div class="speaker-frame" style="background-image: url('/img/Janaina.jpeg');">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">19h35 – 19h55</span>
+                            <span class="speaker-role-pill">Pauta 02</span>
+                        </div>
                     </div>
                     <div class="speaker-info">
-                        <span class="speaker-number">02 · JANAÍNA DALTRO</span>
-                        <h4 class="speaker-theme">QUANDO A SOLIDÃO VIRA MERCADO</h4>
-                        <p class="speaker-desc">Como necessidades de pertencimento, atenção e companhia são incorporadas a produtos, serviços e modelos de negócio?</p>
+                        <div>
+                            <span class="speaker-number">02 · JANAÍNA DALTRO</span>
+                            <h4 class="speaker-theme">QUANDO A SOLIDÃO VIRA MERCADO</h4>
+                            <p class="speaker-desc">
+                                Como necessidades de pertencimento, atenção e companhia são incorporadas a produtos, serviços e modelos de negócio?
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Exposição + Pergunta da Plateia</span>
+                            <span style="color: var(--brand-primary);">Professora e Administradora</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Pauta 03 -->
-                <div class="speaker-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="speaker-frame" style="background-image: url('/img/Denilson.png'); background-size: cover; background-position: top center;">
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="speaker-frame" style="background-image: url('/img/Denilson.png');">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">19h55 – 20h15</span>
+                            <span class="speaker-role-pill">Pauta 03</span>
+                        </div>
                     </div>
                     <div class="speaker-info">
-                        <span class="speaker-number">03 · DENILSON CARNEIRO</span>
-                        <h4 class="speaker-theme">POR QUE PODEMOS ESTAR CERCADOS DE PESSOAS E AINDA NÃO PERTENCER A LUGAR NENHUM?</h4>
-                        <p class="speaker-desc">Uma discussão sobre pertencimento, relações interpessoais e os fatores que produzem aproximação ou isolamento dentro das organizações.</p>
+                        <div>
+                            <span class="speaker-number">03 · DENILSON CARNEIRO</span>
+                            <h4 class="speaker-theme">POR QUE PODEMOS ESTAR CERCADOS DE PESSOAS E AINDA NÃO PERTENCER A LUGAR NENHUM?</h4>
+                            <p class="speaker-desc">
+                                Uma discussão sobre pertencimento, relações interpessoais e os fatores que produzem aproximação ou isolamento dentro das organizações.
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Exposição + Pergunta da Plateia</span>
+                            <span style="color: var(--brand-primary);">Advogado, Prof. e Empreendedor</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Pauta 04 -->
+                <div class="speaker-card" data-aos="fade-up">
+                    <div class="speaker-frame" style="background-image: url('/img/Sergio.jpeg');">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">20h15 – 20h35</span>
+                            <span class="speaker-role-pill">Pauta 04</span>
+                        </div>
+                    </div>
+                    <div class="speaker-info">
+                        <div>
+                            <span class="speaker-number">04 · SÉRGIO PASSOS</span>
+                            <h4 class="speaker-theme">O FUTURO DO TRABALHO VAI NOS APROXIMAR OU NOS TORNAR PROFISSIONAIS CADA VEZ MAIS ISOLADOS?</h4>
+                            <p class="speaker-desc">
+                                Uma análise das transformações nas relações profissionais diante do trabalho remoto, dos novos modelos de organização e do avanço tecnológico.
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Exposição + Pergunta da Plateia</span>
+                            <span style="color: var(--brand-primary);">Advogado, Psicólogo e Empresário</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pauta 05 · Dulcila -->
+                <div class="speaker-card" data-aos="fade-up" data-aos-delay="50">
+                    <div class="speaker-frame" style="background-image: url('/img/Dulcila.jpeg');">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">20h35 – 20h55</span>
+                            <span class="speaker-role-pill">Pauta 05 + Votação</span>
+                        </div>
+                    </div>
+                    <div class="speaker-info">
+                        <div>
+                            <span class="speaker-number">05 · DULCILA TORRES</span>
+                            <h4 class="speaker-theme">PODEMOS CONSTRUIR UMA ECONOMIA DA CONEXÃO?</h4>
+                            <p class="speaker-desc">
+                                Uma reflexão sobre alternativas capazes de transformar relações humanas, inovação e propósito em novas possibilidades de valor. Durante esta pauta, abre-se às 20h40 a votação oficial da Mesa-Redonda.
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Exposição + Pergunta da Plateia</span>
+                            <span style="color: var(--brand-primary);">Prof.ª e Esp. em Felicidade Organizacional</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 06 · Mesa-Redonda & Fechamento Coletivo (Foto "todos juntos.png" sem fundo) -->
                 <div class="speaker-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="speaker-frame" style="background-image: url('/img/Sergio.jpeg'); background-size: cover; background-position: top center;">
+                    <div class="speaker-frame" style="background: radial-gradient(circle at 50% 45%, rgba(20, 83, 45, 0.55) 0%, #050C08 78%); display: flex; align-items: flex-end; justify-content: center;">
+                        <div class="speaker-badge-overlay">
+                            <span class="speaker-time-pill">21h00 – 21h20</span>
+                            <span class="speaker-role-pill">Mesa-Redonda</span>
+                        </div>
+                        <img src="/img/todos%20juntos.png" alt="Todos os Palestrantes — Mesa-Redonda A Nova Moeda" style="width: 100%; height: 92%; object-fit: contain; object-position: bottom center; position: relative; z-index: 1; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.65));">
                     </div>
                     <div class="speaker-info">
-                        <span class="speaker-number">04 · SÉRGIO PASSOS</span>
-                        <h4 class="speaker-theme">O FUTURO DO TRABALHO VAI NOS APROXIMAR OU NOS TORNAR PROFISSIONAIS CADA VEZ MAIS ISOLADOS?</h4>
-                        <p class="speaker-desc">Uma análise das transformações nas relações profissionais diante do trabalho remoto, dos novos modelos de organização e do avanço tecnológico.</p>
-                    </div>
-                </div>
-
-                <!-- Pauta 05 -->
-                <div class="speaker-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="speaker-frame" style="background-image: url('/img/Dulcila.jpeg'); background-size: cover; background-position: top center;">
-                    </div>
-                    <div class="speaker-info">
-                        <span class="speaker-number">05 · DULCILA TORRES</span>
-                        <h4 class="speaker-theme">PODEMOS CONSTRUIR UMA ECONOMIA DA CONEXÃO?</h4>
-                        <p class="speaker-desc">Uma reflexão sobre alternativas capazes de transformar relações humanas, inovação e propósito em novas possibilidades de valor.</p>
-                    </div>
-                </div>
-
-                <!-- Pauta 06 (Fechamento Coletivo) -->
-                <div class="speaker-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="speaker-frame" style="background: radial-gradient(circle at center, rgba(87, 85, 46, 0.4) 0%, #030A06 70%); display: flex; align-items: center; justify-content: center;">
-                        <img src="/img/Ativo 1.png" alt="Arena A Nova Moeda" style="width: 70px; height: auto; opacity: 0.85;">
-                    </div>
-                    <div class="speaker-info">
-                        <span class="speaker-number">06 · ARENA COLETIVA</span>
-                        <h4 class="speaker-theme">COMO TRANSFORMAR A ECONOMIA DA SOLIDÃO EM UMA ECONOMIA DA CONEXÃO?</h4>
-                        <p class="speaker-desc">Fechamento do evento: construção coletiva e síntese com a participação de todos os palestrantes e do público.</p>
+                        <div>
+                            <span class="speaker-number">06 · MESA-REDONDA (TODOS OS ESPECIALISTAS)</span>
+                            <h4 class="speaker-theme">COMO TRANSFORMAR A ECONOMIA DA SOLIDÃO EM UMA ECONOMIA DA CONEXÃO?</h4>
+                            <p class="speaker-desc">
+                                Debate coletivo reunindo Daniel, Janaína, Denilson, Sérgio e Dulcila no palco, orientado pela questão escolhida ao vivo pelo público na votação.
+                            </p>
+                        </div>
+                        <div class="speaker-meta-footer">
+                            <span>Debate Coletivo no Palco</span>
+                            <span style="color: var(--brand-primary);">Questão Eleita pelo Público</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- O QUE VOCE LEVA PARA CASA -->
-        <section class="dynamic-section takeaways-section">
-            <h3 class="section-title text-center" data-aos="fade-up">O QUE VOCÊ LEVA PARA CASA?</h3>
+        <!-- 6. PROGRAMAÇÃO OFICIAL PARA O PÚBLICO (SEM INSTRUÇÕES INTERNAS DE EQUIPE, SEM DURAÇÃO EXPOSTA E COM MINIATURAS DOS ESPECIALISTAS) -->
+        <section class="dynamic-section" id="programacao">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-eyebrow">Agenda Oficial · 17 de Novembro</span>
+                <h3 class="section-title">PROGRAMAÇÃO OFICIAL DO EVENTO</h3>
+                <p class="section-subtitle">
+                    Acompanhe a jornada completa das 19h00 às 21h55 no Auditório 2 da UEFS. Clique em qualquer etapa para visualizar os tópicos e momentos de participação.
+                </p>
+            </div>
+
+            <!-- Filtros Dinâmicos -->
+            <div class="schedule-filter-bar" data-aos="fade-up">
+                <button type="button" class="schedule-filter-btn active" data-schedule-filter="all">Toda a Programação (19h00–21h55)</button>
+                <button type="button" class="schedule-filter-btn" data-schedule-filter="abertura">Abertura & Contexto</button>
+                <button type="button" class="schedule-filter-btn" data-schedule-filter="pautas">As 5 Pautas & Votação</button>
+                <button type="button" class="schedule-filter-btn" data-schedule-filter="mesa">Mesa-Redonda</button>
+                <button type="button" class="schedule-filter-btn" data-schedule-filter="networking">Encerramento, Coffee Break & Sorteios</button>
+                <button type="button" class="schedule-filter-btn" id="toggle-all-schedule" style="border-color: var(--brand-primary); color: var(--brand-primary);">
+                    Expandir todos os detalhes
+                </button>
+            </div>
+
+            <div class="timeline-container" data-aos="fade-up">
+
+                <!-- 19h00 às 19h05 — Abertura institucional -->
+                <div class="timeline-item expanded" data-category="abertura">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">19h00 às 19h05</span>
+                            <span class="timeline-category-tag">Abertura Institucional</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ocultar detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Boas-Vindas e Apresentação da Arena</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/logo.png" alt="Coordenação" class="timeline-avatar" style="object-fit: contain; padding: 3px;">
+                            <span>Mestre de Cerimônias e Coordenação</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">O QUE ACONTECE NESTE MOMENTO:</strong>
+                            <ul class="timeline-list">
+                                <li>Recepção e boas-vindas ao público no Auditório 2 da UEFS.</li>
+                                <li>Apresentação do propósito do encontro <strong>A Nova Moeda — Economia da Solidão</strong>.</li>
+                                <li>Explicação da dinâmica das cinco palestras e da Mesa-Redonda.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">EXPERIÊNCIA DO PARTICIPANTE:</strong>
+                            <ul class="timeline-list">
+                                <li>Orientações práticas para enviar perguntas e participar da votação pelo celular.</li>
+                                <li>Apresentação dos benefícios: Certificado, Banco de Talentos, Coffee Break e Sorteios.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19h05 às 19h15 — Introdução e contexto -->
+                <div class="timeline-item" data-category="abertura">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">19h05 às 19h15</span>
+                            <span class="timeline-category-tag">Introdução e Contexto</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Introdução e Contexto da Economia da Solidão</h4>
+                        <span class="timeline-responsible">
+                            <span class="timeline-avatar-badge">P</span>
+                            <span>Responsável: Paula</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">EIXOS DA INTRODUÇÃO:</strong>
+                            <ul class="timeline-list">
+                                <li>Panorama contemporâneo da economia da solidão.</li>
+                                <li>O impacto da tecnologia e dos modelos de negócio nas relações humanas.</li>
+                                <li>A questão central que conecta as cinco pautas da noite.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19h15 às 19h35 — PAUTA 1 -->
+                <div class="timeline-item" data-category="pautas">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">19h15 às 19h35</span>
+                            <span class="timeline-category-tag">Pauta 1</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">PAUTA 1 — A solidão na era da hiperconexão</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/Daniel.jpeg" alt="Daniel Duarte" class="timeline-avatar">
+                            <span>Especialista: Daniel Duarte</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PROGRAMAÇÃO DO BLOCO:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>19h15–19h30</td><td>Exposição do especialista</td></tr>
+                                <tr><td>19h30–19h35</td><td>Pergunta selecionada da plateia e resposta ao vivo</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PARTICIPAÇÃO DO PÚBLICO:</strong>
+                            <ul class="timeline-list">
+                                <li>Envio de perguntas pelo celular aberto durante toda a exposição sobre hiperconexão e relações digitais.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19h35 às 19h55 — PAUTA 2 -->
+                <div class="timeline-item" data-category="pautas">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">19h35 às 19h55</span>
+                            <span class="timeline-category-tag">Pauta 2</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">PAUTA 2 — Quando a solidão vira mercado</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/Janaina.jpeg" alt="Janaína Daltro" class="timeline-avatar">
+                            <span>Especialista: Janaína Daltro</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PROGRAMAÇÃO DO BLOCO:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>19h35–19h50</td><td>Exposição da especialista</td></tr>
+                                <tr><td>19h50–19h55</td><td>Pergunta selecionada da plateia e resposta ao vivo</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PARTICIPAÇÃO DO PÚBLICO:</strong>
+                            <ul class="timeline-list">
+                                <li>Envio de perguntas pelo celular sobre consumo, atenção e novos modelos de negócio.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19h55 às 20h15 — PAUTA 3 -->
+                <div class="timeline-item" data-category="pautas">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">19h55 às 20h15</span>
+                            <span class="timeline-category-tag">Pauta 3</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">PAUTA 3 — Por que podemos estar cercados de pessoas e ainda não pertencer a lugar nenhum?</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/Denilson.png" alt="Denilson Carneiro" class="timeline-avatar">
+                            <span>Especialista: Denilson Carneiro</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PROGRAMAÇÃO DO BLOCO:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>19h55–20h10</td><td>Exposição do especialista</td></tr>
+                                <tr><td>20h10–20h15</td><td>Pergunta selecionada da plateia e resposta ao vivo</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PARTICIPAÇÃO DO PÚBLICO:</strong>
+                            <ul class="timeline-list">
+                                <li>Interação aberta pelo celular sobre pertencimento, comunidade e ambiente institucional.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20h15 às 20h35 — PAUTA 4 -->
+                <div class="timeline-item" data-category="pautas">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">20h15 às 20h35</span>
+                            <span class="timeline-category-tag">Pauta 4</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">PAUTA 4 — O futuro do trabalho vai nos aproximar ou nos tornar profissionais cada vez mais isolados?</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/Sergio.jpeg" alt="Sérgio Passos" class="timeline-avatar">
+                            <span>Especialista: Sérgio Passos</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PROGRAMAÇÃO DO BLOCO:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>20h15–20h30</td><td>Exposição do especialista</td></tr>
+                                <tr><td>20h30–20h35</td><td>Pergunta selecionada da plateia e resposta ao vivo</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PARTICIPAÇÃO DO PÚBLICO:</strong>
+                            <ul class="timeline-list">
+                                <li>Envio de perguntas sobre carreira, trabalho remoto, saúde mental e transformações profissionais.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20h35 às 20h55 — PAUTA 5 + VOTAÇÃO DA MESA-REDONDA (DULCILA) -->
+                <div class="timeline-item highlight-special expanded" data-category="pautas">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">20h35 às 20h55</span>
+                            <span class="timeline-category-tag">Pauta 5 + Votação da Mesa-Redonda</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ocultar detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">PAUTA 5 — Podemos construir uma economia da conexão? (+ Votação ao Vivo)</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/Dulcila.jpeg" alt="Dulcila Torres" class="timeline-avatar">
+                            <span>Especialista: Dulcila Torres</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">PROGRAMAÇÃO DO BLOCO:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>20h35–20h50</td><td>Exposição da especialista</td></tr>
+                                <tr><td>20h40</td><td><strong>Abertura da Votação</strong> no celular para escolher a questão da Mesa-Redonda</td></tr>
+                                <tr><td>20h50–20h55</td><td>Pergunta selecionada da plateia e resposta ao vivo</td></tr>
+                                <tr><td>20h55</td><td>Encerramento da votação pelo público</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">DECISÃO DA PLATEIA:</strong>
+                            <ul class="timeline-list">
+                                <li>A partir das <strong>20h40</strong>, todos os participantes podem votar pelo celular em uma das 3 grandes questões candidatas para a Mesa-Redonda.</li>
+                                <li>O resultado permanece em sigilo até o anúncio oficial às <strong>20h55</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20h55 às 21h00 — TRANSIÇÃO E ANÚNCIO DO RESULTADO -->
+                <div class="timeline-item" data-category="mesa">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">20h55 às 21h00</span>
+                            <span class="timeline-category-tag">Resultado da Votação</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Revelação da Questão Escolhida pelo Público e Composição da Mesa</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/todos%20juntos.png" alt="Especialistas" class="timeline-avatar" style="object-fit: cover;">
+                            <span>Todos os Especialistas</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">MOMENTO NA ARENA:</strong>
+                            <ul class="timeline-list">
+                                <li>Divulgação no telão do resultado oficial da votação realizada pelo público.</li>
+                                <li>Reunião dos cinco especialistas no palco para o início imediato da Mesa-Redonda.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 21h00 às 21h20 — MESA-REDONDA -->
+                <div class="timeline-item highlight-special expanded" data-category="mesa">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">21h00 às 21h20</span>
+                            <span class="timeline-category-tag">Mesa-Redonda</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ocultar detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Mesa-Redonda — Debate Coletivo sobre a Questão Eleita pelo Público</h4>
+                        <span class="timeline-responsible">
+                            <span class="timeline-avatar-group">
+                                <img src="/img/Daniel.jpeg" alt="Daniel" class="timeline-avatar">
+                                <img src="/img/Janaina.jpeg" alt="Janaína" class="timeline-avatar">
+                                <img src="/img/Denilson.png" alt="Denilson" class="timeline-avatar">
+                                <img src="/img/Sergio.jpeg" alt="Sérgio" class="timeline-avatar">
+                                <img src="/img/Dulcila.jpeg" alt="Dulcila" class="timeline-avatar">
+                            </span>
+                            <span>Daniel, Janaína, Denilson, Sérgio, Dulcila e Mediador</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">DINÂMICA DA MESA-REDONDA:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>21h00–21h02</td><td>Apresentação da questão vencedora escolhida pela plateia</td></tr>
+                                <tr><td>21h02–21h12</td><td>Posicionamento inicial de cada especialista sob diferentes óticas</td></tr>
+                                <tr><td>21h12–21h18</td><td>Diálogo aberto, contrapontos e construção coletiva</td></tr>
+                                <tr><td>21h18–21h20</td><td>Síntese final do debate</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">AS 3 QUESTÕES CANDIDATAS À VOTAÇÃO:</strong>
+                            <ul class="timeline-list">
+                                <li><strong>1. Tecnologia e Responsabilidade:</strong> Como criar soluções tecnológicas que combatam a solidão sem repetir o modelo de dependência?</li>
+                                <li><strong>2. Mercado e Relações Humanas:</strong> Quando convivência e acolhimento são vendidos, o mercado resolve a solidão ou transforma vínculo em produto?</li>
+                                <li><strong>3. Trabalho e Sociedade:</strong> O isolamento contemporâneo é escolha individual ou resultado de como organizamos a vida profissional?</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 21h20 às 21h25 — ENCERRAMENTO -->
+                <div class="timeline-item" data-category="networking">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">21h20 às 21h25</span>
+                            <span class="timeline-category-tag">Encerramento</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ver detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Considerações Finais, Certificado e Abertura do Banco de Talentos</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/logo.png" alt="Coordenação" class="timeline-avatar" style="object-fit: contain; padding: 3px;">
+                            <span>Mediador e Coordenação Geral</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">FECHAMENTO DO AUDITÓRIO:</strong>
+                            <ul class="timeline-list">
+                                <li>Síntese da noite e agradecimentos aos especialistas, parceiros e participantes.</li>
+                                <li>Orientações para emissão do <strong>Certificado Oficial</strong> e cadastro no <strong>Banco de Talentos</strong>.</li>
+                                <li>Convite para o <strong>Coffee Break</strong> e para os <strong>Sorteios de Brindes</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 21h25 às 21h55 — COFFEE BREAK, NETWORKING E SORTEIOS -->
+                <div class="timeline-item highlight-special expanded" data-category="networking">
+                    <div class="timeline-header">
+                        <div class="timeline-time-group">
+                            <span class="timeline-time-badge">21h25 às 21h55</span>
+                            <span class="timeline-category-tag">Coffee Break, Networking & Sorteios</span>
+                        </div>
+                        <span class="timeline-expand-hint"><span>Ocultar detalhes</span> ▾</span>
+                    </div>
+                    <div class="timeline-title-row">
+                        <h4 class="timeline-title">Coffee Break, Conversa com Palestrantes, Banco de Talentos e Sorteio de Brindes</h4>
+                        <span class="timeline-responsible">
+                            <img src="/img/todos%20juntos.png" alt="Comunidade A Nova Moeda" class="timeline-avatar" style="object-fit: cover;">
+                            <span>Palestrantes, Empresas Parceiras e Participantes</span>
+                        </span>
+                    </div>
+                    <div class="timeline-details">
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">MOMENTOS DO COFFEE BREAK:</strong>
+                            <table class="timeline-subtable">
+                                <tr><td>21h25–21h30</td><td><strong>Início do Coffee Break:</strong> recepção no espaço de convivência com alimentos e bebidas.</td></tr>
+                                <tr><td>21h30–21h40</td><td><strong>Networking e Banco de Talentos:</strong> conversa próxima com os palestrantes, fotos e acesso via QR Code ao Banco de Talentos.</td></tr>
+                                <tr><td>21h40–21h45</td><td><strong>Sorteio de Brindes Exclusivos:</strong> realização do sorteio oficial entre os participantes presentes.</td></tr>
+                                <tr><td>21h45–21h55</td><td><strong>Continuidade do Networking:</strong> troca de contatos profissionais e encerramento do encontro às 21h55.</td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <strong style="font-size: 0.78rem; color: var(--text-main); display: block; margin-bottom: 0.5rem;">CONEXÕES REAIS:</strong>
+                            <ul class="timeline-list">
+                                <li>Oportunidade para conversar diretamente com os cinco especialistas e com representantes das empresas parceiras.</li>
+                                <li>Acesso rápido ao <a href="/talentos" style="color: var(--brand-primary); font-weight: 700;">Banco de Talentos</a> para conectar seu perfil profissional às vagas disponíveis.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 7. O QUE VOCÊ LEVA PARA CASA (BENEFÍCIOS REAIS DO PARTICIPANTE: BANCO DE TALENTOS, COFFEE BREAK, CERTIFICADO E BRINDES) -->
+        <section class="dynamic-section" id="beneficios">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-eyebrow">Benefícios Exclusivos do Participante</span>
+                <h3 class="section-title">O QUE VOCÊ VIVE E LEVA PARA CASA?</h3>
+                <p class="section-subtitle">
+                    Além de protagonizar as discussões da Arena, sua inscrição garante acesso a oportunidades de carreira, networking presencial, certificação e sorteios.
+                </p>
+            </div>
+
             <div class="takeaways-grid">
-                <div class="takeaway-item" data-aos="fade-right">
-                    <h5>CERTIFICADO</h5>
-                    <p>Registro formal da sua participação no evento.</p>
+                <div class="takeaway-item" data-aos="fade-up">
+                    <div>
+                        <div class="takeaway-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <h5 style="margin-top: 1rem;">BANCO DE TALENTOS OFICIAL</h5>
+                        <p style="margin-top: 0.5rem;">
+                            Cadastre seu currículo e competências no nosso portal exclusivo de recrutamento, conectando você diretamente às empresas patrocinadoras e parceiras.
+                        </p>
+                    </div>
+                    <a href="/talentos" style="font-size: 0.75rem; font-weight: 700; color: var(--brand-primary); text-decoration: none;">
+                        Acessar Banco de Talentos →
+                    </a>
                 </div>
-                <div class="takeaway-item" data-aos="fade-left">
-                    <h5>BANCO DE TALENTOS</h5>
-                    <p>Seus perfis poderão ser apresentados às empresas patrocinadoras.</p>
+
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="50">
+                    <div>
+                        <div class="takeaway-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+                        </div>
+                        <h5 style="margin-top: 1rem;">COFFEE BREAK & NETWORKING</h5>
+                        <p style="margin-top: 0.5rem;">
+                            Das 21h25 às 21h55, um momento especial com alimentação para conversar de perto com os palestrantes, trocar contatos e ampliar sua rede profissional.
+                        </p>
+                    </div>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--brand-primary);">Seu próximo parceiro pode estar ao seu lado</span>
                 </div>
-                <div class="takeaway-item" data-aos="fade-right">
-                    <h5>CONEXÃO COM EMPRESAS</h5>
-                    <p>Seu próximo contato profissional pode estar sentado ao seu lado.</p>
+
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="100">
+                    <div>
+                        <div class="takeaway-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                        </div>
+                        <h5 style="margin-top: 1rem;">CERTIFICADO DE PARTICIPAÇÃO</h5>
+                        <p style="margin-top: 0.5rem;">
+                            Certificação oficial emitida aos participantes presentes para comprovação de horas complementares acadêmicas e enriquecimento curricular.
+                        </p>
+                    </div>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--brand-primary);">Horas complementares garantidas</span>
                 </div>
-                <div class="takeaway-item" data-aos="fade-left">
-                    <h5>BRINDES EXCLUSIVOS</h5>
-                    <p>Concorra a brindes oferecidos especialmente para o evento.</p>
+
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="150">
+                    <div>
+                        <div class="takeaway-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                        </div>
+                        <h5 style="margin-top: 1rem;">SORTEIO DE BRINDES EXCLUSIVOS</h5>
+                        <p style="margin-top: 0.5rem;">
+                            Às 21h40, durante o nosso Coffee Break, realizaremos o sorteio de brindes e experiências especiais oferecidos pelas marcas apoiadoras do evento.
+                        </p>
+                    </div>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--brand-primary);">Sorteio ao vivo às 21h40</span>
                 </div>
             </div>
         </section>
 
-        <!-- CHAMADA FINAL -->
-        <section class="dynamic-section final-cta" data-aos="fade-in">
+        <!-- 8. CHAMADA FINAL (CTA) -->
+        <section class="dynamic-section" style="border-bottom: none;" data-aos="fade-up">
             <div class="cta-box">
-                <h2 class="cta-quote">Conteúdo você provavelmente encontrará em algum lugar. O que você não consegue reproduzir depois é a sala cheia.</h2>
-                <p class="elegant-text">A Nova Moeda acontece em uma data específica.</p>
-                <div class="hero-details">
-                    <span class="detail-item">17/11 · 19H</span>
-                    <span class="detail-divider">|</span>
-                    <span class="detail-item">UEFS · AUDITÓRIO 2</span>
+                <span class="section-eyebrow">Vagas Limitadas ao Auditório 2</span>
+                <h2 class="cta-quote">
+                    Conteúdo você provavelmente encontrará em algum lugar. O que você não consegue reproduzir depois é a sala cheia.
+                </h2>
+                <p class="elegant-text" style="max-width: 620px; margin: 0 auto 1.5rem auto;">
+                    A Nova Moeda acontece em uma data específica. Garanta sua credencial para viver os debates, o Coffee Break, os sorteios e o Banco de Talentos.
+                </p>
+
+                <div class="hero-pills" style="margin-bottom: 1.5rem;">
+                    <span class="hero-pill">17/11 · 19H00 ÀS 21H55</span>
+                    <span class="hero-pill">UEFS · AUDITÓRIO 2</span>
+                    <span class="hero-pill">BANCO DE TALENTOS + CERTIFICADO + COFFEE BREAK</span>
                 </div>
-                
+
                 <div class="action-buttons">
-                    <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" class="btn-solid-gold">RESERVAR MINHA PARTICIPAÇÃO</a>
-                    <a href="https://wa.me/557581998285?text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20evento%20A%20Nova%20Moeda." target="_blank" class="btn-outline">FALAR COM A ORGANIZAÇÃO</a>
+                    <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" class="btn-solid-gold">
+                        <span>RESERVAR MINHA PARTICIPAÇÃO AGORA</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </a>
+                    <a href="/talentos" class="btn-emerald">
+                        <span>ACESSAR BANCO DE TALENTOS</span>
+                    </a>
+                    <a href="https://wa.me/557581998285?text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20evento%20A%20Nova%20Moeda." target="_blank" rel="noopener noreferrer" class="btn-outline">
+                        <span>FALAR COM A ORGANIZAÇÃO</span>
+                    </a>
                 </div>
             </div>
         </section>
-
-        <footer class="footer-section">
-            <img src="/img/logo.png" alt="A Nova Moeda Logo" class="footer-logo">
-            <p>&copy; 2026 A NOVA MOEDA. TODOS OS DIREITOS RESERVADOS.</p>
-        </footer>
 
     </main>
+
+    <!-- FOOTER UNIFICADO COM O PADRÃO TALENT HUB -->
+    <footer class="footer-section">
+        <div class="footer-inner">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <img src="/img/logo.png" alt="A Nova Moeda Logo" class="footer-logo">
+                <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">A Nova Moeda · Economia da Solidão</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">UEFS · Auditório 2 · 17 de Novembro de 2026</div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.78rem; font-weight: 600;">
+                <a href="index.html" style="color: var(--text-muted); text-decoration: none;">Início</a>
+                <a href="patrocinio.html" style="color: var(--text-muted); text-decoration: none;">Seja um Patrocinador</a>
+                <a href="/talentos" style="color: var(--brand-primary); text-decoration: none;">Banco de Talentos</a>
+                <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer" style="color: var(--text-main); text-decoration: none;">Inscrições Even3</a>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="/script.js"></script>
     <script>
-        AOS.init({ once: true, offset: 50 });
+        AOS.init({ once: true, offset: 40, duration: 700, easing: 'ease-out-cubic' });
     </script>
 </body>
 </html>

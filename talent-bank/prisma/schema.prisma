@@ -176,6 +176,7 @@ model CandidateProfile {
   educations          Education[]
   experiences         Experience[]
   skills              CandidateSkill[]
+  achievements        CandidateAchievement[]
   languages           Language[]
   resumes             Resume[]
   applications        Application[]
@@ -200,19 +201,29 @@ model Education {
   @@index([candidateId, level])
 }
 
+enum ExperienceType {
+  EMPREGO
+  ESTAGIO
+  APRENDIZAGEM
+  PROJETO_ACADEMICO
+  VOLUNTARIADO
+  FREELANCE
+}
+
 model Experience {
-  id          String           @id @default(cuid())
-  candidateId String
-  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  company     String
-  role        String
-  modality    WorkModality?
-  startDate   DateTime
-  endDate     DateTime?
-  isCurrent   Boolean          @default(false)
-  description String?          @db.Text
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  candidateId    String
+  candidate      CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  experienceType ExperienceType   @default(EMPREGO)
+  company        String
+  role           String
+  modality       WorkModality?
+  startDate      DateTime
+  endDate        DateTime?
+  isCurrent      Boolean          @default(false)
+  description    String?          @db.Text
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([candidateId])
 }
@@ -233,15 +244,41 @@ model CandidateSkill {
   skillId     String
   candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   skill       Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  level          SkillLevel     @default(INTERMEDIARIO)
-  evidenceStatus EvidenceStatus @default(DECLARADA)
-  validatedById  String?
-  validatedAt    DateTime?
-  evidences      SkillEvidence[]
-  createdAt   DateTime         @default(now())
+  level           SkillLevel      @default(INTERMEDIARIO)
+  evidenceStatus  EvidenceStatus  @default(DECLARADA)
+  validatedById   String?
+  validatedByName String?
+  validatedAt     DateTime?
+  evidences       SkillEvidence[]
+  createdAt       DateTime        @default(now())
 
   @@unique([candidateId, skillId])
   @@index([skillId])
+}
+
+enum AchievementCategory {
+  PORTFOLIO_PLANILHA
+  PORTFOLIO_RELATORIO
+  PORTFOLIO_APRESENTACAO
+  PORTFOLIO_PROJETO
+  CERTIFICACAO
+  PREMIACAO
+  CONQUISTA_ACADEMICA
+}
+
+model CandidateAchievement {
+  id              String              @id @default(cuid())
+  candidateId     String
+  candidate       CandidateProfile    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  category        AchievementCategory @default(PORTFOLIO_PROJETO)
+  title           String
+  issuerOrContext String?
+  url             String?
+  description     String?             @db.Text
+  achievedAt      DateTime?
+  createdAt       DateTime            @default(now())
+
+  @@index([candidateId])
 }
 
 enum SkillLevel {
@@ -307,33 +344,42 @@ model Resume {
 }
 
 model Job {
-  id                 String          @id @default(cuid())
-  slug               String          @unique
-  title              String
-  companyName        String
-  companyLogoUrl     String?
-  professionalArea   String
-  location           String
-  modality           WorkModality
-  contractType       ContractType
-  experienceLevel    ExperienceLevel
-  requiredEducation  EducationLevel?
-  salaryRange        String?
-  description        String          @db.Text
-  responsibilities   String          @db.Text
-  requirements       String          @db.Text
-  differentials      String?         @db.Text
-  benefits           String?         @db.Text
-  desiredSkills      String[]        @default([])
-  customQuestions    Json?
-  vacanciesCount     Int             @default(1)
-  status             JobStatus       @default(DRAFT)
-  publishedAt        DateTime?
-  applicationDeadline DateTime?
-  viewsCount         Int             @default(0)
+  id                    String          @id @default(cuid())
+  slug                  String          @unique
+  title                 String
+  companyName           String
+  companyLogoUrl        String?
+  companyIdentifier     String?
+  companyVerified       Boolean         @default(false)
+  companyVerifiedByName String?
+  companyVerifiedAt     DateTime?
+  professionalArea      String
+  location              String
+  modality              WorkModality
+  contractType          ContractType
+  experienceLevel       ExperienceLevel
+  requiredEducation     EducationLevel?
+  salaryRange           String?
+  workSchedule          String?
+  description           String          @db.Text
+  responsibilities      String          @db.Text
+  requirements          String          @db.Text
+  differentials         String?         @db.Text
+  benefits              String?         @db.Text
+  growthPossibility     String?         @db.Text
+  desiredSkills         String[]        @default([])
+  selectionStages       String[]        @default([])
+  feedbackSlaDays       Int             @default(7)
+  feedbackEstimate      String?
+  customQuestions       Json?
+  vacanciesCount        Int             @default(1)
+  status                JobStatus       @default(DRAFT)
+  publishedAt           DateTime?
+  applicationDeadline   DateTime?
+  viewsCount            Int             @default(0)
 
-  ownerId            String?
-  owner              User?           @relation("JobOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId               String?
+  owner                 User?           @relation("JobOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt

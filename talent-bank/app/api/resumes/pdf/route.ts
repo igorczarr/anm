@@ -234,7 +234,13 @@ export async function GET(req: NextRequest) {
       include: {
         educations: { orderBy: { startDate: "desc" } },
         experiences: { orderBy: { startDate: "desc" } },
-        skills: { include: { skill: true, evidences: true } },
+        skills: {
+          include: {
+            skill: true,
+            evidences: { orderBy: { createdAt: "desc" } },
+          },
+        },
+        achievements: { orderBy: { createdAt: "desc" } },
         languages: { orderBy: { createdAt: "asc" } },
         resumes: { orderBy: { updatedAt: "desc" } },
         applications: {
@@ -253,7 +259,7 @@ export async function GET(req: NextRequest) {
     professionalTitle:
       targetProfile.professionalTitle ||
       targetProfile.interestArea ||
-      "Profissional — Banco de Talentos A Nova Moeda",
+      "Profissional — Talent Hub A Nova Moeda",
     email: targetProfile.email,
     phone: targetProfile.phone || "",
     location: [targetProfile.city, targetProfile.state]
@@ -281,7 +287,9 @@ export async function GET(req: NextRequest) {
       }`,
       description: ex.description || "",
     })),
-    skills: targetProfile.skills.map((s) => s.skill.name),
+    skills: targetProfile.skills.map(
+      (s) => `${s.skill.name} (${s.level} · ${s.evidenceStatus})`
+    ),
     languages: targetProfile.languages.map((l) => ({
       language: l.language,
       proficiency: l.proficiency,

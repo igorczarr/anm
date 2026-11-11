@@ -71,15 +71,6 @@ async function AdminLoginForm({
             Entrar na Central de Comando
           </button>
         </form>
-
-        <div className="pt-3 border-t border-[#D5C5AA]/15 text-[11px] text-[#D5C5AA]/70 space-y-1">
-          <div className="font-semibold text-[#F7DECA]">
-            Perfis pré-cadastrados (Senha padrão: ANM@Arena2026!):
-          </div>
-          <div>• Direção Geral: admin@anovamoeda.com.br (ADMIN)</div>
-          <div>• Mesa de Operação: operacao@anovamoeda.com.br (OPERATOR)</div>
-          <div>• Curadoria: curadoria@anovamoeda.com.br (CURATOR)</div>
-        </div>
       </div>
     </div>
   );

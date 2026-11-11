@@ -11,10 +11,12 @@ export type ArenaSyncEventType =
   | "stage.finished"
   | "timer.updated"
   | "question.received"
+  | "question.edited"
   | "question.approved"
   | "question.selected"
   | "poll.opened"
   | "poll.vote_received"
+  | "poll.tie_break_started"
   | "poll.closed"
   | "poll.results_published"
   | "screen.message_updated"
@@ -122,16 +124,20 @@ export function computeServerTimerSnapshot(
 export const ARENA_MODE_LABELS: Record<ArenaMode, string> = {
   WAITING: "Tela de Espera",
   OPENING: "Abertura",
+  INTRODUCTION: "Introdução e Contexto (Paula)",
   TOPIC_OVERVIEW: "Pauta em Andamento",
-  SPEAKER_EXPOSITION: "Exposição do Palestrante",
+  SPEAKER_EXPOSITION: "Exposição Individual (15 min)",
   PROVOCATION: "Momento de Provocação",
   REBUTTAL: "Réplica",
-  POLL_OPEN: "Votação Aberta",
+  POLL_OPEN: "Votação da Mesa-Redonda Aberta",
   POLL_RESULTS: "Resultado da Votação",
-  SELECTED_QUESTION: "Pergunta Selecionada (Voz da Plateia)",
+  SELECTED_QUESTION: "Pergunta e Resposta (5 min)",
+  TRANSITION: "Transição e Preparação da Mesa",
+  ROUNDTABLE: "Mesa-Redonda (20 min)",
   INTERVAL: "Intervalo",
   COLLECTIVE_BUILDING: "Construção Coletiva",
   CLOSING: "Encerramento",
+  CONTINGENCY: "Contingência Técnica",
   OPERATIONAL_NOTICE: "Aviso Operacional",
 };
 
@@ -142,5 +148,5 @@ export const EVENT_STATUS_LABELS: Record<EventStatus, string> = {
   PAUSED: "Pausado",
   INTERVAL: "Em Intervalo",
   FINISHED: "Encerrado",
-  EMERGENCY: "Modo de Emergência",
+  EMERGENCY: "Contingência Técnica",
 };

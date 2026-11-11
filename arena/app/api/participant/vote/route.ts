@@ -54,11 +54,23 @@ export async function POST(req: NextRequest) {
 
     const result = await prisma.$transaction(
       async (tx) => {
-        const poll = await tx.poll.findUnique({ where: { id: pollId } });
+        const poll = await tx.poll.findUnique({
+          where: { id: pollId },
+          include: { event: { select: { requireCredential: true } } },
+        });
         if (!poll || poll.eventId !== session.eventId) {
           throw new VoteError("Votação não encontrada.", 404, "NOT_FOUND");
         }
-        if (poll.status !== "OPEN") {
+
+        if (poll.event.requireCredential && !session.credentialCode) {
+          throw new VoteError(
+            "Informe seu código de credencial de check-in (ex.: ANM-001) para registrar o voto.",
+            403,
+            "CREDENTIAL_REQUIRED"
+          );
+        }
+
+        if (poll.status !== "OPEN" && poll.status !== "TIE_BREAK") {
           throw new VoteError(
             "Votação encerrada. Confira o resultado no telão.",
             403,
@@ -73,18 +85,44 @@ export async function POST(req: NextRequest) {
           throw new VoteError("Alternativa inválida.", 400, "BAD_OPTION");
         }
 
+        // Se estiver em rodada de desempate (TIE_BREAK), valida se a opção participa do desempate
+        if (
+          poll.status === "TIE_BREAK" &&
+          poll.tieBreakOptionIds &&
+          poll.tieBreakOptionIds.length > 0 &&
+          !poll.tieBreakOptionIds.includes(option.id)
+        ) {
+          throw new VoteError(
+            "Esta questão não está na rodada rápida de desempate.",
+            400,
+            "OPTION_NOT_IN_TIE_BREAK"
+          );
+        }
+
         const existing = await tx.vote.findUnique({
           where: { pollId_sessionId: { pollId, sessionId: session.id } },
         });
 
         let changed = false;
+        let isUpdatedVote = false;
+
         if (existing) {
           if (existing.optionId !== optionId) {
+            const previousOptionId = existing.optionId;
             await tx.vote.update({
               where: { id: existing.id },
               data: { optionId, clientRequestId: clientRequestId ?? null },
             });
+            await tx.voteHistory.create({
+              data: {
+                pollId,
+                sessionId: session.id,
+                previousOptionId,
+                newOptionId: optionId,
+              },
+            });
             changed = true;
+            isUpdatedVote = true;
           }
         } else {
           await tx.vote.create({
@@ -93,6 +131,14 @@ export async function POST(req: NextRequest) {
               optionId,
               sessionId: session.id,
               clientRequestId: clientRequestId ?? null,
+            },
+          });
+          await tx.voteHistory.create({
+            data: {
+              pollId,
+              sessionId: session.id,
+              previousOptionId: null,
+              newOptionId: optionId,
             },
           });
           changed = true;
@@ -120,7 +166,7 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        return { changed, eventId: poll.eventId };
+        return { changed, isUpdatedVote, eventId: poll.eventId };
       },
       { timeout: 15000, maxWait: 15000 }
     );
@@ -129,7 +175,11 @@ export async function POST(req: NextRequest) {
       await updateLiveStateAtomic(result.eventId, "poll.vote_received", {});
     }
 
-    return NextResponse.json({ ok: true, changed: result.changed });
+    return NextResponse.json({
+      ok: true,
+      changed: result.changed,
+      updated: result.isUpdatedVote,
+    });
   } catch (error) {
     if (error instanceof VoteError) {
       return NextResponse.json(

@@ -162,7 +162,18 @@ export async function unifiedRegisterAction(formData: FormData) {
     );
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  let existingUser = null;
+  try {
+    existingUser = await prisma.user.findUnique({ where: { email } });
+  } catch (err) {
+    console.error("[unifiedRegisterAction] erro ao consultar email:", err);
+    redirect(
+      `/cadastro${
+        inviteToken ? `?convite=${inviteToken}&` : "?"
+      }error=erro_interno`
+    );
+  }
+
   if (existingUser) {
     redirect(
       `/cadastro${
@@ -193,70 +204,81 @@ export async function unifiedRegisterAction(formData: FormData) {
     resolvedCompany = companyName || invite.companyName || null;
   }
 
-  const createdUser = await prisma.user.create({
-    data: {
-      fullName,
-      email,
-      companyName: resolvedCompany,
-      passwordHash: hashPassword(password),
-      role: assignedRole,
-      status: "ACTIVE",
-      consentRecords: {
-        create: [
-          {
-            purpose: ConsentPurpose.CORE_PLATFORM,
-            termsVersion: "v1.0-2026",
-            granted: true,
-          },
-          {
-            purpose: ConsentPurpose.TALENT_POOL_OPPORTUNITIES,
-            termsVersion: "v1.0-2026",
-            granted: allowPool,
-          },
-          {
-            purpose: ConsentPurpose.COMPANY_DATA_SHARING,
-            termsVersion: "v1.0-2026",
-            granted: allowSharing,
-          },
-        ],
-      },
-    },
-  });
-
-  if (validInviteId) {
-    await prisma.recruiterInvite.update({
-      where: { id: validInviteId },
+  let createdUser;
+  try {
+    createdUser = await prisma.user.create({
       data: {
-        usedAt: new Date(),
-        usedByEmail: createdUser.email,
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        userId: createdUser.id,
-        action: "RECRUITER_REGISTERED_VIA_INVITE",
-        entityType: "RecruiterInvite",
-        entityId: validInviteId,
-        metadata: {
-          email: createdUser.email,
-          companyName: resolvedCompany,
-          role: assignedRole,
+        fullName,
+        email,
+        companyName: resolvedCompany,
+        passwordHash: hashPassword(password),
+        role: assignedRole,
+        status: "ACTIVE",
+        consentRecords: {
+          create: [
+            {
+              purpose: ConsentPurpose.CORE_PLATFORM,
+              termsVersion: "v1.0-2026",
+              granted: true,
+            },
+            {
+              purpose: ConsentPurpose.TALENT_POOL_OPPORTUNITIES,
+              termsVersion: "v1.0-2026",
+              granted: allowPool,
+            },
+            {
+              purpose: ConsentPurpose.COMPANY_DATA_SHARING,
+              termsVersion: "v1.0-2026",
+              granted: allowSharing,
+            },
+          ],
         },
+        ...(validInviteId
+          ? {}
+          : {
+              candidateProfile: {
+                create: {
+                  fullName,
+                  email,
+                  isPublicInPool: allowPool,
+                  allowCompanySharing: allowSharing,
+                  completionPercent: 20,
+                },
+              },
+            }),
       },
     });
-  } else {
-    // Cria o CandidateProfile inicial para o candidato
-    await prisma.candidateProfile.create({
-      data: {
-        userId: createdUser.id,
-        fullName: createdUser.fullName,
-        email: createdUser.email,
-        isPublicInPool: allowPool,
-        allowCompanySharing: allowSharing,
-        completionPercent: 20,
-      },
-    });
+
+    if (validInviteId) {
+      await prisma.recruiterInvite.update({
+        where: { id: validInviteId },
+        data: {
+          usedAt: new Date(),
+          usedByEmail: createdUser.email,
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userId: createdUser.id,
+          action: "RECRUITER_REGISTERED_VIA_INVITE",
+          entityType: "RecruiterInvite",
+          entityId: validInviteId,
+          metadata: {
+            email: createdUser.email,
+            companyName: resolvedCompany,
+            role: assignedRole,
+          },
+        },
+      });
+    }
+  } catch (err) {
+    console.error("[unifiedRegisterAction] erro ao criar conta:", err);
+    redirect(
+      `/cadastro${
+        inviteToken ? `?convite=${inviteToken}&` : "?"
+      }error=erro_interno`
+    );
   }
 
   const token = createSessionToken(

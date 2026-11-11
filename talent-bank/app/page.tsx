@@ -82,7 +82,7 @@ async function FeaturedOpportunities() {
         </div>
       </div>
 
-      {/* Cards de vagas estilo LinkedIn / Wellfound */}
+      {/* Cards de vagas transparentes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {jobs.map((job) => (
           <Link
@@ -91,12 +91,20 @@ async function FeaturedOpportunities() {
             className="flex flex-col justify-between border border-[#D5C5AA]/20 bg-[#0A150D] p-6 rounded-2xl hover:shadow-lg transition group"
           >
             <div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">
-                  {job.modality}
-                </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">
+                    {job.modality}
+                  </span>
+                  {job.companyVerified && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Verificada
+                    </span>
+                  )}
+                </div>
                 {job.salaryRange && (
-                  <span className="text-xs font-medium text-[#D5C5AA]/75">
+                  <span className="text-xs font-semibold text-[#14532D]">
                     {job.salaryRange}
                   </span>
                 )}
@@ -115,7 +123,11 @@ async function FeaturedOpportunities() {
                 {job.description}
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-1.5">
+              <div className="mt-3 text-[11px] text-slate-600">
+                Retorno previsto: até {job.feedbackSlaDays || 7} dias
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
                 {job.desiredSkills.slice(0, 4).map((skill) => (
                   <span
                     key={skill}
@@ -133,7 +145,7 @@ async function FeaturedOpportunities() {
                 {job.location}
               </span>
               <span className="inline-flex items-center gap-1 group-hover:translate-x-1 transition">
-                Candidatar-se <ArrowRight className="w-3.5 h-3.5" />
+                Ver etapas <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </Link>
@@ -152,20 +164,25 @@ export default function HomePage() {
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D5C5AA]/25 bg-[#030A06] text-xs font-semibold text-[#F7DECA]">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>A Nova Moeda · Edição 17 de Novembro</span>
+              <span>A Nova Moeda · Passaporte de Talentos</span>
             </div>
 
             <h1 className="font-bold text-4xl sm:text-5xl lg:text-6xl text-[#F7DECA] tracking-tight leading-[1.08]">
-              Seu próximo passo profissional começa com uma{" "}
-              <span className="font-editorial italic font-normal">conexão</span>.
+              Talentos reais. Oportunidades{" "}
+              <span className="font-editorial italic font-normal">
+                mais próximas
+              </span>
+              .
             </h1>
 
             <p className="text-base sm:text-lg text-[#D5C5AA]/85 leading-relaxed max-w-2xl">
-              Construa seu perfil em menos de 2 minutos, gere seu currículo estruturado em PDF e conecte-se direto com as empresas e recrutadores do ecossistema{" "}
+              Não apenas um currículo: uma{" "}
               <strong className="text-[#F7DECA] font-semibold">
-                A Nova Moeda
+                vitrine de potencial
               </strong>
-              .
+              . Construa seu Passaporte de Talentos com competências, projetos e
+              evidências práticas para se conectar diretamente com empresas de
+              Feira de Santana e região.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -173,7 +190,8 @@ export default function HomePage() {
                 href="/cadastro"
                 className="px-6 py-3.5 rounded-xl bg-[#D5C5AA] text-[#030A06] font-semibold text-sm hover:opacity-95 transition flex items-center justify-center gap-2 shadow-sm"
               >
-                <span>Criar meu perfil</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Criar meu Passaporte de Talentos</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -181,7 +199,7 @@ export default function HomePage() {
                 className="px-6 py-3.5 rounded-xl border border-[#D5C5AA]/35 bg-[#030A06] text-[#F7DECA] font-semibold text-sm hover:opacity-90 transition flex items-center justify-center gap-2"
               >
                 <Briefcase className="w-4 h-4" />
-                <span>Explorar vagas</span>
+                <span>Explorar oportunidades</span>
               </Link>
               <Link
                 href="/entrar"
@@ -189,6 +207,88 @@ export default function HomePage() {
               >
                 Já tenho conta →
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* O Diferencial: Passaporte de Talentos por Evidências */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border border-emerald-200 bg-[#ECFDF5]/60 rounded-2xl p-6 sm:p-10 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-[#14532D]">
+                <ShieldCheck className="w-4 h-4" />
+                Diferencial · Passaporte de Talentos
+              </span>
+              <h2 className="mt-1 font-bold text-2xl sm:text-3xl text-slate-900">
+                Mostre o que você sabe fazer, antes mesmo do primeiro emprego
+              </h2>
+              <p className="mt-2 text-sm text-slate-700 leading-relaxed">
+                No Talent Hub, cada competência evolui conforme você apresenta
+                provas práticas — ajudando empresas a enxergar capacidade real em
+                vez de analisar centenas de currículos genéricos.
+              </p>
+            </div>
+            <Link
+              href="/passaporte"
+              className="px-4 py-2.5 bg-[#14532D] text-white text-xs font-semibold uppercase tracking-[0.16em] rounded-xl hover:bg-[#166534] transition self-start md:self-auto shrink-0"
+            >
+              Acessar meu Passaporte →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-2">
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-300">
+                1. Declarada
+              </span>
+              <h3 className="font-bold text-sm text-slate-900">
+                Informada pelo candidato
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Você registra suas habilidades técnicas e comportamentais com seu
+                nível atual (Básico, Intermediário ou Avançado).
+              </p>
+            </div>
+
+            <div className="bg-white border border-sky-200 rounded-xl p-5 space-y-2">
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-900 border border-sky-200">
+                2. Documentada
+              </span>
+              <h3 className="font-bold text-sm text-slate-900">
+                Acompanhada de evidência
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Ao anexar uma planilha, relatório, certificado ou projeto, sua
+                competência sobe automaticamente para Documentada.
+              </p>
+            </div>
+
+            <div className="bg-white border border-amber-200 rounded-xl p-5 space-y-2">
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                3. Demonstrada
+              </span>
+              <h3 className="font-bold text-sm text-slate-900">
+                Comprovada em tarefa prática
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Resolvendo desafios práticos na plataforma, você demonstra sua
+                capacidade de execução em cenários reais de trabalho.
+              </p>
+            </div>
+
+            <div className="bg-white border border-emerald-200 rounded-xl p-5 space-y-2">
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-900 border border-emerald-300">
+                4. Validada
+              </span>
+              <h3 className="font-bold text-sm text-slate-900">
+                Reconhecida por avaliador
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Avaliadores identificados, professores ou empresas parceiras
+                validam oficialmente sua competência no Passaporte.
+              </p>
             </div>
           </div>
         </div>

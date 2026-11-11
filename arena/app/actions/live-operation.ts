@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminPermission, logAdminAction } from "@/lib/admin-auth";
+import {
+  requireAdminPermission,
+  requireAudiovisualOrOperator,
+  logAdminAction,
+} from "@/lib/admin-auth";
 import {
   ensureLiveState,
   getPrimaryEvent,
@@ -23,6 +27,8 @@ async function transitionToStep({
   operatorName,
   prevStepStatus = "COMPLETED",
   autoStartTimer = true,
+  allowException = false,
+  justification,
 }: {
   eventId: string;
   targetStepId: string;
@@ -30,18 +36,10 @@ async function transitionToStep({
   operatorName: string;
   prevStepStatus?: "COMPLETED" | "SKIPPED" | "PENDING";
   autoStartTimer?: boolean;
+  allowException?: boolean;
+  justification?: string;
 }) {
   const liveState = await ensureLiveState(eventId);
-
-  if (liveState.activeStepId) {
-    await closeActiveTimerSession({
-      eventId,
-      liveState,
-      stepStatus: prevStepStatus,
-      operatorId,
-      operatorName,
-    });
-  }
 
   const targetStep = await prisma.scheduleStep.findUnique({
     where: { id: targetStepId },
@@ -56,49 +54,70 @@ async function transitionToStep({
     throw new Error("Etapa de destino não encontrada");
   }
 
-  // Regra §5.5: Captação de perguntas abre quando a pauta começa (Exposição, Provocação, Réplica, Votação)
-  // e fecha automaticamente quando começa "Voz da Plateia" (AUDIENCE_VOICE) ou fora de pauta
-  const shouldOpenQuestions = Boolean(
-    targetStep.topicId &&
-      ["EXPOSITION", "PROVOCATION", "REBUTTAL", "POLL", "COLLECTIVE_CONTRIBUTION"].includes(
-        targetStep.stepType
-      )
-  );
+  // Regra Central (§1 e §2): Uma etapa concluída não pode ser reaberta pelo operador comum;
+  // exige ação administrativa com justificativa registrada.
+  if (
+    targetStep.status === "COMPLETED" &&
+    liveState.activeStepId !== targetStep.id &&
+    !allowException
+  ) {
+    throw new Error(
+      "Esta etapa já foi formalmente concluída. Para reabri-la excepcionalmente, informe uma justificativa administrativa."
+    );
+  }
 
-  let activePollId = targetStep.topic?.poll?.id ?? null;
-
-  // Se a etapa for POLL (Votação), garante que nenhuma outra votação esteja aberta e abre a votação da pauta atual
-  if (targetStep.stepType === "POLL" && activePollId) {
-    await prisma.poll.updateMany({
-      where: {
-        eventId,
-        status: "OPEN",
-        id: { not: activePollId },
-      },
-      data: {
-        status: "CLOSED",
-        closedAt: new Date(),
-      },
+  // Regra Central (§4 e §5): A Mesa-Redonda não pode ser iniciada enquanto a votação estiver aberta
+  // ou sem questão vencedora definida.
+  if (targetStep.stepType === "ROUNDTABLE" && !allowException) {
+    const poll = await prisma.poll.findFirst({
+      where: { eventId },
+      orderBy: { number: "asc" },
     });
+    if (poll && (poll.status === "OPEN" || poll.status === "TIE_BREAK")) {
+      throw new Error(
+        "A Mesa-Redonda não pode ser iniciada enquanto a votação do público ainda estiver aberta. Encerre a votação e publique o resultado antes de iniciar a Mesa-Redonda."
+      );
+    }
+  }
 
-    await prisma.poll.update({
-      where: { id: activePollId },
-      data: {
-        status: "OPEN",
-        openedAt: new Date(),
-      },
+  if (liveState.activeStepId && liveState.activeStepId !== targetStep.id) {
+    await closeActiveTimerSession({
+      eventId,
+      liveState,
+      stepStatus: prevStepStatus,
+      operatorId,
+      operatorName,
     });
   }
 
-  // Seleciona automaticamente a pergunta principal da pauta quando entra em Voz da Plateia
+  // Regra (§2 e §3): O envio de perguntas fica disponível APENAS durante os 15 minutos de Exposição da pauta ativa,
+  // sendo encerrado automaticamente ao iniciar os 5 minutos de Pergunta e Resposta.
+  const shouldOpenQuestions = Boolean(
+    targetStep.topicId && targetStep.stepType === "EXPOSITION"
+  );
+
+  const officialPoll = await prisma.poll.findFirst({
+    where: { eventId },
+    orderBy: { number: "asc" },
+  });
+  const activePollId = officialPoll?.id ?? liveState.activePollId ?? null;
+
+  // Ao entrar em Pergunta e Resposta (AUDIENCE_VOICE), projeta automaticamente a pergunta principal
+  // selecionada pela moderação ou a pergunta de reserva da mediação caso nenhuma pergunta do público tenha sido selecionada.
   let selectedQuestionId = liveState.selectedQuestionId;
   if (targetStep.topicId) {
-    if (targetStep.stepType === "AUDIENCE_VOICE" && targetStep.topic?.primaryQuestionId) {
-      selectedQuestionId = targetStep.topic.primaryQuestionId;
-      await prisma.question.update({
-        where: { id: selectedQuestionId },
-        data: { status: "DISPLAYED", displayedAt: new Date() },
-      });
+    if (targetStep.stepType === "AUDIENCE_VOICE") {
+      const candidateId =
+        targetStep.topic?.primaryQuestionId ||
+        targetStep.topic?.reserveQuestionId ||
+        null;
+      if (candidateId) {
+        selectedQuestionId = candidateId;
+        await prisma.question.update({
+          where: { id: candidateId },
+          data: { status: "DISPLAYED", displayedAt: new Date() },
+        });
+      }
     } else if (liveState.activeTopicId !== targetStep.topicId) {
       selectedQuestionId = targetStep.topic?.primaryQuestionId ?? null;
     }
@@ -119,8 +138,8 @@ async function transitionToStep({
     targetStep.stepType === "INTERVAL"
       ? "INTERVAL"
       : autoStartTimer
-      ? "LIVE"
-      : "PAUSED";
+        ? "LIVE"
+        : "PAUSED";
 
   const topicChanged = liveState.activeTopicId !== targetStep.topicId;
 
@@ -145,6 +164,18 @@ async function transitionToStep({
     }
   );
 
+  if (justification) {
+    await logAdminAction({
+      eventId,
+      userId: operatorId,
+      action: "STAGE_TRANSITION_EXCEPTION",
+      entityType: "ScheduleStep",
+      entityId: targetStep.id,
+      justification,
+      metadata: { code: targetStep.code, title: targetStep.title },
+    });
+  }
+
   return targetStep;
 }
 
@@ -168,10 +199,12 @@ export async function startEventAction() {
     throw new Error("Nenhuma etapa operacional cadastrada");
   }
 
+  // Bloqueia edições comuns no cronograma assim que o evento entra AO VIVO (§2 e §7)
   await prisma.event.update({
     where: { id: event.id },
     data: {
       status: "LIVE",
+      scheduleLocked: true,
       actualStartAt: event.actualStartAt ?? new Date(),
     },
   });
@@ -183,6 +216,7 @@ export async function startEventAction() {
     operatorName: admin.fullName,
     prevStepStatus: "PENDING",
     autoStartTimer: true,
+    allowException: true,
   });
 
   await logAdminAction({
@@ -196,6 +230,7 @@ export async function startEventAction() {
 
   revalidatePath("/admin");
   revalidatePath("/admin/operacao");
+  revalidatePath("/admin/cronograma");
 }
 
 export async function pauseTimerAction() {
@@ -204,7 +239,10 @@ export async function pauseTimerAction() {
   if (!event) throw new Error("Evento não encontrado");
 
   const liveState = await ensureLiveState(event.id);
-  if (liveState.timerStatus !== "RUNNING" && liveState.timerStatus !== "EXPIRED") {
+  if (
+    liveState.timerStatus !== "RUNNING" &&
+    liveState.timerStatus !== "EXPIRED"
+  ) {
     return;
   }
 
@@ -267,7 +305,6 @@ export async function resumeTimerAction() {
   const liveState = await ensureLiveState(event.id);
   const now = new Date();
 
-  // Se o cronômetro estava IDLE (nunca iniciado para a etapa atual), inicia do zero
   if (liveState.timerStatus === "IDLE" || !liveState.timerStartedAt) {
     if (liveState.activeStepId) {
       await transitionToStep({
@@ -277,6 +314,7 @@ export async function resumeTimerAction() {
         operatorName: admin.fullName,
         prevStepStatus: "PENDING",
         autoStartTimer: true,
+        allowException: true,
       });
       revalidatePath("/admin");
       revalidatePath("/admin/operacao");
@@ -350,7 +388,7 @@ export async function resumeTimerAction() {
   revalidatePath("/admin/operacao");
 }
 
-export async function resetTimerAction() {
+export async function resetTimerAction(justification?: string) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
@@ -358,7 +396,7 @@ export async function resetTimerAction() {
   const liveState = await ensureLiveState(event.id);
   const now = new Date();
 
-  let durationMs = liveState.timerDurationMs || 480000;
+  let durationMs = liveState.timerDurationMs || 300000;
   if (liveState.activeStepId) {
     const step = await prisma.scheduleStep.findUnique({
       where: { id: liveState.activeStepId },
@@ -384,6 +422,7 @@ export async function resetTimerAction() {
     action: "TIMER_RESET",
     entityType: "LiveState",
     entityId: liveState.id,
+    justification: justification || "Reinício operacional do cronômetro da etapa",
     metadata: { durationSec: Math.round(durationMs / 1000) },
   });
 
@@ -391,7 +430,10 @@ export async function resetTimerAction() {
   revalidatePath("/admin/operacao");
 }
 
-export async function adjustTimerAction(deltaSec: number) {
+export async function adjustTimerAction(
+  deltaSec: number,
+  justification?: string
+) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
@@ -422,6 +464,7 @@ export async function adjustTimerAction(deltaSec: number) {
         at: new Date().toISOString(),
         deltaSec,
         operatorName: admin.fullName,
+        justification,
       });
 
       await prisma.timerSession.update({
@@ -453,7 +496,11 @@ export async function adjustTimerAction(deltaSec: number) {
     action: deltaSec >= 0 ? "TIMER_TIME_ADDED" : "TIMER_TIME_REDUCED",
     entityType: "LiveState",
     entityId: liveState.id,
-    metadata: { deltaSec, totalAdjustmentSec: Math.round(newAdjustmentMs / 1000) },
+    justification: justification || `Ajuste manual de ${deltaSec}s`,
+    metadata: {
+      deltaSec,
+      totalAdjustmentSec: Math.round(newAdjustmentMs / 1000),
+    },
   });
 
   revalidatePath("/admin");
@@ -486,6 +533,7 @@ export async function nextStepAction() {
     operatorName: admin.fullName,
     prevStepStatus: "COMPLETED",
     autoStartTimer: true,
+    allowException: true,
   });
 
   await logAdminAction({
@@ -501,7 +549,56 @@ export async function nextStepAction() {
   revalidatePath("/admin/operacao");
 }
 
-export async function previousStepAction() {
+/**
+ * Ação explícita para Pautas 1 a 5: Encerrar Exposição (15m) e Iniciar Pergunta e Resposta (5m)
+ */
+export async function startTopicQAPhaseAction() {
+  const admin = await requireAdminPermission("canOperateTimer");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  const liveState = await ensureLiveState(event.id);
+  if (!liveState.activeTopicId) {
+    throw new Error("Nenhuma pauta ativa no momento.");
+  }
+
+  const qaStep = await prisma.scheduleStep.findFirst({
+    where: {
+      eventId: event.id,
+      topicId: liveState.activeTopicId,
+      stepType: "AUDIENCE_VOICE",
+      isMacroBlock: false,
+    },
+  });
+
+  if (!qaStep) {
+    throw new Error("Fase de Pergunta e Resposta não encontrada para esta pauta.");
+  }
+
+  const target = await transitionToStep({
+    eventId: event.id,
+    targetStepId: qaStep.id,
+    operatorId: admin.id,
+    operatorName: admin.fullName,
+    prevStepStatus: "COMPLETED",
+    autoStartTimer: true,
+    allowException: true,
+  });
+
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: "TOPIC_QA_PHASE_STARTED",
+    entityType: "ScheduleStep",
+    entityId: target.id,
+    metadata: { code: target.code, title: target.title },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/operacao");
+}
+
+export async function previousStepAction(justification?: string) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
@@ -513,8 +610,7 @@ export async function previousStepAction() {
   });
 
   const currentIdx = allSteps.findIndex((s) => s.id === liveState.activeStepId);
-  const prevStep =
-    currentIdx > 0 ? allSteps[currentIdx - 1] : allSteps[0];
+  const prevStep = currentIdx > 0 ? allSteps[currentIdx - 1] : allSteps[0];
 
   if (!prevStep) return;
 
@@ -525,6 +621,9 @@ export async function previousStepAction() {
     operatorName: admin.fullName,
     prevStepStatus: "PENDING",
     autoStartTimer: true,
+    allowException: true,
+    justification:
+      justification || "Retorno operacional autorizado à etapa anterior",
   });
 
   await logAdminAction({
@@ -533,6 +632,8 @@ export async function previousStepAction() {
     action: "STAGE_PREVIOUS",
     entityType: "ScheduleStep",
     entityId: target.id,
+    justification:
+      justification || "Retorno operacional autorizado à etapa anterior",
     metadata: { code: target.code, title: target.title },
   });
 
@@ -540,7 +641,7 @@ export async function previousStepAction() {
   revalidatePath("/admin/operacao");
 }
 
-export async function skipStepAction() {
+export async function skipStepAction(justification?: string) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
@@ -566,6 +667,8 @@ export async function skipStepAction() {
     operatorName: admin.fullName,
     prevStepStatus: "SKIPPED",
     autoStartTimer: true,
+    allowException: true,
+    justification: justification || "Etapa pulada pelo operador de palco",
   });
 
   await logAdminAction({
@@ -574,6 +677,7 @@ export async function skipStepAction() {
     action: "STAGE_SKIPPED",
     entityType: "ScheduleStep",
     entityId: target.id,
+    justification: justification || "Etapa pulada pelo operador de palco",
     metadata: { skippedTo: target.code },
   });
 
@@ -581,10 +685,23 @@ export async function skipStepAction() {
   revalidatePath("/admin/operacao");
 }
 
-export async function jumpToStepAction(stepId: string) {
+export async function jumpToStepAction(stepId: string, justification?: string) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
+
+  const stepToActivate = await prisma.scheduleStep.findUnique({
+    where: { id: stepId },
+  });
+  if (!stepToActivate) throw new Error("Etapa não encontrada");
+
+  // Se a etapa já estava COMPLETED, exige justificativa para reabrir (§2 e §7)
+  const isReopeningCompleted = stepToActivate.status === "COMPLETED";
+  if (isReopeningCompleted && !justification?.trim()) {
+    throw new Error(
+      "Para reabrir uma etapa já concluída, é obrigatório registrar uma justificativa."
+    );
+  }
 
   const target = await transitionToStep({
     eventId: event.id,
@@ -593,14 +710,19 @@ export async function jumpToStepAction(stepId: string) {
     operatorName: admin.fullName,
     prevStepStatus: "COMPLETED",
     autoStartTimer: true,
+    allowException: true,
+    justification:
+      justification ||
+      (isReopeningCompleted ? "Reabertura excepcional autorizada" : undefined),
   });
 
   await logAdminAction({
     eventId: event.id,
     userId: admin.id,
-    action: "STAGE_JUMPED",
+    action: isReopeningCompleted ? "STAGE_REOPENED_EXCEPTION" : "STAGE_JUMPED",
     entityType: "ScheduleStep",
     entityId: target.id,
+    justification: justification || null,
     metadata: { code: target.code, title: target.title },
   });
 
@@ -626,12 +748,13 @@ export async function finishCurrentStepAction() {
   await updateLiveStateAtomic(event.id, "stage.finished", {
     timerStatus: "FINISHED",
     timerPausedAt: new Date(),
+    questionsOpen: false,
   });
 
   await logAdminAction({
     eventId: event.id,
     userId: admin.id,
-    action: "STAGE_FINISHED_EARLY",
+    action: "STAGE_FINISHED_FORMALLY",
     entityType: "ScheduleStep",
     entityId: liveState.activeStepId,
   });
@@ -641,13 +764,13 @@ export async function finishCurrentStepAction() {
 }
 
 export async function setArenaModeManualAction(arenaMode: ArenaMode) {
-  const admin = await requireAdminPermission("canOperateTimer");
+  const admin = await requireAudiovisualOrOperator();
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
   await updateLiveStateAtomic(event.id, "screen.message_updated", {
     arenaMode,
-    emergencyActive: false,
+    emergencyActive: arenaMode === "CONTINGENCY",
   });
 
   await logAdminAction({
@@ -693,12 +816,6 @@ export async function openCurrentTopicPollAction() {
     ? await prisma.poll.findUnique({ where: { id: liveState.activePollId } })
     : null;
 
-  if (!poll && liveState.activeTopicId) {
-    poll = await prisma.poll.findUnique({
-      where: { topicId: liveState.activeTopicId },
-    });
-  }
-
   if (!poll) {
     poll = await prisma.poll.findFirst({
       where: { eventId: event.id },
@@ -706,38 +823,32 @@ export async function openCurrentTopicPollAction() {
     });
   }
 
-  if (!poll) throw new Error("Nenhuma votação encontrada");
-
-  // Regra §6.2: Impedir que duas votações sejam abertas simultaneamente
-  await prisma.poll.updateMany({
-    where: {
-      eventId: event.id,
-      status: "OPEN",
-      id: { not: poll.id },
-    },
-    data: {
-      status: "CLOSED",
-      closedAt: new Date(),
-    },
-  });
+  if (!poll) throw new Error("Votação da Mesa-Redonda não encontrada");
 
   await prisma.poll.update({
     where: { id: poll.id },
     data: {
       status: "OPEN",
+      isTieBreak: false,
       openedAt: new Date(),
     },
   });
 
+  // Mantém o modo da Arena na exposição da Pauta 5 se estiver em andamento, ou muda para POLL_OPEN se estiver em transição
+  const nextArenaMode =
+    liveState.arenaMode === "SPEAKER_EXPOSITION"
+      ? "SPEAKER_EXPOSITION"
+      : "POLL_OPEN";
+
   await updateLiveStateAtomic(event.id, "poll.opened", {
     activePollId: poll.id,
-    arenaMode: "POLL_OPEN",
+    arenaMode: nextArenaMode,
   });
 
   await logAdminAction({
     eventId: event.id,
     userId: admin.id,
-    action: "POLL_OPENED",
+    action: "ROUNDTABLE_POLL_OPENED",
     entityType: "Poll",
     entityId: poll.id,
     metadata: { number: poll.number },
@@ -754,18 +865,45 @@ export async function closeActivePollAction() {
   if (!event) throw new Error("Evento não encontrado");
 
   const liveState = await ensureLiveState(event.id);
-  if (!liveState.activePollId) return;
+  const pollId = liveState.activePollId;
+  const pollRecord = pollId
+    ? await prisma.poll.findUnique({
+        where: { id: pollId },
+        include: { options: { orderBy: { optionOrder: "asc" } } },
+      })
+    : await prisma.poll.findFirst({
+        where: { eventId: event.id },
+        include: { options: { orderBy: { optionOrder: "asc" } } },
+      });
 
-  const poll = await prisma.poll.update({
-    where: { id: liveState.activePollId },
+  if (!pollRecord) return;
+
+  // Apura automaticamente a questão vencedora caso não haja empate no 1º lugar
+  const sorted = [...pollRecord.options].sort(
+    (a, b) => b.votesCount - a.votesCount
+  );
+  const topVotes = sorted[0]?.votesCount ?? 0;
+  const tiedTop = sorted.filter((o) => o.votesCount === topVotes && topVotes > 0);
+
+  const autoWinner = tiedTop.length === 1 ? tiedTop[0] : sorted[0] ?? null;
+
+  const updatedPoll = await prisma.poll.update({
+    where: { id: pollRecord.id },
     data: {
       status: "RESULTS_PUBLISHED",
       closedAt: new Date(),
       resultsPublishedAt: new Date(),
+      closedByUserId: admin.id,
+      winningOptionId:
+        pollRecord.winningOptionId ?? (autoWinner ? autoWinner.id : null),
+      winningQuestionText:
+        pollRecord.winningQuestionText ??
+        (autoWinner ? autoWinner.label : null),
     },
   });
 
   await updateLiveStateAtomic(event.id, "poll.results_published", {
+    activePollId: updatedPoll.id,
     arenaMode: "POLL_RESULTS",
   });
 
@@ -774,8 +912,12 @@ export async function closeActivePollAction() {
     userId: admin.id,
     action: "POLL_CLOSED_AND_PUBLISHED",
     entityType: "Poll",
-    entityId: poll.id,
-    metadata: { number: poll.number, totalVotes: poll.totalVotes },
+    entityId: updatedPoll.id,
+    metadata: {
+      number: updatedPoll.number,
+      totalVotes: updatedPoll.totalVotes,
+      winningOptionId: updatedPoll.winningOptionId,
+    },
   });
 
   revalidatePath("/admin");
@@ -840,7 +982,7 @@ export async function clearOperationalNoticeAction() {
     data: { isActive: false },
   });
 
-  let fallbackMode: ArenaMode = "TOPIC_OVERVIEW";
+  let fallbackMode: ArenaMode = "SPEAKER_EXPOSITION";
   if (liveState.activeStepId) {
     const step = await prisma.scheduleStep.findUnique({
       where: { id: liveState.activeStepId },
@@ -868,24 +1010,34 @@ export async function toggleEmergencyModeAction(
   active: boolean,
   customMessage?: string
 ) {
-  const admin = await requireAdminPermission("canOperateTimer");
+  const admin = await requireAudiovisualOrOperator();
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
+  const liveState = await ensureLiveState(event.id);
+
+  let fallbackMode: ArenaMode = "SPEAKER_EXPOSITION";
+  if (liveState.activeStepId) {
+    const step = await prisma.scheduleStep.findUnique({
+      where: { id: liveState.activeStepId },
+    });
+    if (step) fallbackMode = step.arenaMode;
+  }
+
   const defaultMsg =
-    "Estamos realizando um ajuste técnico. A Arena continuará em instantes.";
+    "Estamos realizando um ajuste técnico. A programação continuará em instantes.";
 
   await updateLiveStateAtomic(event.id, "screen.message_updated", {
     emergencyActive: active,
     emergencyMessage: active ? customMessage || defaultMsg : null,
     status: active ? "EMERGENCY" : "LIVE",
-    arenaMode: active ? "OPERATIONAL_NOTICE" : "TOPIC_OVERVIEW",
+    arenaMode: active ? "CONTINGENCY" : fallbackMode,
   });
 
   await logAdminAction({
     eventId: event.id,
     userId: admin.id,
-    action: active ? "EMERGENCY_MODE_ACTIVATED" : "EMERGENCY_MODE_DEACTIVATED",
+    action: active ? "CONTINGENCY_MODE_ACTIVATED" : "CONTINGENCY_MODE_DEACTIVATED",
     entityType: "LiveState",
   });
 

@@ -12,6 +12,7 @@ import {
   moderateQuestionStatusAction,
   removeQuestionFromArenaAction,
   selectTopicQuestionSlotAction,
+  upsertAndActivateMediationReserveQuestionAction,
 } from "@/app/actions/curation-and-polls";
 import { toggleQuestionsOpenAction } from "@/app/actions/live-operation";
 import {
@@ -28,6 +29,8 @@ import {
   Sparkles,
   Star,
   XCircle,
+  ShieldCheck,
+  Save,
 } from "lucide-react";
 
 interface CurationQuestion {
@@ -37,11 +40,13 @@ interface CurationQuestion {
   status: QuestionStatusKey;
   isPrimary: boolean;
   isReserve: boolean;
+  isMediationReserve: boolean;
+  editCount: number;
   createdAt: string;
   displayedAt: string | null;
   answeredAt: string | null;
   topic: { id: string; number: number; title: string };
-  session: { anonymousCode: string };
+  session: { anonymousCode: string; credentialCode?: string | null } | null;
   moderatedBy: { fullName: string } | null;
   history: Array<{
     id: string;
@@ -71,6 +76,9 @@ export function CurationDesk() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [sortOrder, setSortOrder] = useState<"DESC" | "ASC">("DESC");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [editingReserveTopicId, setEditingReserveTopicId] = useState<
+    string | null
+  >(null);
 
   const fetchCurationData = useCallback(async () => {
     try {
@@ -109,7 +117,9 @@ export function CurationDesk() {
     (q) => q.topicId === focusedTopicId && q.isPrimary
   );
   const reserveQuestion = questions.find(
-    (q) => q.topicId === focusedTopicId && q.isReserve
+    (q) =>
+      q.topicId === focusedTopicId &&
+      (q.isReserve || q.isMediationReserve)
   );
 
   const filteredQuestions = questions
@@ -120,12 +130,12 @@ export function CurationDesk() {
       if (statusFilter !== "ALL" && q.status !== statusFilter) {
         return false;
       }
+      const codeStr =
+        q.session?.credentialCode || q.session?.anonymousCode || "Mediação";
       if (
         searchQuery.trim() &&
         !q.text.toLowerCase().includes(searchQuery.trim().toLowerCase()) &&
-        !q.session.anonymousCode
-          .toLowerCase()
-          .includes(searchQuery.trim().toLowerCase())
+        !codeStr.toLowerCase().includes(searchQuery.trim().toLowerCase())
       ) {
         return false;
       }
@@ -138,12 +148,12 @@ export function CurationDesk() {
     });
 
   const unanalyzedCount = questions.filter(
-    (q) => q.status === "RECEIVED"
+    (q) => !q.isMediationReserve && q.status === "RECEIVED"
   ).length;
 
   return (
     <div className="space-y-6">
-      {/* Barra de Status de Captação e Indicador para o Mediador (§5.4 e §5.5) */}
+      {/* Barra de Status de Captação e Indicador para o Moderador */}
       <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-5 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <span
@@ -154,16 +164,19 @@ export function CurationDesk() {
             }`}
           >
             {questionsOpen
-              ? "Captação de Perguntas ABERTA"
-              : "Captação de Perguntas ENCERRADA"}
+              ? "Envio de Perguntas ABERTO (Exposição 15 min)"
+              : "Envio de Perguntas ENCERRADO"}
           </span>
 
-          <span className="px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-bold">
+          <span className="px-3 py-1 rounded-full bg-sky-900/50 text-sky-200 border border-sky-500/30 font-bold">
             Não analisadas: {unanalyzedCount}
           </span>
 
           <span className="text-[#D5C5AA]/80">
-            Total na fila: <strong>{questions.length}</strong> perguntas
+            Regra oficial:{" "}
+            <strong className="text-[#F7DECA]">
+              1 pergunta selecionada por pauta (5 min P&amp;R)
+            </strong>
           </span>
         </div>
 
@@ -197,20 +210,24 @@ export function CurationDesk() {
         </div>
       </div>
 
-      {/* Painel de Seleção para o Mediador: Pergunta Principal & Reserva da Pauta (§5.4 e §5.5) */}
+      {/* Painel de Seleção para o Mediador: Pergunta Selecionada (Plateia) & Pergunta de Reserva da Mediação */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Pergunta Principal */}
+        {/* Pergunta Selecionada para os 5 Minutos de Pergunta e Resposta */}
         <div className="border-2 border-[#14532D] bg-[#0A150D]/90 p-5 rounded-2xl space-y-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-[#14532D] uppercase tracking-wider flex items-center gap-1.5">
               <Star className="w-4 h-4" />
-              Pergunta Principal ·{" "}
-              {focusedTopic ? `Pauta ${focusedTopic.number}` : "Pauta Atual"}
+              Pergunta Selecionada (5 min P&amp;R) ·{" "}
+              {focusedTopic
+                ? `Pauta ${focusedTopic.number} (${focusedTopic.mainSpeaker.name})`
+                : "Pauta Atual"}
             </span>
             {primaryQuestion ? (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/30 text-emerald-300 font-bold text-[11px] flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                Pronta para o Mediador
+                {primaryQuestion.isMediationReserve
+                  ? "Pergunta da Mediação"
+                  : "Pergunta da Plateia"}
               </span>
             ) : (
               <span className="text-[#D5C5AA]/70">Nenhuma selecionada</span>
@@ -223,10 +240,22 @@ export function CurationDesk() {
                 &ldquo;{primaryQuestion.text}&rdquo;
               </p>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[#D5C5AA]/75">
-                  Status:{" "}
-                  <strong>{QUESTION_STATUS_LABELS[primaryQuestion.status]}</strong>
-                </span>
+                <div className="space-x-3 text-[#D5C5AA]/75">
+                  <span>
+                    Status:{" "}
+                    <strong>
+                      {QUESTION_STATUS_LABELS[primaryQuestion.status]}
+                    </strong>
+                  </span>
+                  {primaryQuestion.moderatedBy && (
+                    <span>
+                      Selecionada por:{" "}
+                      <strong className="text-[#F7DECA]">
+                        {primaryQuestion.moderatedBy.fullName}
+                      </strong>
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -239,7 +268,7 @@ export function CurationDesk() {
                     className="px-3.5 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
                   >
                     <MonitorPlay className="w-3.5 h-3.5" />
-                    <span>Exibir no Telão ARENA</span>
+                    <span>Exibir na ARENA</span>
                   </button>
                   <button
                     type="button"
@@ -249,7 +278,7 @@ export function CurationDesk() {
                         moderateQuestionStatusAction(
                           primaryQuestion.id,
                           "ANSWERED",
-                          "Respondida no debate"
+                          "Respondida no momento de Pergunta e Resposta"
                         )
                       )
                     }
@@ -262,39 +291,93 @@ export function CurationDesk() {
             </div>
           ) : (
             <p className="text-xs text-[#D5C5AA]/75">
-              Aprove uma pergunta da fila abaixo e clique em{" "}
-              <strong>&ldquo;Definir Principal&rdquo;</strong> para encaminhá-la
-              ao mediador.
+              Aprove uma pergunta da plateia abaixo e clique em{" "}
+              <strong>&ldquo;Selecionar para Resposta&rdquo;</strong>, ou acione
+              a <strong>Pergunta de Reserva da Mediação</strong> ao lado.
             </p>
           )}
         </div>
 
-        {/* Pergunta Reserva */}
+        {/* Pergunta de Reserva da Mediação (§7 — Tratamento quando nenhuma pergunta da plateia for aprovada) */}
         <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-[#F7DECA] uppercase tracking-wider flex items-center gap-1.5">
-              <BookmarkCheck className="w-4 h-4 text-[#14532D]" />
-              Pergunta Reserva ·{" "}
+              <ShieldCheck className="w-4 h-4 text-[#14532D]" />
+              Pergunta de Reserva da Mediação ·{" "}
               {focusedTopic ? `Pauta ${focusedTopic.number}` : "Pauta Atual"}
             </span>
-            {reserveQuestion ? (
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-950/30 text-amber-300 font-bold text-[11px]">
-                Reserva Disponível
-              </span>
-            ) : (
-              <span className="text-[#D5C5AA]/70">Nenhuma selecionada</span>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                setEditingReserveTopicId(
+                  editingReserveTopicId === focusedTopicId
+                    ? null
+                    : focusedTopicId
+                )
+              }
+              className="text-[11px] font-semibold text-[#D5C5AA] underline cursor-pointer"
+            >
+              {editingReserveTopicId === focusedTopicId
+                ? "Fechar Edição"
+                : "Editar / Cadastrar Reserva"}
+            </button>
           </div>
 
-          {reserveQuestion ? (
+          {editingReserveTopicId === focusedTopicId && focusedTopicId ? (
+            <form
+              action={(fd) =>
+                runCurationAction(async () => {
+                  await upsertAndActivateMediationReserveQuestionAction(fd);
+                  setEditingReserveTopicId(null);
+                })
+              }
+              className="space-y-2.5 text-xs bg-[#030A06] p-3.5 rounded-xl border border-[#D5C5AA]/25"
+            >
+              <input type="hidden" name="topicId" value={focusedTopicId} />
+              <label className="block font-semibold text-[#D5C5AA]">
+                Texto da Pergunta da Mediação (Nunca atribuída falsamente à
+                plateia):
+              </label>
+              <textarea
+                name="text"
+                rows={2}
+                required
+                defaultValue={reserveQuestion?.text || ""}
+                className="w-full px-3 py-2 border border-[#D5C5AA]/30 bg-[#0A150D] text-[#F7DECA] rounded-lg"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <label className="inline-flex items-center gap-1.5 text-[#D5C5AA] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="activateNow"
+                    value="true"
+                    defaultChecked
+                  />
+                  <span>Acionar imediatamente como Pergunta Selecionada</span>
+                </label>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-3.5 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold rounded-lg flex items-center gap-1 cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Salvar Reserva</span>
+                </button>
+              </div>
+            </form>
+          ) : reserveQuestion ? (
             <div className="space-y-3">
               <p className="text-sm font-semibold text-[#F7DECA] bg-[#030A06] p-3.5 rounded-xl border border-[#D5C5AA]/20">
                 &ldquo;{reserveQuestion.text}&rdquo;
               </p>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="text-[#D5C5AA]/75">
-                  Status:{" "}
-                  <strong>{QUESTION_STATUS_LABELS[reserveQuestion.status]}</strong>
+                  Identificação na ARENA:{" "}
+                  <strong className="text-amber-300">
+                    {reserveQuestion.isMediationReserve
+                      ? "Pergunta da Mediação"
+                      : "Reserva da Plateia"}
+                  </strong>
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -310,7 +393,7 @@ export function CurationDesk() {
                     }
                     className="px-3 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-semibold rounded-xl cursor-pointer"
                   >
-                    Promover a Principal
+                    Acionar para Resposta (5m)
                   </button>
                   <button
                     type="button"
@@ -330,15 +413,15 @@ export function CurationDesk() {
             </div>
           ) : (
             <p className="text-xs text-[#D5C5AA]/75">
-              Selecione uma segunda pergunta aprovada como{" "}
-              <strong>&ldquo;Definir Reserva&rdquo;</strong> para contingência de
-              tempo ou adequação.
+              Caso nenhuma pergunta da plateia seja aprovada até o fim da
+              exposição, acione a Pergunta de Reserva da Mediação para manter os
+              5 minutos de Pergunta e Resposta.
             </p>
           )}
         </div>
       </div>
 
-      {/* Filtros, Busca e Ordenação da Fila (§5.3) */}
+      {/* Filtros por Pauta (1 a 5), Busca e Ordenação */}
       <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs">
         <div className="sm:col-span-4 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
@@ -346,7 +429,7 @@ export function CurationDesk() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por palavras na pergunta..."
+            placeholder="Buscar por texto ou credencial..."
             className="w-full pl-9 pr-3 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
           />
         </div>
@@ -358,7 +441,7 @@ export function CurationDesk() {
             onChange={(e) => setSelectedTopicFilter(e.target.value)}
             className="w-full px-2.5 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
           >
-            <option value="ALL">Todas as Pautas (1 a 6)</option>
+            <option value="ALL">Todas as Pautas (1 a 5)</option>
             {topics.map((t) => (
               <option key={t.id} value={t.id}>
                 Pauta {t.number} — {t.mainSpeaker.name}
@@ -373,11 +456,11 @@ export function CurationDesk() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full px-2.5 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
           >
-            <option value="ALL">Todos os 8 Estados</option>
+            <option value="ALL">Todos os Estados</option>
             {(
               Object.entries(QUESTION_STATUS_LABELS) as [
                 QuestionStatusKey,
-                string
+                string,
               ][]
             ).map(([k, label]) => (
               <option key={k} value={k}>
@@ -399,7 +482,7 @@ export function CurationDesk() {
         </div>
       </div>
 
-      {/* Fila de Perguntas em Tempo Real (§5.2 e §5.3) */}
+      {/* Fila de Perguntas em Tempo Real */}
       <div className="space-y-3">
         {filteredQuestions.length === 0 ? (
           <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-8 rounded-2xl text-center text-xs text-[#D5C5AA]/75">
@@ -420,8 +503,8 @@ export function CurationDesk() {
                   isOnScreen
                     ? "border-2 border-[#14532D] bg-emerald-950/30"
                     : isUnanalyzed
-                    ? "border-sky-400 bg-[#0A150D]"
-                    : "border-[#D5C5AA]/20 bg-[#0A150D]/85"
+                      ? "border-sky-400 bg-[#0A150D]"
+                      : "border-[#D5C5AA]/20 bg-[#0A150D]/85"
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -436,19 +519,23 @@ export function CurationDesk() {
                     >
                       {QUESTION_STATUS_LABELS[q.status]}
                     </span>
-                    {isUnanalyzed && (
-                      <span className="px-2 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-bold uppercase">
-                        Nova · Aguardando Análise
+                    {q.isMediationReserve ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-900/60 text-amber-200 border border-amber-400/40 font-bold">
+                        ◆ Pergunta da Mediação
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-[#D5C5AA] font-medium">
+                        Pergunta da Plateia
+                      </span>
+                    )}
+                    {q.editCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-sky-950/60 text-sky-300 text-[10px] font-semibold">
+                        Editada ({q.editCount}x)
                       </span>
                     )}
                     {q.isPrimary && (
                       <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold">
-                        ★ Pergunta Principal
-                      </span>
-                    )}
-                    {q.isReserve && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-violet-600 text-white font-bold">
-                        ◆ Pergunta Reserva
+                        ★ Selecionada para Resposta (5m)
                       </span>
                     )}
                     {isOnScreen && (
@@ -459,7 +546,18 @@ export function CurationDesk() {
                   </div>
 
                   <div className="flex items-center gap-3 text-[11px] text-[#D5C5AA]/75 font-mono">
-                    <span>Sessão anônima #{q.session.anonymousCode}</span>
+                    {q.moderatedBy && (
+                      <span className="text-emerald-300">
+                        Mod.: {q.moderatedBy.fullName}
+                      </span>
+                    )}
+                    <span>
+                      {q.isMediationReserve
+                        ? "Origem: Mediação"
+                        : q.session?.credentialCode
+                          ? `Credencial ${q.session.credentialCode}`
+                          : `Sessão #${q.session?.anonymousCode || "Anônima"}`}
+                    </span>
                     <span className="inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(q.createdAt).toLocaleTimeString("pt-BR")}
@@ -471,7 +569,7 @@ export function CurationDesk() {
                   {q.text}
                 </p>
 
-                {/* Botões de Moderação e Seleção (§5.3) */}
+                {/* Botões de Moderação e Seleção */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#D5C5AA]/15 text-xs">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <button
@@ -513,7 +611,7 @@ export function CurationDesk() {
                       className="px-2.5 py-1.5 border border-red-500/30 bg-red-950/30 text-red-300 font-semibold flex items-center gap-1 cursor-pointer"
                     >
                       <XCircle className="w-3.5 h-3.5" />
-                      <span>Rejeitar</span>
+                      <span>Recusar</span>
                     </button>
 
                     <button
@@ -531,7 +629,7 @@ export function CurationDesk() {
                     </button>
                   </div>
 
-                  {/* Seleção Principal / Reserva / Exibição no Telão */}
+                  {/* Seleção Principal (1 por pauta) / Reserva / Exibição no Telão */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {canSelectOrDisplay && (
                       <>
@@ -555,8 +653,8 @@ export function CurationDesk() {
                           <Star className="w-3.5 h-3.5" />
                           <span>
                             {q.isPrimary
-                              ? "Desmarcar Principal"
-                              : "Definir Principal"}
+                              ? "Desmarcar Selecionada"
+                              : "Selecionar para Resposta (5m)"}
                           </span>
                         </button>
 
@@ -585,9 +683,12 @@ export function CurationDesk() {
                           </span>
                         </button>
 
-                        {["APPROVED", "SELECTED", "DISPLAYED", "ANSWERED"].includes(
-                          q.status
-                        ) && (
+                        {[
+                          "APPROVED",
+                          "SELECTED",
+                          "DISPLAYED",
+                          "ANSWERED",
+                        ].includes(q.status) && (
                           <button
                             type="button"
                             disabled={isPending}
@@ -606,7 +707,9 @@ export function CurationDesk() {
                           >
                             <MonitorPlay className="w-3.5 h-3.5" />
                             <span>
-                              {isOnScreen ? "Retirar do Telão" : "Exibir no Telão"}
+                              {isOnScreen
+                                ? "Retirar do Telão"
+                                : "Enviar para ARENA"}
                             </span>
                           </button>
                         )}

@@ -12,6 +12,8 @@ import {
   ConsentPurpose,
   SkillLevel,
   EvidenceType,
+  ExperienceType,
+  AchievementCategory,
 } from "@prisma/client";
 
 function slugify(value: string): string {
@@ -178,12 +180,25 @@ export async function deleteEducationAction(formData: FormData) {
   redirect("/perfil?salvo=formacao_removida");
 }
 
-// D. Experiência Profissional
+// D. Experiência Profissional, Estágio, Projeto Acadêmico ou Voluntariado
 export async function addExperienceAction(formData: FormData) {
   const { profile } = await getOrCreateCurrentCandidate();
 
   const company = String(formData.get("company") || "").trim();
   const role = String(formData.get("role") || "").trim();
+  const typeRaw = String(formData.get("experienceType") || "EMPREGO");
+  const validTypes = [
+    "EMPREGO",
+    "ESTAGIO",
+    "APRENDIZAGEM",
+    "PROJETO_ACADEMICO",
+    "VOLUNTARIADO",
+    "FREELANCE",
+  ];
+  const experienceType = (validTypes.includes(typeRaw)
+    ? typeRaw
+    : "EMPREGO") as ExperienceType;
+
   const modalityRaw = String(formData.get("modality") || "");
   const modality = (["PRESENCIAL", "HIBRIDO", "REMOTO"].includes(modalityRaw)
     ? modalityRaw
@@ -198,6 +213,7 @@ export async function addExperienceAction(formData: FormData) {
   await prisma.experience.create({
     data: {
       candidateId: profile.id,
+      experienceType,
       company,
       role,
       modality,
@@ -211,6 +227,7 @@ export async function addExperienceAction(formData: FormData) {
   revalidatePath("/perfil");
   revalidatePath("/painel");
   revalidatePath("/curriculo");
+  revalidatePath(`/passaporte/${profile.id}`);
   redirect("/perfil?salvo=experiencia");
 }
 
@@ -418,4 +435,102 @@ export async function deleteLanguageAction(formData: FormData) {
   revalidatePath("/painel");
   revalidatePath("/curriculo");
   redirect("/perfil?salvo=idioma_removido");
+}
+
+// H. Portfólio & Conquistas do Passaporte de Talentos
+export async function addAchievementAction(formData: FormData) {
+  const { profile } = await getOrCreateCurrentCandidate();
+
+  const title = String(formData.get("title") || "").trim();
+  const categoryRaw = String(formData.get("category") || "PORTFOLIO_PROJETO");
+  const issuerOrContext =
+    String(formData.get("issuerOrContext") || "").trim() || null;
+  const urlRaw = String(formData.get("url") || "").trim();
+  const description = String(formData.get("description") || "").trim() || null;
+
+  if (!title) return;
+
+  const validCategories = [
+    "PORTFOLIO_PLANILHA",
+    "PORTFOLIO_RELATORIO",
+    "PORTFOLIO_APRESENTACAO",
+    "PORTFOLIO_PROJETO",
+    "CERTIFICACAO",
+    "PREMIACAO",
+    "CONQUISTA_ACADEMICA",
+  ];
+  const category = (validCategories.includes(categoryRaw)
+    ? categoryRaw
+    : "PORTFOLIO_PROJETO") as AchievementCategory;
+
+  let url: string | null = null;
+  if (urlRaw) {
+    try {
+      const parsed = new URL(
+        /^https?:\/\//i.test(urlRaw) ? urlRaw : `https://${urlRaw}`
+      );
+      if (["http:", "https:"].includes(parsed.protocol)) {
+        url = parsed.toString();
+      }
+    } catch {
+      url = null;
+    }
+  }
+
+  await prisma.candidateAchievement.create({
+    data: {
+      candidateId: profile.id,
+      category,
+      title,
+      issuerOrContext,
+      url,
+      description,
+    },
+  });
+
+  revalidatePath("/perfil");
+  revalidatePath("/painel");
+  revalidatePath("/curriculo");
+  revalidatePath(`/passaporte/${profile.id}`);
+  redirect("/perfil?salvo=portfolio#portfolio");
+}
+
+export async function deleteAchievementAction(formData: FormData) {
+  const { profile } = await getOrCreateCurrentCandidate();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+
+  await prisma.candidateAchievement.deleteMany({
+    where: { id, candidateId: profile.id },
+  });
+
+  revalidatePath("/perfil");
+  revalidatePath("/painel");
+  revalidatePath("/curriculo");
+  revalidatePath(`/passaporte/${profile.id}`);
+  redirect("/perfil?salvo=portfolio_removido#portfolio");
+}
+
+// Ativar/desativar visibilidade pública do Passaporte de Talentos (com registro LGPD)
+export async function togglePublicPassportAction(formData: FormData) {
+  const { profile, user } = await getOrCreateCurrentCandidate();
+  const nextPublic = formData.get("enable") === "1";
+
+  await prisma.candidateProfile.update({
+    where: { id: profile.id },
+    data: { isPublicInPool: nextPublic },
+  });
+
+  await prisma.consentRecord.create({
+    data: {
+      userId: user.id,
+      purpose: ConsentPurpose.TALENT_POOL_OPPORTUNITIES,
+      termsVersion: "v1.0-2026",
+      granted: nextPublic,
+    },
+  });
+
+  revalidatePath("/perfil");
+  revalidatePath("/painel");
+  revalidatePath(`/passaporte/${profile.id}`);
 }

@@ -9,6 +9,7 @@ import {
   FileText,
   LayoutDashboard,
   Settings,
+  ShieldCheck,
   UserCheck,
 } from "lucide-react";
 
@@ -20,8 +21,13 @@ const CANDIDATE_NAV_ITEMS = [
     exact: true,
   },
   {
+    href: "/passaporte",
+    label: "Passaporte de Talentos",
+    icon: ShieldCheck,
+  },
+  {
     href: "/perfil",
-    label: "Meu Perfil",
+    label: "Editar Perfil & Evidências",
     icon: UserCheck,
   },
   {
@@ -31,7 +37,7 @@ const CANDIDATE_NAV_ITEMS = [
   },
   {
     href: "/vagas",
-    label: "Mural de Vagas",
+    label: "Oportunidades",
     icon: Briefcase,
   },
   {
@@ -41,7 +47,7 @@ const CANDIDATE_NAV_ITEMS = [
   },
   {
     href: "/conta",
-    label: "Conta & Privacidade",
+    label: "Conta & LGPD",
     icon: Settings,
   },
 ];
@@ -96,7 +102,7 @@ export function CandidateNavTabs() {
           className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 hover:border-[#14532D] hover:text-[#14532D] transition"
         >
           <FileDown className="w-3.5 h-3.5 text-[#14532D]" />
-          <span>Baixar Currículo PDF</span>
+          <span>Baixar Passaporte PDF</span>
         </a>
       </div>
     </div>

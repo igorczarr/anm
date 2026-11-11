@@ -13,31 +13,9 @@ import {
 async function AuthControls() {
   const admin = await getAuthenticatedAdmin();
 
+  // Modo cego: se não houver admin autenticado, não exibe atalhos para outras interfaces
   if (!admin) {
-    return (
-      <div className="flex items-center gap-2.5">
-        <Link
-          href="/participar"
-          className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5"
-        >
-          <Smartphone className="w-3.5 h-3.5 text-[#14532D]" />
-          <span>Participar</span>
-        </Link>
-        <Link
-          href="/arena"
-          className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5"
-        >
-          <MonitorPlay className="w-3.5 h-3.5 text-[#14532D]" />
-          <span>Telão ARENA</span>
-        </Link>
-        <Link
-          href="/admin/login"
-          className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#14532D] text-white hover:bg-[#166534] transition shadow-sm"
-        >
-          Acesso ADMIN
-        </Link>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -97,7 +75,7 @@ export function Navbar() {
             </span>
             <span className="text-[11px] font-medium text-slate-500 mt-0.5 flex items-center gap-1">
               <Radio className="w-3 h-3 text-[#14532D]" />
-              Arena UEFS · Economia da Solidão
+              Arena UEFS
             </span>
           </div>
         </Link>

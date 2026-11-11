@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Nova Moeda - Patrocínio</title>
+    <title>A Nova Moeda — Patrocínio & Parcerias Institucionais</title>
     <link rel="icon" type="image/png" href="/img/logo.png">
     
     <link rel="stylesheet" href="/style.css">
@@ -12,6 +12,10 @@
 </head>
 <body class="page-content">
 
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress-bar"></div>
+
+    <!-- Preloader -->
     <div id="preloader">
         <div class="loader-content">
             <svg id="Camada_2" class="preloader-svg" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 119.67 203.43">
@@ -29,23 +33,48 @@
         </div>
     </div>
 
-    <!-- Fundo será o Preto Profundo com o spotlight definido no style.css -->
+    <!-- Ambient Background & Watermark -->
     <div class="background-watermark"></div>
 
-    <!-- HEADER FLUTUANTE -->
-    <nav class="top-nav">
-        <a href="index.html" class="nav-logo">
-            <img src="/img/logo.png" alt="A Nova Moeda">
-        </a>
-        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20patroc%C3%ADnio%20de%20A%20Nova%20Moeda." target="_blank" class="btn-outline-small">FALAR COM A ORGANIZAÇÃO</a>
+    <!-- NAVBAR CORPORATIVA DE LARGURA TOTAL (Padrão Banco de Talentos) -->
+    <nav class="top-nav" aria-label="Navegação principal">
+        <div class="top-nav-inner">
+            <a href="index.html" class="nav-brand">
+                <img src="/img/logo.png" alt="A Nova Moeda">
+                <div class="nav-brand-text">
+                    <span class="nav-brand-title">A Nova Moeda</span>
+                    <span class="nav-brand-sub">Parcerias & Patrocínio</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="projeto.html" class="nav-link">O Evento</a>
+                <a href="projeto.html#programacao" class="nav-link">Programação</a>
+                <a href="#planos" class="nav-link">Cotas de Patrocínio</a>
+                <a href="/talentos" class="nav-link">Banco de Talentos</a>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Alternar tema Claro/Escuro" title="Alternar tema Claro/Escuro"></button>
+                <a href="/talentos" class="nav-talent-btn">Banco de Talentos</a>
+                <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20patroc%C3%ADnio%20de%20A%20Nova%20Moeda." target="_blank" rel="noopener noreferrer" class="btn-outline-small">Falar com a Organização</a>
+            </div>
+        </div>
     </nav>
 
     <main class="projeto-container">
         
         <!-- HERO SECTION -->
-        <section class="hero-section" data-aos="fade-up" data-aos-duration="1500">
-            <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 4rem);">UM ENCONTRO ENTRE PESSOAS, IDEIAS E EMPRESAS</h1>
-            <p class="hero-subtitle">17 de Novembro · Auditório 2 · UEFS</p>
+        <section class="hero-section" data-aos="fade-up" data-aos-duration="1200">
+            <div class="hero-badge-pill">
+                <span class="pulse-dot"></span> Parcerias Institucionais · 17 de Novembro · UEFS
+            </div>
+            <h1 class="hero-title" style="font-size: clamp(2rem, 4.8vw, 3.8rem);">UM ENCONTRO ENTRE PESSOAS, IDEIAS E <span class="editorial-serif">empresas.</span></h1>
+            <h2 class="hero-subtitle" style="margin-bottom: 2rem;">17 de Novembro · 19h00 às 21h55 · Auditório 2 · UEFS</h2>
+            <div class="hero-cta-group">
+                <a href="#planos" class="btn-solid-gold">Conhecer Cotas de Patrocínio</a>
+                <a href="projeto.html" class="btn-secondary-glass">Ver Página do Evento</a>
+            </div>
             <div class="scroll-indicator">
                 <span>DESCUBRA</span>
                 <div class="line-down"></div>
@@ -57,7 +86,7 @@
             <div class="text-block" data-aos="fade-up">
                 <p class="elegant-text">Uma experiência dedicada a discutir uma transformação silenciosa da sociedade contemporânea: a forma como a falta de conexão está alterando pessoas, mercados, organizações e relações de trabalho.</p>
                 <div class="separator-center"></div>
-                <h2 class="monumental-quote" style="font-size: clamp(1.5rem, 4vw, 2.5rem);" data-aos="zoom-in">Em uma sociedade em que dinheiro continua sendo importante, mas atenção, confiança, relacionamento e acesso se tornam cada vez mais disputados, o que realmente possui valor?</h2>
+                <h2 class="monumental-quote" style="font-size: clamp(1.5rem, 3.5vw, 2.4rem);" data-aos="zoom-in">Em uma sociedade em que dinheiro continua sendo importante, mas atenção, confiança, relacionamento e acesso se tornam cada vez mais disputados, o que realmente possui <span class="editorial-serif">valor?</span></h2>
             </div>
         </section>
 
@@ -65,6 +94,7 @@
         <section class="dynamic-section">
             <div class="split-layout">
                 <div class="split-text" data-aos="fade-right">
+                    <div class="section-eyebrow">Posicionamento Estratégico</div>
                     <h3 class="section-title" style="text-align: left;">UMA OPORTUNIDADE PARA ESTAR PERTO DE QUEM ESTÁ CONSTRUINDO O PRÓXIMO MERCADO</h3>
                     <p class="elegant-text">A universidade concentra pessoas em formação. São futuros administradores, advogados, profissionais de tecnologia, empreendedores, gestores e especialistas que começam a definir suas escolhas profissionais e suas relações com marcas.</p>
                     <p class="elegant-text highlight-gold">Para uma empresa, estar nesse ambiente não precisa significar apenas colocar o logotipo em uma peça.</p>
@@ -93,13 +123,16 @@
 
         <!-- O PONTO DE CONTATO -->
         <section class="dynamic-section question-section" data-aos="fade-up">
-            <h2 class="massive-word" style="font-size: clamp(2rem, 6vw, 4rem); letter-spacing: 5px; line-height: 1.4;">O PATROCÍNIO NÃO É UM ESPAÇO PUBLICITÁRIO.<br><span class="highlight-gold">É UM PONTO DE CONTATO.</span></h2>
+            <h2 class="massive-word" style="font-size: clamp(1.85rem, 5vw, 3.5rem); letter-spacing: 0.08em; line-height: 1.35;">O PATROCÍNIO NÃO É UM ESPAÇO PUBLICITÁRIO.<br><span class="highlight-gold">É UM PONTO DE CONTATO.</span></h2>
             <p class="elegant-text text-center" style="max-width: 700px; margin: 0 auto;">O projeto foi pensado para que as marcas estejam presentes de maneira natural na experiência do público. O público não precisa apenas ver a sua marca. Ele pode interagir com ela.</p>
         </section>
 
         <!-- O QUE CONSTRUIR (GRID DE VALOR) -->
         <section class="dynamic-section takeaways-section">
-            <h3 class="section-title text-center" data-aos="fade-up">O QUE SUA EMPRESA PODE CONSTRUIR DENTRO DO EVENTO</h3>
+            <div class="section-header-block" data-aos="fade-up">
+                <div class="section-eyebrow">Retorno Institucional</div>
+                <h3 class="section-title text-center">O QUE SUA EMPRESA PODE CONSTRUIR DENTRO DO EVENTO</h3>
+            </div>
             <div class="takeaways-grid">
                 <div class="takeaway-item" data-aos="fade-up" data-aos-delay="0">
                     <h5>VISIBILIDADE</h5>
@@ -130,8 +163,11 @@
 
         <!-- PLANOS DE PATROCÍNIO -->
         <section class="dynamic-section tiers-section" id="planos">
-            <h2 class="monumental-quote" data-aos="fade-up">ESCOLHA COMO SUA MARCA QUER PARTICIPAR.</h2>
-            <div class="separator-center"></div>
+            <div class="section-header-block" data-aos="fade-up">
+                <div class="section-eyebrow">Modalidades de Apoio</div>
+                <h2 class="monumental-quote">ESCOLHA COMO SUA MARCA QUER <span class="editorial-serif">participar.</span></h2>
+                <div class="separator-center"></div>
+            </div>
             
             <div class="tiers-grid">
                 <!-- TROCA -->
@@ -144,7 +180,7 @@
                     <div class="tier-body">
                         <p class="elegant-text">Presença e associação institucional. Divulgação, reconhecimento público e possibilidade de ofertar um benefício exclusivo para o público.</p>
                         <p class="tier-indicated"><strong>Indicada para:</strong> empresas que desejam presença institucional e aproximação inicial com o público.</p>
-                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20TROCA%20(R$%20150)." target="_blank" class="btn-tier-cta">PATROCINAR TROCA</a>
+                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20TROCA%20(R$%20150)." target="_blank" rel="noopener noreferrer" class="btn-tier-cta">PATROCINAR TROCA</a>
                     </div>
                 </div>
 
@@ -158,7 +194,7 @@
                     <div class="tier-body">
                         <p class="elegant-text">Para empresas que querem transformar presença em interação. Desenvolva uma ativação própria dentro do evento (QR Code, cupom, sorteio, quiz).</p>
                         <p class="tier-indicated"><strong>Indicada para:</strong> empresas que desejam interação direta, tráfego e relacionamento com o público.</p>
-                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20CONEX%C3%83O%20(R$%20250)." target="_blank" class="btn-tier-cta">PATROCINAR CONEXÃO</a>
+                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20CONEX%C3%83O%20(R$%20250)." target="_blank" rel="noopener noreferrer" class="btn-tier-cta">PATROCINAR CONEXÃO</a>
                     </div>
                 </div>
 
@@ -172,58 +208,67 @@
                     <div class="tier-body">
                         <p class="elegant-text">Presença ampliada + ativação própria (espaço físico) + patrocínio de experiência/sorteio + peça digital produzida após o evento (continuidade).</p>
                         <p class="tier-indicated"><strong>Indicada para:</strong> empresas que desejam unir exposição, experiência, relacionamento e ativação de marca.</p>
-                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20CIRCULA%C3%87%C3%83O%20(R$%20500)." target="_blank" class="btn-tier-cta">PATROCINAR CIRCULAÇÃO</a>
+                        <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Tenho%20interesse%20em%20apoiar%20A%20Nova%20Moeda%20na%20modalidade%20CIRCULA%C3%87%C3%83O%20(R$%20500)." target="_blank" rel="noopener noreferrer" class="btn-tier-cta">PATROCINAR CIRCULAÇÃO</a>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- BANCO DE TALENTOS & CONTEXTO -->
-        <section class="dynamic-section manifesto-box" data-aos="zoom-in">
-            <h4 style="font-size: 1.5rem;">UMA SEGUNDA OPORTUNIDADE: O BANCO DE TALENTOS</h4>
-            <p>Os patrocinadores terão acesso a esse banco para identificar potenciais talentos e oportunidades de contratação. Isso cria uma conexão extremamente relevante: <span class="highlight-gold">UNIVERSIDADE → TALENTO → EMPRESA</span>.</p>
-            <p>O evento deixa de ser apenas um investimento em comunicação e se torna uma porta de entrada para recrutamento.</p>
-            
-            <div class="separator-center"></div>
-            
-            <h4 style="font-size: 1.5rem;">POR QUE APOIAR?</h4>
-            <p>Marcas fortes são construídas através de associação. Ao participar, sua empresa se conecta à educação, inovação, carreira e empreendedorismo, no momento exato em que jovens definem suas preferências de consumo.</p>
+        <section class="dynamic-section">
+            <div class="manifesto-box" data-aos="zoom-in">
+                <h4 style="font-size: 1.4rem;">UMA SEGUNDA OPORTUNIDADE: O BANCO DE TALENTOS</h4>
+                <p>Os patrocinadores terão acesso a esse banco para identificar potenciais talentos e oportunidades de contratação. Isso cria uma conexão extremamente relevante: <span class="highlight-gold">UNIVERSIDADE → TALENTO → EMPRESA</span>.</p>
+                <p>O evento deixa de ser apenas um investimento em comunicação e se torna uma porta de entrada para recrutamento.</p>
+                
+                <div style="margin: 1.5rem 0;">
+                    <a href="/talentos" class="btn-secondary-glass" style="font-size: 0.82rem;">Conhecer o Banco de Talentos →</a>
+                </div>
+
+                <div class="separator-center"></div>
+                
+                <h4 style="font-size: 1.4rem;">POR QUE APOIAR?</h4>
+                <p>Marcas fortes são construídas através de associação. Ao participar, sua empresa se conecta à educação, inovação, carreira e empreendedorismo, no momento exato em que jovens definem suas preferências de consumo.</p>
+            </div>
         </section>
 
         <!-- MASSIVE CONTEXT -->
         <section class="dynamic-section question-section" data-aos="fade-up">
-            <h2 class="massive-word" style="font-size: clamp(2rem, 6vw, 4rem); letter-spacing: 5px; line-height: 1.4;">MAIS DO QUE LOGO.<br><span class="highlight-gold">CONTEXTO.</span></h2>
+            <h2 class="massive-word" style="font-size: clamp(1.85rem, 5vw, 3.5rem); letter-spacing: 0.08em; line-height: 1.35;">MAIS DO QUE LOGO.<br><span class="highlight-gold">CONTEXTO.</span></h2>
             <p class="elegant-text text-center" style="max-width: 700px; margin: 0 auto;">Não se trata apenas de: <em>“essa empresa anunciou aqui”</em>. Trata-se de: <strong>“essa empresa esteve aqui porque acredita nessa discussão.”</strong> Essa diferença importa.</p>
         </section>
 
         <!-- A EXPERIÊNCIA E PALESTRANTES -->
         <section class="dynamic-section takeaways-section">
-            <h3 class="section-title text-center" data-aos="fade-up">A EXPERIÊNCIA</h3>
-            <div class="hero-details" style="justify-content: center; margin-bottom: 3rem;">
-                <span class="detail-item">17 DE NOVEMBRO · 19H</span>
-                <span class="detail-divider">|</span>
-                <span class="detail-item">AUDITÓRIO 2 — UEFS</span>
+            <div class="section-header-block" data-aos="fade-up">
+                <div class="section-eyebrow">Corpo de Especialistas</div>
+                <h3 class="section-title text-center">A EXPERIÊNCIA</h3>
+                <div class="hero-details" style="justify-content: center; margin-top: 1rem;">
+                    <span class="detail-item">17 DE NOVEMBRO · 19H</span>
+                    <span class="detail-divider">|</span>
+                    <span class="detail-item">AUDITÓRIO 2 — UEFS</span>
+                </div>
             </div>
-            <div class="takeaways-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="takeaway-item" data-aos="fade-right">
-                    <h5>Sérgio Passos</h5>
-                    <p>Advogado, psicólogo e empresário.</p>
-                </div>
-                <div class="takeaway-item" data-aos="fade-right">
-                    <h5>Janaína Daltro</h5>
-                    <p>Professora, administradora, corretora e ex-empresária.</p>
-                </div>
-                <div class="takeaway-item" data-aos="fade-left">
-                    <h5>Denilson Carneiro</h5>
-                    <p>Advogado, professor de Direito e empreendedor.</p>
-                </div>
-                <div class="takeaway-item" data-aos="fade-left">
-                    <h5>Dulcila Torres</h5>
-                    <p>Professora, administradora e esp. em felicidade organizacional.</p>
-                </div>
+            <div class="takeaways-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
                 <div class="takeaway-item" data-aos="fade-up">
                     <h5>Daniel Duarte</h5>
-                    <p>Professor e administrador.</p>
+                    <p>Professor e administrador · Pauta 01: A solidão na era da hiperconexão.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="50">
+                    <h5>Janaína Daltro</h5>
+                    <p>Professora, administradora, corretora e ex-empresária · Pauta 02: Quando a solidão vira mercado.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="100">
+                    <h5>Denilson Carneiro</h5>
+                    <p>Advogado, professor de Direito e empreendedor · Pauta 03: Cercados de pessoas e sem pertencer.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="150">
+                    <h5>Sérgio Passos</h5>
+                    <p>Advogado, psicólogo e empresário · Pauta 04: O futuro do trabalho e isolamento profissional.</p>
+                </div>
+                <div class="takeaway-item" data-aos="fade-up" data-aos-delay="200">
+                    <h5>Dulcila Torres</h5>
+                    <p>Professora, administradora e especialista em felicidade organizacional · Pauta 05: Economia da conexão.</p>
                 </div>
             </div>
         </section>
@@ -244,15 +289,31 @@
                     </a>
                 </div>
 
-                <div class="action-buttons">
-                    <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Gostaria%20de%20tratar%20sobre%20o%20patroc%C3%ADnio%20do%20evento%20A%20Nova%20Moeda." target="_blank" class="btn-solid-gold">FALAR COM A NATHALIA NO WHATSAPP</a>
+                <div class="action-buttons" style="margin-top: 2rem;">
+                    <a href="https://wa.me/557581998285?text=Ol%C3%A1%2C%20Nathalia!%20Gostaria%20de%20tratar%20sobre%20o%20patroc%C3%ADnio%20do%20evento%20A%20Nova%20Moeda." target="_blank" rel="noopener noreferrer" class="btn-solid-gold">FALAR COM A NATHALIA NO WHATSAPP</a>
                 </div>
             </div>
         </section>
 
+        <!-- FOOTER UNIFICADO -->
         <footer class="footer-section">
-            <img src="/img/logo.png" alt="A Nova Moeda Logo" class="footer-logo">
-            <p>&copy; 2026 A NOVA MOEDA. TODOS OS DIREITOS RESERVADOS.</p>
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <img src="/img/logo.png" alt="A Nova Moeda Logo" class="footer-logo">
+                    <div>
+                        <div class="footer-title">A Nova Moeda</div>
+                        <div class="footer-sub">Economia da Solidão · UEFS</div>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">Início</a>
+                    <a href="projeto.html">O Evento</a>
+                    <a href="projeto.html#programacao">Programação</a>
+                    <a href="/talentos">Banco de Talentos</a>
+                    <a href="https://www.even3.com.br/a-nova-moeda-806942" target="_blank" rel="noopener noreferrer">Inscrição Even3</a>
+                </div>
+                <p class="footer-copy">&copy; 2026 A NOVA MOEDA. TODOS OS DIREITOS RESERVADOS.</p>
+            </div>
         </footer>
 
     </main>
@@ -260,7 +321,7 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="/script.js"></script>
     <script>
-        AOS.init({ once: true, offset: 50 });
+        AOS.init({ once: true, offset: 50, duration: 800, easing: 'ease-out-cubic' });
     </script>
 </body>
 </html>

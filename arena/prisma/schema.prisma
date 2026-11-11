@@ -10,9 +10,11 @@ datasource db {
 
 enum AdminRoleType {
   ADMIN
+  PRODUCER
+  MODERATOR
+  AUDIOVISUAL
   OPERATOR
   CURATOR
-  MODERATOR
   OBSERVER
 }
 
@@ -35,6 +37,7 @@ enum EventStatus {
 enum ArenaMode {
   WAITING
   OPENING
+  INTRODUCTION
   TOPIC_OVERVIEW
   SPEAKER_EXPOSITION
   PROVOCATION
@@ -42,14 +45,18 @@ enum ArenaMode {
   POLL_OPEN
   POLL_RESULTS
   SELECTED_QUESTION
+  TRANSITION
+  ROUNDTABLE
   INTERVAL
   COLLECTIVE_BUILDING
   CLOSING
+  CONTINGENCY
   OPERATIONAL_NOTICE
 }
 
 enum StepType {
   OPENING
+  INTRODUCTION
   TOPIC_BLOCK
   EXPOSITION
   PROVOCATION
@@ -57,6 +64,7 @@ enum StepType {
   POLL
   AUDIENCE_VOICE
   TRANSITION
+  ROUNDTABLE
   COLLECTIVE_CONTRIBUTION
   SYNTHESIS
   INTERVAL
@@ -93,6 +101,7 @@ enum QuestionStatus {
 enum PollStatus {
   DRAFT
   OPEN
+  TIE_BREAK
   CLOSED
   RESULTS_PUBLISHED
 }
@@ -103,17 +112,20 @@ model Event {
   name                   String
   theme                  String
   institution            String
-  estimatedAudience      Int         @default(150)
-  programmedDurationMin  Int         @default(131)
+  estimatedAudience      Int         @default(250)
+  programmedDurationMin  Int         @default(145)
+  certifiedHours         Int         @default(4)
+  scheduleLocked         Boolean     @default(false)
   formatDescription      String
   status                 EventStatus @default(WAITING)
   scheduledStartAt       DateTime?
   actualStartAt          DateTime?
   actualEndAt            DateTime?
   questionCharLimit      Int         @default(400)
-  maxQuestionsPerTopic   Int         @default(2)
-  minQuestionIntervalSec Int         @default(15)
+  maxQuestionsPerTopic   Int         @default(1)
+  minQuestionIntervalSec Int         @default(10)
   requireAccessCode      Boolean     @default(false)
+  requireCredential      Boolean     @default(false)
   accessCode             String?
   soundAlertsEnabled     Boolean     @default(true)
   showTimerOnArena       Boolean     @default(true)
@@ -121,16 +133,17 @@ model Event {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
-  speakers            Speaker[]
-  topics              Topic[]
-  scheduleSteps       ScheduleStep[]
-  liveState           LiveState?
-  timerSessions       TimerSession[]
-  participantSessions ParticipantSession[]
-  questions           Question[]
-  polls               Poll[]
-  screenMessages      ScreenMessage[]
-  auditLogs           AuditLog[]
+  speakers               Speaker[]
+  topics                 Topic[]
+  scheduleSteps          ScheduleStep[]
+  liveState              LiveState?
+  timerSessions          TimerSession[]
+  participantSessions    ParticipantSession[]
+  participantCredentials ParticipantCredential[]
+  questions              Question[]
+  polls                  Poll[]
+  screenMessages         ScreenMessage[]
+  auditLogs              AuditLog[]
 }
 
 model Speaker {
@@ -159,15 +172,16 @@ model Topic {
   number                Int
   title                 String
   description           String?
-  durationSec           Int        @default(1140)
+  durationSec           Int        @default(1200)
   mainSpeakerId         String
   provokerId            String?
-  provokerLabel         String
+  provokerLabel         String     @default("Plateia & Mediação")
   status                StepStatus @default(PENDING)
   primaryQuestionId     String?
   reserveQuestionId     String?
   actualDurationSec     Int?
   expositionDurationSec Int?
+  qaDurationSec         Int?
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -294,7 +308,7 @@ model AdminUser {
   email        String        @unique
   fullName     String
   passwordHash String
-  roleCode     AdminRoleType @default(OPERATOR)
+  roleCode     AdminRoleType @default(PRODUCER)
   roleId       String?
   status       UserStatus    @default(ACTIVE)
   lastLoginAt  DateTime?
@@ -309,11 +323,32 @@ model AdminUser {
   auditLogs       AuditLog[]
 }
 
+model ParticipantCredential {
+  id          String    @id @default(cuid())
+  eventId     String
+  code        String
+  label       String?
+  isUsed      Boolean   @default(false)
+  sessionId   String?   @unique
+  validatedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  event   Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  session ParticipantSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, code])
+  @@index([eventId, isUsed])
+}
+
 model ParticipantSession {
   id                String    @id @default(cuid())
   sessionToken      String    @unique
   eventId           String
   anonymousCode     String
+  name              String?
+  email             String?
+  credentialCode    String?
   userAgent         String?
   ipHash            String?
   consentAcceptedAt DateTime?
@@ -322,32 +357,37 @@ model ParticipantSession {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  questions Question[]
-  votes     Vote[]
+  event       Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  credential  ParticipantCredential?
+  questions   Question[]
+  votes       Vote[]
+  voteHistory VoteHistory[]
 
   @@index([eventId, lastSeenAt])
+  @@index([eventId, email])
 }
 
 model Question {
-  id              String         @id @default(cuid())
-  eventId         String
-  topicId         String
-  sessionId       String
-  clientRequestId String         @unique
-  text            String
-  status          QuestionStatus @default(RECEIVED)
-  isPrimary       Boolean        @default(false)
-  isReserve       Boolean        @default(false)
-  displayedAt     DateTime?
-  answeredAt      DateTime?
-  moderatedById   String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                 String         @id @default(cuid())
+  eventId            String
+  topicId            String
+  sessionId          String?
+  clientRequestId    String         @unique
+  text               String
+  status             QuestionStatus @default(RECEIVED)
+  isPrimary          Boolean        @default(false)
+  isReserve          Boolean        @default(false)
+  isMediationReserve Boolean        @default(false)
+  editCount          Int            @default(0)
+  displayedAt        DateTime?
+  answeredAt         DateTime?
+  moderatedById      String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   event       Event                   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   topic       Topic                   @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  session     ParticipantSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session     ParticipantSession?     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   moderatedBy AdminUser?              @relation("QuestionModerator", fields: [moderatedById], references: [id])
   history     QuestionStatusHistory[]
 
@@ -369,24 +409,31 @@ model QuestionStatusHistory {
 }
 
 model Poll {
-  id                 String     @id @default(cuid())
-  eventId            String
-  topicId            String     @unique
-  number             Int
-  question           String
-  status             PollStatus @default(DRAFT)
-  openedAt           DateTime?
-  closedAt           DateTime?
-  resultsPublishedAt DateTime?
-  durationSec        Int        @default(60)
-  totalVotes         Int        @default(0)
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  id                    String     @id @default(cuid())
+  eventId               String
+  topicId               String?    @unique
+  number                Int
+  question              String
+  status                PollStatus @default(DRAFT)
+  openedAt              DateTime?
+  closedAt              DateTime?
+  resultsPublishedAt    DateTime?
+  durationSec           Int        @default(300)
+  totalVotes            Int        @default(0)
+  winningOptionId       String?
+  winningQuestionText   String?
+  isTieBreak            Boolean    @default(false)
+  tieBreakOptionIds     String[]   @default([])
+  tieBreakJustification String?
+  closedByUserId        String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 
-  event   Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  topic   Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  options PollOption[]
-  votes   Vote[]
+  event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  topic       Topic?        @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  options     PollOption[]
+  votes       Vote[]
+  voteHistory VoteHistory[]
 
   @@unique([eventId, number])
 }
@@ -395,6 +442,7 @@ model PollOption {
   id          String   @id @default(cuid())
   pollId      String
   optionOrder Int
+  themeLabel  String?
   label       String
   votesCount  Int      @default(0)
   createdAt   DateTime @default(now())
@@ -422,6 +470,20 @@ model Vote {
   @@unique([pollId, sessionId])
 }
 
+model VoteHistory {
+  id               String   @id @default(cuid())
+  pollId           String
+  sessionId        String
+  previousOptionId String?
+  newOptionId      String
+  changedAt        DateTime @default(now())
+
+  poll    Poll               @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  session ParticipantSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([pollId, changedAt])
+}
+
 model ScreenMessage {
   id              String   @id @default(cuid())
   eventId         String
@@ -438,14 +500,15 @@ model ScreenMessage {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  eventId    String?
-  userId     String?
-  action     String
-  entityType String
-  entityId   String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  eventId       String?
+  userId        String?
+  action        String
+  entityType    String
+  entityId      String?
+  justification String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
 
   event Event?     @relation(fields: [eventId], references: [id], onDelete: SetNull)
   user  AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)

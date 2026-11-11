@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getPrimaryEvent } from "@/lib/live-state";
+import { LiveAudienceCounter } from "@/components/live-audience-counter";
 import {
   ArrowRight,
   Clock,
@@ -10,7 +11,6 @@ import {
   Radio,
   ShieldCheck,
   Smartphone,
-  Users,
   Vote,
 } from "lucide-react";
 
@@ -66,24 +66,18 @@ async function HomeContent() {
             {event?.institution || "Universidade Estadual de Feira de Santana (UEFS)"}
           </span>
           <span className="text-xs font-medium text-[#D5C5AA]/75 flex items-center gap-3">
-            <span className="inline-flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" />
-              Público estimado: {event?.estimatedAudience ?? 150} participantes
-            </span>
+            <LiveAudienceCounter />
             <span>·</span>
             <span className="inline-flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              Duração programada: {totalMin || 131} minutos
+              Duração programada: {totalMin || 145} minutos (2h25 · {event?.certifiedHours ?? 4}h cert.)
             </span>
           </span>
         </div>
 
         <div className="space-y-3 max-w-3xl">
           <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] tracking-tight">
-            {event?.name || "A Nova Moeda"} —{" "}
-            <span className="font-editorial italic font-normal">
-              {event?.theme || "Economia da Solidão"}
-            </span>
+            {event?.name || "A Nova Moeda"}
           </h1>
           <p className="text-sm sm:text-base text-[#D5C5AA]/85 leading-relaxed">
             Centro de comando operacional e interação em tempo real da Arena de
@@ -173,19 +167,19 @@ async function HomeContent() {
         </div>
       </section>
 
-      {/* As 6 Pautas Cadastradas (§2.2) */}
+      {/* As 5 Pautas Cadastradas & Fluxo Oficial v2.0 */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#14532D]">
-              Configuração Inicial do Evento · Seção 2.2
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+              Formato Oficial v2.0 · 10 Etapas Macro
             </span>
             <h2 className="font-display text-2xl text-[#F7DECA]">
-              As 6 Pautas da Arena A Nova Moeda
+              As 5 Exposições Individuais (15 min + 5 min P&amp;R) + Mesa-Redonda
             </h2>
           </div>
           <span className="text-xs text-[#D5C5AA]/70">
-            5 palestrantes recorrentes · {pollsCount} votações configuradas
+            5 especialistas (Paula, Daniel, Janaína, Denilson, Sérgio) · Votação da Mesa-Redonda na Pauta 5
           </span>
         </div>
 
@@ -201,7 +195,8 @@ async function HomeContent() {
                     Pauta {t.number}
                   </span>
                   <span className="text-[#D5C5AA]/70 font-mono">
-                    {Math.round(t.durationSec / 60)}:00 min
+                    {Math.round(t.durationSec / 60)}m Exposição +{" "}
+                    {Math.round((t.qaDurationSec ?? 300) / 60)}m P&amp;R
                   </span>
                 </div>
                 <h3 className="font-semibold text-sm text-[#F7DECA] leading-snug">
@@ -211,15 +206,15 @@ async function HomeContent() {
 
               <div className="pt-3 border-t border-[#D5C5AA]/15 text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#D5C5AA]/65">Palestrante:</span>
+                  <span className="text-[#D5C5AA]/65">Especialista:</span>
                   <strong className="text-[#F7DECA]">
                     {t.mainSpeaker?.name ?? "A definir"}
                   </strong>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#D5C5AA]/65">Provocador(a):</span>
+                  <span className="text-[#D5C5AA]/65">Dinâmica:</span>
                   <span className="font-medium text-[#D5C5AA]">
-                    {t.provokerLabel || t.provoker?.name || "A definir"}
+                    {t.provokerLabel || "15m Exposição + 5m Pergunta e Resposta"}
                   </span>
                 </div>
               </div>

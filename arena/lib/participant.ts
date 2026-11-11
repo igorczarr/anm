@@ -63,7 +63,10 @@ export async function getParticipantSession() {
   }
 }
 
-export async function createParticipantSession(eventId: string) {
+export async function createParticipantSession(
+  eventId: string,
+  data?: { name?: string; email?: string }
+) {
   const ip = await getClientIp();
   const h = await headers();
   const code = crypto.randomBytes(3).toString("hex").toUpperCase();
@@ -72,6 +75,8 @@ export async function createParticipantSession(eventId: string) {
       eventId,
       sessionToken: crypto.randomUUID(),
       anonymousCode: code,
+      name: data?.name?.trim() || null,
+      email: data?.email?.trim().toLowerCase() || null,
       userAgent: (h.get("user-agent") || "").slice(0, 200),
       ipHash: hashIp(ip),
       consentAcceptedAt: new Date(),

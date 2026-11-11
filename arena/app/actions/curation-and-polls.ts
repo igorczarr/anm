@@ -40,7 +40,6 @@ export async function moderateQuestionStatusAction(
     },
   });
 
-  // Se foi rejeitada ou marcada como duplicada e estava como principal/reserva ou no telão, limpa vínculos
   if (toStatus === "REJECTED" || toStatus === "DUPLICATE") {
     await prisma.topic.updateMany({
       where: { id: question.topicId, primaryQuestionId: question.id },
@@ -73,7 +72,7 @@ export async function moderateQuestionStatusAction(
 }
 
 /**
- * Seleciona a Pergunta Principal ou a Pergunta Reserva de uma pauta (§5.4)
+ * Seleciona a Pergunta Principal (1 por pauta) ou a Pergunta Reserva de uma pauta (§2 e §3)
  */
 export async function selectTopicQuestionSlotAction(
   questionId: string,
@@ -116,7 +115,6 @@ export async function selectTopicQuestionSlotAction(
       data: { reserveQuestionId: null },
     });
   } else if (slot === "PRIMARY") {
-    // Limpa principal anterior da mesma pauta
     await prisma.question.updateMany({
       where: { topicId: question.topicId, isPrimary: true },
       data: { isPrimary: false },
@@ -139,7 +137,7 @@ export async function selectTopicQuestionSlotAction(
             fromStatus: question.status,
             toStatus: nextStatus,
             changedByUserId: admin.id,
-            note: "Definida como Pergunta Principal da pauta",
+            note: `Definida como Pergunta Selecionada da pauta por ${admin.fullName}`,
           },
         },
       },
@@ -153,7 +151,6 @@ export async function selectTopicQuestionSlotAction(
       },
     });
   } else if (slot === "RESERVE") {
-    // Limpa reserva anterior da mesma pauta
     await prisma.question.updateMany({
       where: { topicId: question.topicId, isReserve: true },
       data: { isReserve: false },
@@ -176,7 +173,7 @@ export async function selectTopicQuestionSlotAction(
             fromStatus: question.status,
             toStatus: nextStatus,
             changedByUserId: admin.id,
-            note: "Definida como Pergunta Reserva da pauta",
+            note: `Definida como Pergunta Reserva da pauta por ${admin.fullName}`,
           },
         },
       },
@@ -199,7 +196,11 @@ export async function selectTopicQuestionSlotAction(
     action: `QUESTION_SLOT_${slot}`,
     entityType: "Question",
     entityId: question.id,
-    metadata: { topicId: question.topicId, slot },
+    metadata: {
+      topicId: question.topicId,
+      slot,
+      isMediationReserve: question.isMediationReserve,
+    },
   });
 
   revalidatePath("/admin/perguntas");
@@ -207,7 +208,110 @@ export async function selectTopicQuestionSlotAction(
 }
 
 /**
- * Exibe uma pergunta aprovada/selecionada no telão ARENA (§5.3, §5.4 e §5.6)
+ * Cadastra ou atualiza e aciona uma Pergunta de Reserva da Mediação para uma pauta (§7 — Tratamento quando nenhuma pergunta da plateia for aprovada)
+ */
+export async function upsertAndActivateMediationReserveQuestionAction(
+  formData: FormData
+) {
+  const admin = await requireAdminPermission("canModerateQuestions");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  const topicId = String(formData.get("topicId") || "").trim();
+  const text = String(formData.get("text") || "").trim();
+  const activateNow = formData.get("activateNow") === "true";
+
+  if (!topicId || text.length < 5) {
+    throw new Error("Informe o texto da Pergunta de Reserva da Mediação.");
+  }
+
+  const existingReserve = await prisma.question.findFirst({
+    where: {
+      eventId: event.id,
+      topicId,
+      isMediationReserve: true,
+    },
+  });
+
+  const reserveQuestion = existingReserve
+    ? await prisma.question.update({
+        where: { id: existingReserve.id },
+        data: {
+          text,
+          status: activateNow ? "SELECTED" : "APPROVED",
+          isReserve: !activateNow,
+          isPrimary: activateNow,
+          moderatedById: admin.id,
+          history: {
+            create: {
+              fromStatus: existingReserve.status,
+              toStatus: activateNow ? "SELECTED" : "APPROVED",
+              changedByUserId: admin.id,
+              note: activateNow
+                ? "Pergunta de Reserva da Mediação acionada para resposta"
+                : "Pergunta de Reserva da Mediação atualizada",
+            },
+          },
+        },
+      })
+    : await prisma.question.create({
+        data: {
+          eventId: event.id,
+          topicId,
+          sessionId: null,
+          clientRequestId: `mediation-reserve-${topicId}-${Date.now()}`,
+          text,
+          status: activateNow ? "SELECTED" : "APPROVED",
+          isReserve: !activateNow,
+          isPrimary: activateNow,
+          isMediationReserve: true,
+          moderatedById: admin.id,
+        },
+      });
+
+  if (activateNow) {
+    await prisma.question.updateMany({
+      where: {
+        topicId,
+        id: { not: reserveQuestion.id },
+        isPrimary: true,
+      },
+      data: { isPrimary: false },
+    });
+
+    await prisma.topic.update({
+      where: { id: topicId },
+      data: {
+        primaryQuestionId: reserveQuestion.id,
+        reserveQuestionId: reserveQuestion.id,
+      },
+    });
+  } else {
+    await prisma.topic.update({
+      where: { id: topicId },
+      data: { reserveQuestionId: reserveQuestion.id },
+    });
+  }
+
+  await updateLiveStateAtomic(event.id, "question.selected", {});
+
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: activateNow
+      ? "MEDIATION_RESERVE_QUESTION_ACTIVATED"
+      : "MEDIATION_RESERVE_QUESTION_UPDATED",
+    entityType: "Question",
+    entityId: reserveQuestion.id,
+    metadata: { topicId, isMediationReserve: true },
+  });
+
+  revalidatePath("/admin/perguntas");
+  revalidatePath("/admin");
+}
+
+/**
+ * Exibe uma pergunta aprovada/selecionada no telão ARENA
  */
 export async function displayQuestionOnArenaAction(questionId: string) {
   const admin = await requireAdminPermission("canModerateQuestions");
@@ -219,14 +323,13 @@ export async function displayQuestionOnArenaAction(questionId: string) {
   });
   if (!question) throw new Error("Pergunta não encontrada");
 
-  // Regra inegociável §3 e §10.2: Impedir exibição de perguntas não aprovadas
   if (
     question.status === "REJECTED" ||
     question.status === "DUPLICATE" ||
     question.status === "RECEIVED"
   ) {
     throw new Error(
-      "Somente perguntas aprovadas ou selecionadas pela curadoria podem ir ao telão."
+      "Somente perguntas aprovadas ou selecionadas pela moderação podem ir ao telão."
     );
   }
 
@@ -259,6 +362,7 @@ export async function displayQuestionOnArenaAction(questionId: string) {
     action: "QUESTION_DISPLAYED_ON_ARENA",
     entityType: "Question",
     entityId: question.id,
+    metadata: { isMediationReserve: question.isMediationReserve },
   });
 
   revalidatePath("/admin/perguntas");
@@ -273,7 +377,7 @@ export async function removeQuestionFromArenaAction() {
 
   await updateLiveStateAtomic(event.id, "screen.message_updated", {
     selectedQuestionId: null,
-    arenaMode: "TOPIC_OVERVIEW",
+    arenaMode: "SPEAKER_EXPOSITION",
   });
 
   await logAdminAction({
@@ -289,38 +393,31 @@ export async function removeQuestionFromArenaAction() {
 }
 
 /**
- * Ações de Gerenciamento de Votações (§6.1, §6.2 e §6.3)
+ * Ações de Gerenciamento da Votação Única da Mesa-Redonda e Desempate (§4, §5 e §7)
  */
 export async function openPollByIdAction(pollId: string) {
   const admin = await requireAdminPermission("canManagePolls");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
-  // Regra §6.2: Impedir que duas votações sejam abertas simultaneamente
-  await prisma.poll.updateMany({
-    where: {
-      eventId: event.id,
-      status: "OPEN",
-      id: { not: pollId },
-    },
-    data: {
-      status: "CLOSED",
-      closedAt: new Date(),
-    },
-  });
-
   const poll = await prisma.poll.update({
     where: { id: pollId },
     data: {
       status: "OPEN",
+      isTieBreak: false,
       openedAt: new Date(),
     },
   });
 
+  const currentArenaMode = event.liveState?.arenaMode;
+  const nextArenaMode =
+    currentArenaMode === "SPEAKER_EXPOSITION"
+      ? "SPEAKER_EXPOSITION"
+      : "POLL_OPEN";
+
   await updateLiveStateAtomic(event.id, "poll.opened", {
     activePollId: poll.id,
-    activeTopicId: poll.topicId,
-    arenaMode: "POLL_OPEN",
+    arenaMode: nextArenaMode,
   });
 
   await logAdminAction({
@@ -345,6 +442,21 @@ export async function closePollByIdAction(
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
+  const pollRecord = await prisma.poll.findUnique({
+    where: { id: pollId },
+    include: { options: { orderBy: { optionOrder: "asc" } } },
+  });
+  if (!pollRecord) throw new Error("Votação não encontrada");
+
+  const sorted = [...pollRecord.options].sort(
+    (a, b) => b.votesCount - a.votesCount
+  );
+  const topVotes = sorted[0]?.votesCount ?? 0;
+  const tiedTop = sorted.filter(
+    (o) => o.votesCount === topVotes && topVotes > 0
+  );
+  const autoWinner = tiedTop.length === 1 ? tiedTop[0] : sorted[0] ?? null;
+
   const nextStatus = publishOnArena ? "RESULTS_PUBLISHED" : "CLOSED";
 
   const poll = await prisma.poll.update({
@@ -352,7 +464,13 @@ export async function closePollByIdAction(
     data: {
       status: nextStatus,
       closedAt: new Date(),
+      closedByUserId: admin.id,
       ...(publishOnArena ? { resultsPublishedAt: new Date() } : {}),
+      winningOptionId:
+        pollRecord.winningOptionId ?? (autoWinner ? autoWinner.id : null),
+      winningQuestionText:
+        pollRecord.winningQuestionText ??
+        (autoWinner ? autoWinner.label : null),
     },
   });
 
@@ -371,7 +489,139 @@ export async function closePollByIdAction(
     action: publishOnArena ? "POLL_RESULTS_PUBLISHED" : "POLL_CLOSED",
     entityType: "Poll",
     entityId: poll.id,
-    metadata: { number: poll.number, totalVotes: poll.totalVotes },
+    metadata: {
+      number: poll.number,
+      totalVotes: poll.totalVotes,
+      winningOptionId: poll.winningOptionId,
+    },
+  });
+
+  revalidatePath("/admin/votacoes");
+  revalidatePath("/admin/operacao");
+  revalidatePath("/admin");
+}
+
+/**
+ * Inicia uma Rodada Rápida de Desempate de 2 minutos apenas entre as questões empatadas (§7 — Regra de desempate)
+ */
+export async function startPollTieBreakRoundAction(pollId: string) {
+  const admin = await requireAdminPermission("canManagePolls");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  const poll = await prisma.poll.findUnique({
+    where: { id: pollId },
+    include: { options: { orderBy: { optionOrder: "asc" } } },
+  });
+  if (!poll) throw new Error("Votação não encontrada");
+
+  const maxVotes = Math.max(...poll.options.map((o) => o.votesCount), 0);
+  const tiedIds = poll.options
+    .filter((o) => o.votesCount === maxVotes)
+    .map((o) => o.id);
+
+  await prisma.poll.update({
+    where: { id: pollId },
+    data: {
+      status: "TIE_BREAK",
+      isTieBreak: true,
+      tieBreakOptionIds: tiedIds,
+      durationSec: 120,
+      openedAt: new Date(),
+    },
+  });
+
+  await updateLiveStateAtomic(event.id, "poll.tie_break_started", {
+    activePollId: pollId,
+    arenaMode: "POLL_OPEN",
+  });
+
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: "POLL_TIE_BREAK_STARTED",
+    entityType: "Poll",
+    entityId: pollId,
+    justification: "Rodada rápida de desempate de 2 minutos entre opções empatadas",
+    metadata: { tiedOptionIds: tiedIds, maxVotes },
+  });
+
+  revalidatePath("/admin/votacoes");
+  revalidatePath("/admin/operacao");
+  revalidatePath("/admin");
+}
+
+/**
+ * Define oficialmente a questão vencedora para a Mesa-Redonda (ou registra decisão justificada / fusão em caso de empate)
+ * e opcionalmente envia direto para o telão da Mesa-Redonda (§4, §5 e §7)
+ */
+export async function setPollWinnerAndSendToRoundtableAction(
+  formData: FormData
+) {
+  const admin = await requireAdminPermission("canManagePolls");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  const pollId = String(formData.get("pollId") || "").trim();
+  const winningOptionId =
+    String(formData.get("winningOptionId") || "").trim() || null;
+  const customWinningText = String(
+    formData.get("winningQuestionText") || ""
+  ).trim();
+  const justification =
+    String(formData.get("tieBreakJustification") || "").trim() || null;
+  const sendToRoundtableNow =
+    formData.get("sendToRoundtableNow") === "true";
+
+  const poll = await prisma.poll.findUnique({
+    where: { id: pollId },
+    include: { options: true },
+  });
+  if (!poll) throw new Error("Votação não encontrada");
+
+  const chosenOption = winningOptionId
+    ? poll.options.find((o) => o.id === winningOptionId)
+    : null;
+
+  const finalQuestionText =
+    customWinningText ||
+    chosenOption?.label ||
+    poll.winningQuestionText ||
+    poll.options[0]?.label ||
+    "";
+
+  await prisma.poll.update({
+    where: { id: pollId },
+    data: {
+      status: "RESULTS_PUBLISHED",
+      closedAt: poll.closedAt ?? new Date(),
+      resultsPublishedAt: new Date(),
+      closedByUserId: admin.id,
+      winningOptionId: chosenOption?.id ?? winningOptionId,
+      winningQuestionText: finalQuestionText,
+      tieBreakJustification: justification,
+    },
+  });
+
+  await updateLiveStateAtomic(event.id, "poll.results_published", {
+    activePollId: pollId,
+    arenaMode: sendToRoundtableNow ? "ROUNDTABLE" : "POLL_RESULTS",
+  });
+
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: sendToRoundtableNow
+      ? "ROUNDTABLE_QUESTION_CONFIRMED_AND_DISPLAYED"
+      : "ROUNDTABLE_QUESTION_CONFIRMED",
+    entityType: "Poll",
+    entityId: pollId,
+    justification:
+      justification || "Apuração oficial da questão vencedora da Mesa-Redonda",
+    metadata: {
+      winningOptionId: chosenOption?.id ?? winningOptionId,
+      winningQuestionText: finalQuestionText,
+    },
   });
 
   revalidatePath("/admin/votacoes");
@@ -388,7 +638,7 @@ export async function updatePollQuestionAndOptionsAction(formData: FormData) {
   const question = String(formData.get("question") || "").trim();
   const durationSec = Math.max(
     15,
-    Number(formData.get("durationSec") || 60)
+    Number(formData.get("durationSec") || 900)
   );
 
   if (!pollId || !question) return;
@@ -405,10 +655,17 @@ export async function updatePollQuestionAndOptionsAction(formData: FormData) {
 
   for (const opt of options) {
     const newLabel = String(formData.get(`option_${opt.id}`) || "").trim();
-    if (newLabel && newLabel !== opt.label) {
+    const newTheme = String(formData.get(`theme_${opt.id}`) || "").trim();
+    if (
+      (newLabel && newLabel !== opt.label) ||
+      (newTheme && newTheme !== opt.themeLabel)
+    ) {
       await prisma.pollOption.update({
         where: { id: opt.id },
-        data: { label: newLabel },
+        data: {
+          ...(newLabel ? { label: newLabel } : {}),
+          ...(newTheme ? { themeLabel: newTheme } : {}),
+        },
       });
     }
   }
@@ -432,6 +689,7 @@ export async function resetPollVotesAction(pollId: string) {
   if (!event) throw new Error("Evento não encontrado");
 
   await prisma.$transaction([
+    prisma.voteHistory.deleteMany({ where: { pollId } }),
     prisma.vote.deleteMany({ where: { pollId } }),
     prisma.pollOption.updateMany({
       where: { pollId },
@@ -442,6 +700,11 @@ export async function resetPollVotesAction(pollId: string) {
       data: {
         totalVotes: 0,
         status: "DRAFT",
+        isTieBreak: false,
+        tieBreakOptionIds: [],
+        tieBreakJustification: null,
+        winningOptionId: null,
+        winningQuestionText: null,
         openedAt: null,
         closedAt: null,
         resultsPublishedAt: null,

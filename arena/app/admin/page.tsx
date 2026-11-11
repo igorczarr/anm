@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { getCurrentAdminUser } from "@/lib/admin-auth";
+import { getCurrentAdminUser, OFFICIAL_ROLE_LABELS } from "@/lib/admin-auth";
 import { getPrimaryEvent } from "@/lib/live-state";
 import {
   ARENA_MODE_LABELS,
@@ -68,9 +68,15 @@ async function AdminDashboardContent() {
       include: { options: true },
       orderBy: { number: "asc" },
     }),
-    prisma.question.count({ where: { eventId: event.id } }),
     prisma.question.count({
-      where: { eventId: event.id, status: { in: ["RECEIVED", "ANALYZING"] } },
+      where: { eventId: event.id, isMediationReserve: false },
+    }),
+    prisma.question.count({
+      where: {
+        eventId: event.id,
+        isMediationReserve: false,
+        status: { in: ["RECEIVED", "ANALYZING"] },
+      },
     }),
     prisma.question.count({
       where: {
@@ -99,46 +105,50 @@ async function AdminDashboardContent() {
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/30 text-emerald-300 font-semibold">
-              Central de Comando · Operador: {admin.fullName} ({admin.roleCode})
+              ADMIN · {admin.fullName} ({OFFICIAL_ROLE_LABELS[admin.roleCode]})
             </span>
             <span className="text-[#D5C5AA]/70">
-              · {event.institution} · Público estimado: {event.estimatedAudience}
+              · {event.institution} · Público estimado: {event.estimatedAudience}{" "}
+              · Carga horária certificada: {event.certifiedHours}h
             </span>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#F7DECA]">
             {event.name} — {event.theme}
           </h1>
           <p className="text-xs sm:text-sm text-[#D5C5AA]/80">
-            Panorama operacional em tempo real, roteiro de{" "}
-            {Math.round(totalMacroSec / 60)} minutos ({macroSteps.length} blocos
-            macro / {operationalSteps.length} etapas de fluxo), 6 pautas e 6
-            votações.
+            Programação oficial de{" "}
+            <strong>
+              {Math.round(totalMacroSec / 60)} minutos (2h25 de condução)
+            </strong>{" "}
+            com Introdução contextual (Paula), 5 exposições individuais (15 min
+            Exposição + 5 min Pergunta e Resposta), Votação do público na Pauta
+            5 e Mesa-Redonda (20 min).
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Link
             href="/admin/operacao"
-            className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs flex items-center gap-2"
+            className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs rounded-xl flex items-center gap-2"
           >
             <PlayCircle className="w-4 h-4" />
-            <span>Mesa Completa de Operação (40 Etapas)</span>
+            <span>Painel Completo de Operação</span>
           </Link>
           <Link
             href="/admin/configuracoes"
-            className="px-4 py-2.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-semibold text-xs flex items-center gap-2"
+            className="px-4 py-2.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-semibold text-xs rounded-xl flex items-center gap-2"
           >
             <Settings className="w-4 h-4" />
-            <span>Configurar Pautas & Evento</span>
+            <span>Configurar Pautas &amp; Especialistas</span>
           </Link>
         </div>
       </div>
 
-      {/* KPIs Operacionais (§4.1 Informações Principais) */}
+      {/* KPIs Operacionais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Status & Modo do Telão</span>
+            <span>Status &amp; Modo da ARENA</span>
             <Radio className="w-4 h-4 text-[#14532D]" />
           </div>
           <div className="font-display text-xl text-[#F7DECA]">
@@ -156,7 +166,7 @@ async function AdminDashboardContent() {
 
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Etapa Atual & Próxima</span>
+            <span>Etapa Atual &amp; Próxima</span>
             <Clock className="w-4 h-4 text-[#14532D]" />
           </div>
           <div className="font-bold text-sm text-[#F7DECA] truncate">
@@ -164,54 +174,54 @@ async function AdminDashboardContent() {
           </div>
           <div className="text-xs text-[#D5C5AA]/80 truncate">
             Previsto:{" "}
-            <strong>{formatSecondsMMSS(activeStep?.durationSec ?? 480)}</strong>{" "}
+            <strong>{formatSecondsMMSS(activeStep?.durationSec ?? 300)}</strong>{" "}
             · Próx: {nextStep?.title ?? "—"}
           </div>
         </div>
 
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Curadoria de Perguntas</span>
+            <span>Moderação de Perguntas</span>
             <MessageSquareMore className="w-4 h-4 text-[#14532D]" />
           </div>
           <div className="font-display text-xl text-[#F7DECA]">
-            {questionsCount} recebidas
+            {questionsCount} da plateia
           </div>
           <div className="text-xs text-[#D5C5AA]/80">
-            Pendentes: <strong>{questionsPending}</strong> · Aprovadas:{" "}
+            Pendentes: <strong>{questionsPending}</strong> · Aprovadas/Reserva:{" "}
             <strong className="text-emerald-300">{questionsApproved}</strong>
           </div>
         </div>
 
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Votações & Participantes</span>
+            <span>Votação da Mesa &amp; Público</span>
             <Vote className="w-4 h-4 text-[#14532D]" />
           </div>
           <div className="font-display text-xl text-[#F7DECA]">
-            {totalVotes} votos · {polls.length} enquetes
+            {totalVotes} votos na Mesa-Redonda
           </div>
           <div className="text-xs text-[#D5C5AA]/80">
-            Sessões registradas: <strong>{participantsCount}</strong> · Seq #
+            Sessões conectadas: <strong>{participantsCount}</strong> · Seq #
             {liveState?.seq ?? 1}
           </div>
         </div>
       </div>
 
-      {/* Controles Diretos de Operação no Dashboard (§4.1 Controles de Operação) */}
+      {/* Controles Diretos de Operação no Dashboard */}
       <LiveControlDesk compact />
 
-      {/* Resumo das 6 Pautas e Cronograma-Base (§2.2 e §2.3) */}
+      {/* Resumo das 5 Pautas Oficiais e Programação de 145 minutos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 rounded-2xl space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg text-[#F7DECA]">
-                As 6 Pautas Cadastradas (Seção 2.2)
+                As 5 Pautas Individuais (15 min Exposição + 5 min P&amp;R)
               </h2>
               <p className="text-xs text-[#D5C5AA]/70">
-                Numeradas de 1 a 6, com palestrante principal e provocador
-                definidos.
+                Precedidas pela Introdução de Paula (10 min) e seguidas pela
+                Mesa-Redonda (20 min).
               </p>
             </div>
             <Link
@@ -229,18 +239,26 @@ async function AdminDashboardContent() {
                 <tr className="border-b border-[#D5C5AA]/20 bg-[#030A06] text-[10px] uppercase tracking-wider text-[#D5C5AA]/80">
                   <th className="p-3">Nº</th>
                   <th className="p-3">Pauta</th>
-                  <th className="p-3">Palestrante</th>
-                  <th className="p-3">Provocador(a)</th>
+                  <th className="p-3">Especialista</th>
+                  <th className="p-3">Estrutura</th>
                   <th className="p-3 text-right">Previsto / Realizado</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#D5C5AA]/15">
                 {topics.map((t) => (
                   <tr key={t.id}>
-                    <td className="p-3 font-bold text-[#F7DECA]">{t.number}</td>
-                    <td className="p-3 font-medium text-[#F7DECA]">{t.title}</td>
-                    <td className="p-3 text-[#D5C5AA]">{t.mainSpeaker.name}</td>
-                    <td className="p-3 text-[#D5C5AA]/80">{t.provokerLabel}</td>
+                    <td className="p-3 font-bold text-[#F7DECA]">
+                      Pauta {t.number}
+                    </td>
+                    <td className="p-3 font-medium text-[#F7DECA]">
+                      {t.title}
+                    </td>
+                    <td className="p-3 text-[#D5C5AA]">
+                      {t.mainSpeaker.name}
+                    </td>
+                    <td className="p-3 text-[#D5C5AA]/80">
+                      15m Exposição + 5m P&amp;R
+                    </td>
                     <td className="p-3 text-right font-mono text-[#F7DECA]">
                       {formatSecondsMMSS(t.durationSec)}
                       {typeof t.actualDurationSec === "number" && (
@@ -256,15 +274,15 @@ async function AdminDashboardContent() {
           </div>
         </div>
 
-        {/* Cronograma-Base 131 minutos (§2.3) */}
+        {/* Programação Oficial 145 minutos (10 etapas) */}
         <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 rounded-2xl space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg text-[#F7DECA]">
-                Cronograma-Base (131:00)
+                Programação Oficial (145 min)
               </h2>
               <p className="text-xs text-[#D5C5AA]/70">
-                9 blocos macro · {operationalSteps.length} sub-etapas
+                10 etapas macro · {event.certifiedHours}h certificadas
               </p>
             </div>
             <Link
@@ -280,18 +298,18 @@ async function AdminDashboardContent() {
             {macroSteps.map((ms) => (
               <div
                 key={ms.id}
-                className="border border-[#D5C5AA]/15 bg-[#030A06] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"
+                className="border border-[#D5C5AA]/15 bg-[#030A06] px-3.5 py-2 rounded-xl flex items-center justify-between gap-2 text-xs"
               >
                 <div className="min-w-0">
-                  <span className="font-bold text-[#14532D] mr-1.5">
-                    #{ms.macroOrder}
-                  </span>
-                  <span className="font-medium text-[#F7DECA] truncate">
+                  <span className="font-medium text-[#F7DECA] truncate block">
                     {ms.title}
+                  </span>
+                  <span className="text-[10px] text-[#D5C5AA]/70">
+                    {ms.responsibleName}
                   </span>
                 </div>
                 <span className="font-mono font-semibold text-[#F7DECA] shrink-0">
-                  {formatSecondsMMSS(ms.durationSec)}
+                  {Math.round(ms.durationSec / 60)} min
                 </span>
               </div>
             ))}
@@ -299,14 +317,14 @@ async function AdminDashboardContent() {
             <div className="pt-2 border-t border-[#D5C5AA]/20 flex items-center justify-between text-xs font-bold text-[#F7DECA] px-1">
               <span>TOTAL PROGRAMADO</span>
               <span className="font-mono text-sm text-[#14532D]">
-                {Math.floor(totalMacroSec / 60)}:00 min
+                {Math.floor(totalMacroSec / 60)} min (2h25)
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Atalhos Rápidos da Arquitetura ADMIN (§3.1) */}
+      {/* Atalhos Rápidos da Arquitetura ADMIN */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
           href="/admin/cronograma"
@@ -315,10 +333,10 @@ async function AdminDashboardContent() {
           <CalendarClock className="w-5 h-5 text-[#14532D] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-sm text-[#F7DECA]">
-              Cronograma & Etapas
+              Programação Oficial (145 min)
             </div>
             <p className="text-xs text-[#D5C5AA]/75">
-              Ajuste durações dos 9 blocos e das 40 etapas operacionais.
+              Visualize as 10 etapas oficiais e gerencie o bloqueio em andamento.
             </p>
           </div>
         </Link>
@@ -330,10 +348,11 @@ async function AdminDashboardContent() {
           <Settings className="w-5 h-5 text-[#14532D] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-sm text-[#F7DECA]">
-              Pautas, Palestrantes & Regras
+              Especialistas, Pautas &amp; Certificado
             </div>
             <p className="text-xs text-[#D5C5AA]/75">
-              Configure os {speakers.length} palestrantes, 6 pautas e limites.
+              Configure os {speakers.length} especialistas (Paula, Daniel,
+              Janaína, Denilson e Sérgio) e as 5 pautas.
             </p>
           </div>
         </Link>
@@ -345,10 +364,10 @@ async function AdminDashboardContent() {
           <KeyRound className="w-5 h-5 text-[#14532D] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-sm text-[#F7DECA]">
-              Acessos RBAC & Auditoria
+              Perfis de Operação &amp; Auditoria
             </div>
             <p className="text-xs text-[#D5C5AA]/75">
-              Gerencie operadores, curadores, mediadores e histórico de logs.
+              Administrador, Produtor, Moderador e Operador Audiovisual.
             </p>
           </div>
         </Link>
@@ -361,11 +380,10 @@ async function AdminDashboardContent() {
           <MonitorPlay className="w-5 h-5 text-[#14532D] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-sm text-[#F7DECA]">
-              Testar Sincronia no Telão
+              Abrir Exibição Pública (ARENA)
             </div>
             <p className="text-xs text-[#D5C5AA]/75">
-              Abra a tela ARENA em outra aba e valide a sincronização em tempo
-              real.
+              Abra o telão em tela cheia com todas as telas do novo formato.
             </p>
           </div>
         </Link>

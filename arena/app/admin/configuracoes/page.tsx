@@ -37,6 +37,8 @@ async function AdminConfiguracoesContent() {
     ? new Date(event.scheduledStartAt).toISOString().slice(0, 16)
     : "";
 
+  const isLocked = event.status === "LIVE" || event.scheduleLocked;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
       {/* Cabeçalho */}
@@ -45,20 +47,21 @@ async function AdminConfiguracoesContent() {
           Módulo 8 · Configurações Estruturais da Arena
         </span>
         <h1 className="mt-1 font-display text-2xl sm:text-3xl text-[#F7DECA]">
-          Identificação do Evento, Cadastro das 6 Pautas e Palestrantes
+          Identificação do Evento, Carga Horária Certificada, 5 Pautas e Especialistas
         </h1>
         <p className="mt-1 text-xs sm:text-sm text-[#D5C5AA]/80">
-          Qualquer alteração salva abaixo atualiza imediatamente a versão de
-          estado (`LiveState.seq`) e sincroniza todas as interfaces conectadas.
+          O evento possui programação de 145 minutos (2h25) e carga horária
+          certificada configurável independentemente pela organização (padrão:
+          4 horas).
         </p>
       </div>
 
-      {/* 1. Identificação do Evento e Parâmetros Operacionais (§2.1 e §5.1) */}
+      {/* 1. Identificação do Evento e Parâmetros Operacionais */}
       <section className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 sm:p-8 rounded-2xl space-y-6">
         <div className="flex items-center gap-2 text-[#F7DECA]">
           <Settings className="w-5 h-5 text-[#14532D]" />
           <h2 className="font-display text-xl">
-            1. Identificação do Evento & Regras de Interação
+            1. Identificação do Evento, Certificação &amp; Regras de Interação
           </h2>
         </div>
 
@@ -104,7 +107,7 @@ async function AdminConfiguracoesContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1.5">
                 Público Estimado
@@ -133,7 +136,20 @@ async function AdminConfiguracoesContent() {
 
             <div>
               <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1.5">
-                Limite de Caracteres por Pergunta (§5.1)
+                Carga Horária Certificada (h)
+              </label>
+              <input
+                type="number"
+                name="certifiedHours"
+                defaultValue={event.certifiedHours}
+                required
+                className="w-full px-3.5 py-2.5 text-xs border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1.5">
+                Limite Caracteres Pergunta
               </label>
               <input
                 type="number"
@@ -146,7 +162,7 @@ async function AdminConfiguracoesContent() {
 
             <div>
               <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1.5">
-                Máx. Perguntas / Participante / Pauta
+                Perguntas Ativas / Pauta
               </label>
               <input
                 type="number"
@@ -206,7 +222,7 @@ async function AdminConfiguracoesContent() {
                   name="showTimerOnArena"
                   defaultChecked={event.showTimerOnArena}
                 />
-                <span>Exibir cronômetro no telão público ARENA (§7.4)</span>
+                <span>Exibir cronômetro no telão público ARENA</span>
               </label>
               <label className="inline-flex items-center gap-2 text-xs text-[#F7DECA] cursor-pointer">
                 <input
@@ -215,6 +231,17 @@ async function AdminConfiguracoesContent() {
                   defaultChecked={event.soundAlertsEnabled}
                 />
                 <span>Habilitar alertas sonoros discretos (2m / 30s / 0s)</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-xs text-[#F7DECA] cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="requireCredential"
+                  defaultChecked={event.requireCredential}
+                />
+                <span>
+                  Exigir código de Credencial Individual (ANM-001..250) para
+                  votar/perguntar
+                </span>
               </label>
             </div>
 
@@ -231,12 +258,12 @@ async function AdminConfiguracoesContent() {
         </form>
       </section>
 
-      {/* 2. Cadastro e Edição das 6 Pautas (§2.2) */}
+      {/* 2. Cadastro e Edição das 5 Pautas Oficiais */}
       <section className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 sm:p-8 rounded-2xl space-y-6">
         <div className="flex items-center gap-2 text-[#F7DECA]">
           <BookOpen className="w-5 h-5 text-[#14532D]" />
           <h2 className="font-display text-xl">
-            2. Cadastro das 6 Pautas Oficiais (Seção 2.2)
+            2. Cadastro das 5 Pautas Oficiais (15 min Exposição + 5 min P&amp;R)
           </h2>
         </div>
 
@@ -254,12 +281,13 @@ async function AdminConfiguracoesContent() {
                   Pauta {t.number}
                 </span>
                 <span className="text-xs text-[#D5C5AA]/70">
-                  Duração atual: {Math.round(t.durationSec / 60)} minutos
+                  Duração atual: {Math.round(t.durationSec / 60)} minutos (15m
+                  Exposição + 5m P&amp;R)
                 </span>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-6">
                   <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1">
                     Título da Pauta {t.number}
                   </label>
@@ -272,9 +300,9 @@ async function AdminConfiguracoesContent() {
                   />
                 </div>
 
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-3">
                   <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1">
-                    Palestrante Principal
+                    Especialista Responsável
                   </label>
                   <select
                     name="mainSpeakerId"
@@ -291,25 +319,7 @@ async function AdminConfiguracoesContent() {
 
                 <div className="lg:col-span-2">
                   <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1">
-                    Provocador (Vínculo)
-                  </label>
-                  <select
-                    name="provokerId"
-                    defaultValue={t.provokerId || ""}
-                    className="w-full px-3 py-2 text-xs border border-[#D5C5AA]/30 bg-[#0A150D] text-[#F7DECA]"
-                  >
-                    <option value="">Participação Coletiva</option>
-                    {speakers.map((sp) => (
-                      <option key={sp.id} value={sp.id}>
-                        {sp.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="lg:col-span-2">
-                  <label className="block text-xs font-semibold text-[#D5C5AA]/80 mb-1">
-                    Rótulo Provocador
+                    Fase Final (5 min)
                   </label>
                   <input
                     type="text"
@@ -334,7 +344,16 @@ async function AdminConfiguracoesContent() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex items-center justify-end gap-2">
+                {isLocked && (
+                  <input
+                    type="text"
+                    name="justification"
+                    required
+                    placeholder="Justificativa obrigatória (evento em andamento)..."
+                    className="w-80 px-3 py-1.5 text-xs border border-amber-500/40 bg-[#0A150D] text-[#F7DECA]"
+                  />
+                )}
                 <button
                   type="submit"
                   className="px-4 py-2 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
@@ -348,12 +367,12 @@ async function AdminConfiguracoesContent() {
         </div>
       </section>
 
-      {/* 3. Cadastro dos 5 Palestrantes Recorrentes (§2.1) */}
+      {/* 3. Cadastro dos 5 Especialistas (Paula, Daniel, Janaína, Denilson, Sérgio) */}
       <section className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 sm:p-8 rounded-2xl space-y-6">
         <div className="flex items-center gap-2 text-[#F7DECA]">
           <UserCheck className="w-5 h-5 text-[#14532D]" />
           <h2 className="font-display text-xl">
-            3. Palestrantes Recorrentes da Arena (5 Participantes)
+            3. Os 5 Especialistas do Encontro (Paula, Daniel, Janaína, Denilson e Sérgio)
           </h2>
         </div>
 
@@ -374,7 +393,7 @@ async function AdminConfiguracoesContent() {
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-[11px] font-semibold text-[#D5C5AA]/75">
-                      Nome do Palestrante
+                      Nome do Especialista
                     </label>
                     <input
                       type="text"
@@ -386,7 +405,7 @@ async function AdminConfiguracoesContent() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-[#D5C5AA]/75">
-                      Papel / Pauta
+                      Atuação no Evento
                     </label>
                     <input
                       type="text"
