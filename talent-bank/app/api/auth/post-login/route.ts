@@ -10,6 +10,32 @@ import {
 } from "@/lib/session";
 import { ConsentPurpose, UserRole } from "@prisma/client";
 
+function buildClientRedirectResponse(targetPath: string) {
+  const safePath = targetPath.startsWith("/talentos")
+    ? targetPath
+    : `/talentos${targetPath.startsWith("/") ? "" : "/"}${targetPath}`;
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=${safePath}" />
+    <script>window.location.replace(${JSON.stringify(safePath)});</script>
+  </head>
+  <body style="background:#FFFFFF;color:#1E293B;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-size:13px;">
+    Entrando no Talent Hub...
+  </body>
+</html>`;
+
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store, max-age=0",
+    },
+  });
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const email = (sp.get("email") || "").trim().toLowerCase();
@@ -19,6 +45,7 @@ export async function GET(req: NextRequest) {
 
   if (email) {
     let user = await prisma.user.findUnique({ where: { email } });
+    let isNewCandidate = false;
 
     if (!user) {
       let role: UserRole = UserRole.CANDIDATE;
@@ -66,6 +93,7 @@ export async function GET(req: NextRequest) {
           data: { usedAt: new Date(), usedByEmail: user.email },
         });
       } else {
+        isNewCandidate = true;
         await prisma.candidateProfile.create({
           data: {
             userId: user.id,
@@ -76,10 +104,14 @@ export async function GET(req: NextRequest) {
         });
       }
     } else if (clerkId && !user.clerkId) {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { clerkId },
-      });
+      try {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { clerkId },
+        });
+      } catch {
+        // Ignora conflito caso clerkId já esteja vinculado
+      }
     }
 
     const token = createSessionToken(user.id, user.email, user.role);
@@ -100,17 +132,18 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.redirect(
-      new URL(`/talentos${getDestinationForRole(user.role)}`, req.url)
-    );
+    const dest = isNewCandidate
+      ? "/perfil"
+      : getDestinationForRole(user.role);
+    return buildClientRedirectResponse(`/talentos${dest}`);
   }
 
   const existing = await getAuthenticatedUser();
   if (existing) {
-    return NextResponse.redirect(
-      new URL(`/talentos${getDestinationForRole(existing.role)}`, req.url)
+    return buildClientRedirectResponse(
+      `/talentos${getDestinationForRole(existing.role)}`
     );
   }
 
-  return NextResponse.redirect(new URL("/talentos/entrar", req.url));
+  return buildClientRedirectResponse("/talentos/entrar");
 }

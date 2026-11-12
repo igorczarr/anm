@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/admin-ui";
 import { Suspense } from "react";
 import { getCurrentAdminUser } from "@/lib/admin-auth";
 import { getConsolidatedEventReport } from "@/lib/reports";
@@ -29,60 +30,24 @@ async function AdminRelatoriosContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Cabeçalho */}
-      <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 sm:p-8 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <BarChart3 className="w-4 h-4" />
-            Módulo 7 · Relatórios e Indicadores Pós-Evento (Formato Oficial v2.0)
-          </span>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F7DECA]">
-            Consolidação da Arena & Exportações Oficiais
-          </h1>
-          <p className="text-xs sm:text-sm text-[#D5C5AA]/80">
-            Acompanhe o cumprimento do cronograma de {report.durationPlannedMin} min
-            ({report.certifiedHours}h certificadas), métricas das 5 exposições,
-            votação da Mesa-Redonda e exporte em PDF executivo, CSV e XLSX.
-          </p>
-        </div>
-
-        {/* Botões de Download */}
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <a
-            href="/api/admin/reports/pdf"
-            download
-            className="px-4 py-2.5 rounded-xl bg-[#14532D] text-white hover:bg-[#166534] transition font-semibold text-xs flex items-center gap-2 shadow-sm"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Exportar PDF</span>
-          </a>
-
-          <a
-            href="/api/admin/reports/csv"
-            download
-            className="px-4 py-2.5 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] hover:border-[#D5C5AA]/60 transition font-semibold text-xs flex items-center gap-2"
-          >
-            <Download className="w-4 h-4 text-emerald-400" />
-            <span>Exportar CSV</span>
-          </a>
-
-          <a
-            href="/api/admin/reports/xlsx"
-            download
-            className="px-4 py-2.5 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] hover:border-[#D5C5AA]/60 transition font-semibold text-xs flex items-center gap-2"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            <span>Exportar Excel (XLSX)</span>
-          </a>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Relatórios"
+        subtitle={`${report.durationPlannedMin} min planejados · ${report.certifiedHours} h certificadas`}
+        actions={
+          <div className="flex gap-2">
+            <a href="/api/admin/reports/pdf" download className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> PDF</a>
+            <a href="/api/admin/reports/csv" download className="px-3.5 py-2 rounded-lg ring-1 ring-[#D5C5AA]/20 text-[#F7DECA] text-xs font-medium flex items-center gap-1.5 hover:bg-white/5"><Download className="w-3.5 h-3.5" /> CSV</a>
+            <a href="/api/admin/reports/xlsx" download className="px-3.5 py-2 rounded-lg ring-1 ring-[#D5C5AA]/20 text-[#F7DECA] text-xs font-medium flex items-center gap-1.5 hover:bg-white/5"><FileSpreadsheet className="w-3.5 h-3.5" /> Excel</a>
+          </div>
+        }
+      />
 
       {/* 1. Indicadores Gerais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
+        <div className="bg-[#0A120D]/90 border border-white/[0.08] p-5 rounded-2xl space-y-2 shadow-xl backdrop-blur-sm">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Duração & Carga Horária</span>
+            <span>Duração &amp; Carga Horária</span>
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="font-display text-2xl text-[#F7DECA]">
@@ -94,9 +59,9 @@ async function AdminRelatoriosContent() {
           </div>
         </div>
 
-        <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
+        <div className="bg-[#0A120D]/90 border border-white/[0.08] p-5 rounded-2xl space-y-2 shadow-xl backdrop-blur-sm">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Credenciais & Sessões</span>
+            <span>Credenciais &amp; Sessões</span>
             <Users className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="font-display text-2xl text-[#F7DECA]">
@@ -108,9 +73,9 @@ async function AdminRelatoriosContent() {
           </div>
         </div>
 
-        <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
+        <div className="bg-[#0A120D]/90 border border-white/[0.08] p-5 rounded-2xl space-y-2 shadow-xl backdrop-blur-sm">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
-            <span>Perguntas (Plateia & Mediação)</span>
+            <span>Perguntas (Plateia &amp; Mediação)</span>
             <MessageSquare className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="font-display text-2xl text-[#F7DECA]">
@@ -125,7 +90,7 @@ async function AdminRelatoriosContent() {
           </div>
         </div>
 
-        <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-5 rounded-2xl space-y-2">
+        <div className="bg-[#0A120D]/90 border border-white/[0.08] p-5 rounded-2xl space-y-2 shadow-xl backdrop-blur-sm">
           <div className="flex items-center justify-between text-xs text-[#D5C5AA]/70">
             <span>Votação da Mesa-Redonda</span>
             <Vote className="w-4 h-4 text-emerald-400" />
@@ -134,14 +99,14 @@ async function AdminRelatoriosContent() {
             {report.totalVotes} votos
           </div>
           <div className="text-xs text-[#D5C5AA]/80">
-            Alterações de voto rastreadas:{" "}
+            Alterações rastreadas:{" "}
             <strong>{report.voteChangesCount}</strong>
           </div>
         </div>
       </div>
 
       {/* 2. Consolidação da Votação da Mesa-Redonda (20 min) */}
-      <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-6 rounded-2xl space-y-4">
+      <div className="bg-[#0A120D]/90 border border-white/[0.08] p-6 rounded-2xl space-y-4 shadow-xl backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
@@ -151,7 +116,7 @@ async function AdminRelatoriosContent() {
               {report.roundtablePoll.question}
             </h2>
           </div>
-          <span className="px-3 py-1 rounded-full bg-[#14532D] text-white text-xs font-bold">
+          <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/40 text-xs font-semibold">
             {report.roundtablePoll.totalVotes} votos válidos ·{" "}
             {report.roundtablePoll.voteChangesCount} alterações de voto
           </span>
@@ -205,10 +170,10 @@ async function AdminRelatoriosContent() {
       </div>
 
       {/* 3. Relatório Detalhado por Pauta (1 a 5) */}
-      <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 rounded-2xl space-y-4">
+      <div className="bg-[#0A120D]/90 border border-white/[0.08] p-6 rounded-2xl space-y-4 shadow-xl backdrop-blur-sm">
         <div>
           <h2 className="font-display text-xl text-[#F7DECA]">
-            Indicadores por Pauta (5 Exposições Individuais: 15m Exposição + 5m P&R)
+            Indicadores por Pauta (5 Exposições Individuais: 15m Exposição + 5m P&amp;R)
           </h2>
           <p className="text-xs text-[#D5C5AA]/70">
             Tempos de exposição e resposta, perguntas recebidas e identificação da
@@ -220,12 +185,12 @@ async function AdminRelatoriosContent() {
           {report.topics.map((t) => (
             <div
               key={t.number}
-              className="border border-[#D5C5AA]/20 bg-[#030A06] p-5 rounded-2xl space-y-3"
+              className="border border-white/[0.08] bg-[#050C07] p-5 rounded-2xl space-y-3 shadow-md"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D5C5AA]/15 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-0.5 rounded-full bg-[#14532D] text-white text-xs font-bold">
+                    <span className="px-3 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/40 text-xs font-bold font-mono">
                       Pauta {t.number}
                     </span>
                     <h3 className="font-display text-lg text-[#F7DECA]">
@@ -239,25 +204,25 @@ async function AdminRelatoriosContent() {
 
                 <div className="flex items-center gap-4 text-xs font-mono">
                   <div>
-                    <span className="text-[#D5C5AA]/70 block">Exposição (15m)</span>
+                    <span className="text-[#D5C5AA]/50 block text-[10px]">Exposição (15m)</span>
                     <strong className="text-[#F7DECA]">
                       {formatSecondsMMSS(t.expositionDurationSec)}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-[#D5C5AA]/70 block">P&R (5m)</span>
+                    <span className="text-[#D5C5AA]/50 block text-[10px]">P&amp;R (5m)</span>
                     <strong className="text-[#F7DECA]">
                       {formatSecondsMMSS(t.qaDurationSec)}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-[#D5C5AA]/70 block">Total Pauta</span>
+                    <span className="text-[#D5C5AA]/50 block text-[10px]">Total Pauta</span>
                     <strong className="text-emerald-400">
                       {formatSecondsMMSS(t.actualDurationSec)}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-[#D5C5AA]/70 block">
+                    <span className="text-[#D5C5AA]/50 block text-[10px]">
                       Perguntas (Rec/Apr/Resp)
                     </span>
                     <strong className="text-[#F7DECA]">
@@ -269,13 +234,13 @@ async function AdminRelatoriosContent() {
               </div>
 
               {t.answeredQuestionText && (
-                <div className="text-xs bg-[#0A150D] border border-[#D5C5AA]/15 p-3.5 rounded-xl space-y-1">
+                <div className="text-xs bg-[#0A120D] border border-white/[0.06] p-3.5 rounded-xl space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-emerald-400">
+                    <span className="font-semibold text-emerald-400">
                       Pergunta Selecionada ({t.answeredQuestionOrigin})
                     </span>
                     {t.answeredQuestionModerator && (
-                      <span className="text-[#D5C5AA]/70">
+                      <span className="text-[#D5C5AA]/60">
                         Moderador(a): {t.answeredQuestionModerator}
                       </span>
                     )}
@@ -291,13 +256,13 @@ async function AdminRelatoriosContent() {
       </div>
 
       {/* 4. Privacidade e Conformidade LGPD */}
-      <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#0A120D]/90 border border-white/[0.08] p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-sm">
         <div className="space-y-1">
-          <div className="font-bold text-sm text-[#F7DECA] flex items-center gap-2">
+          <div className="font-semibold text-sm text-[#F7DECA] flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            Conformidade LGPD & Expurgo de Dados Técnicos
+            Conformidade LGPD &amp; Expurgo de Dados Técnicos
           </div>
-          <p className="text-xs text-[#D5C5AA]/75 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#D5C5AA]/70 max-w-2xl leading-relaxed">
             Após a conferência e exportação do relatório final, a organização pode
             limpar identificadores de IP e metadados das conexões, preservando os
             resultados estatísticos agregados sem qualquer rastro pessoal.
@@ -307,7 +272,7 @@ async function AdminRelatoriosContent() {
         <form action={purgeParticipantTechnicalDataAction}>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-950/20 text-red-300 hover:bg-red-950/40 transition font-semibold text-xs flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl border border-red-500/40 bg-red-950/30 text-red-300 hover:bg-red-950/50 transition font-semibold text-xs flex items-center gap-2 shrink-0 cursor-pointer shadow-sm"
           >
             <Trash2 className="w-4 h-4" />
             <span>Executar Limpeza Técnica LGPD</span>

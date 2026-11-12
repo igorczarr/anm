@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { AdminRoleType } from "@prisma/client";
+import { Prisma, AdminRoleType } from "@prisma/client";
+
+export type AuthenticatedAdminUser = Prisma.AdminUserGetPayload<{
+  include: { role: true };
+}>;
 
 export const ADMIN_SESSION_COOKIE = "anm_arena_admin_session";
 export const PARTICIPANT_SESSION_COOKIE = "anm_arena_participant_session";
@@ -93,7 +97,21 @@ export function verifyAnonymousSessionToken(rawToken: string): string | null {
   return sessionId;
 }
 
-export async function getAuthenticatedAdmin() {
+// Cache em memória de curta duração para validação de sessão admin (evita re-query no PostgreSQL a cada clique)
+const adminSessionCache = new Map<
+  string,
+  { user: AuthenticatedAdminUser; expiresAt: number }
+>();
+
+export function invalidateAdminSessionCache(userId?: string) {
+  if (userId) {
+    adminSessionCache.delete(userId);
+  } else {
+    adminSessionCache.clear();
+  }
+}
+
+export async function getAuthenticatedAdmin(): Promise<AuthenticatedAdminUser | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
@@ -102,14 +120,27 @@ export async function getAuthenticatedAdmin() {
     const parsed = verifySessionToken(token);
     if (!parsed) return null;
 
+    const now = Date.now();
+    const cached = adminSessionCache.get(parsed.userId);
+    if (cached && cached.expiresAt > now) {
+      return cached.user;
+    }
+
     const user = await prisma.adminUser.findUnique({
       where: { id: parsed.userId },
       include: { role: true },
     });
 
     if (!user || user.status !== "ACTIVE" || user.revokedAt) {
+      adminSessionCache.delete(parsed.userId);
       return null;
     }
+
+    // Cache por 60 segundos
+    adminSessionCache.set(parsed.userId, {
+      user,
+      expiresAt: now + 60000,
+    });
 
     return user;
   } catch {

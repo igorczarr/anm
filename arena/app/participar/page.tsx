@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useArenaSync } from "@/hooks/use-arena-sync";
 import { PUBLIC_STATUS_LABELS } from "@/lib/question-status";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   AlertCircle,
   ArrowRight,
   CheckCircle2,
   Edit3,
   Home,
-  Info,
   KeyRound,
   ListChecks,
   Lock,
@@ -23,7 +23,7 @@ import {
   WifiOff,
 } from "lucide-react";
 
-type TabKey = "inicio" | "pergunta" | "votacao" | "minhas" | "info";
+type TabKey = "inicio" | "pergunta" | "votacao" | "minhas";
 
 interface MyQuestionItem {
   id: string;
@@ -129,7 +129,13 @@ export default function ParticiparPage() {
 
   useEffect(() => {
     fetchMe();
-  }, [fetchMe, snapshot?.seq]);
+  }, [fetchMe]);
+
+  useEffect(() => {
+    if (me?.authenticated && snapshot?.seq) {
+      fetchMe();
+    }
+  }, [fetchMe, me?.authenticated, snapshot?.seq]);
 
   // Sincroniza alternativa já votada quando há votação ativa
   const activePoll = snapshot?.activePoll;
@@ -319,6 +325,27 @@ export default function ParticiparPage() {
   const myVoteForActivePoll = me?.votes.find(
     (v) => v.pollId === activePoll?.id
   );
+
+  const isAfterTopic5 = useMemo(() => {
+    const currentStepOrder = snapshot?.activeStep?.sequenceOrder ?? 0;
+    const currentMacroOrder = snapshot?.activeStep?.macroOrder ?? 0;
+    const currentMode = snapshot?.liveState?.arenaMode;
+    const stepType = snapshot?.activeStep?.stepType;
+
+    // Votação se torna prioridade no início apenas após a conclusão da Pauta 5
+    return Boolean(
+      currentMode === "POLL_OPEN" ||
+      currentMode === "POLL_RESULTS" ||
+      currentMode === "ROUNDTABLE" ||
+      currentMode === "CLOSING" ||
+      stepType === "TRANSITION" ||
+      stepType === "ROUNDTABLE" ||
+      stepType === "CLOSING" ||
+      currentMacroOrder >= 8 ||
+      currentStepOrder >= 13
+    );
+  }, [snapshot?.activeStep, snapshot?.liveState?.arenaMode]);
+
   const requireCredential =
     me?.requireCredential ?? snapshot?.event.requireCredential ?? false;
 
@@ -329,10 +356,17 @@ export default function ParticiparPage() {
   // Tela Inicial de Entrada (antes de iniciar sessão)
   if (!loadingSession && me && !me.authenticated) {
     return (
-      <div className="max-w-md mx-auto px-4 py-10">
+      <div className="max-w-md mx-auto px-4 py-8 space-y-3">
+        <div className="flex justify-end">
+          <ThemeToggle compact />
+        </div>
         <div className="border border-[#D5C5AA]/30 bg-[#0A150D]/95 p-7 rounded-2xl space-y-6 text-center shadow-lg">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-[#14532D] text-white flex items-center justify-center shadow-md">
-            <Smartphone className="w-7 h-7" />
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-[#0A150D] border border-emerald-500/40 p-2 flex items-center justify-center shadow-xl">
+            <img
+              src="/img/logo.png"
+              alt="A Nova Moeda"
+              className="w-full h-full object-contain filter drop-shadow"
+            />
           </div>
 
           <div className="space-y-2">
@@ -434,65 +468,79 @@ export default function ParticiparPage() {
       )}
 
       {/* Cabeçalho Compacto do Participante */}
-      <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-4 rounded-2xl space-y-2.5">
-        <div className="flex items-center justify-between text-xs gap-2">
-          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-400">
-            <Radio className="w-3.5 h-3.5" />
-            {snapshot?.activeTopic
-              ? `Pauta ${snapshot.activeTopic.number} de 5`
-              : snapshot?.liveState.arenaMode === "ROUNDTABLE"
-                ? "Mesa-Redonda (20 min)"
-                : snapshot?.liveState.arenaMode === "INTRODUCTION"
-                  ? "Introdução e Contexto"
-                  : "Arena Ao Vivo"}
-          </span>
-          <div className="flex items-center gap-1.5">
+      <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-4 rounded-2xl space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#0A150D] border border-emerald-500/40 p-1 flex items-center justify-center shadow-sm shrink-0">
+              <img
+                src="/img/logo.png"
+                alt="A Nova Moeda"
+                className="w-full h-full object-contain filter drop-shadow"
+              />
+            </div>
+            <div>
+              <div className="font-display font-bold text-sm sm:text-base text-[#F7DECA] leading-tight">
+                A Nova Moeda
+              </div>
+              <div className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 mt-0.5">
+                <Radio className="w-3 h-3 animate-pulse" />
+                <span>
+                  {snapshot?.activeTopic
+                    ? `Pauta ${snapshot.activeTopic.number} de 5`
+                    : "Arena Interativa"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle compact />
             {me?.credentialCode ? (
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 font-mono text-[11px] font-bold">
-                Credencial {me.credentialCode}
+              <span className="px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 font-mono text-[11px] font-bold">
+                #{me.credentialCode}
               </span>
             ) : (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#030A06] border border-[#D5C5AA]/25 text-[#D5C5AA] font-mono text-[11px]">
-                Sessão #{me?.code || "..."}
+              <span className="px-2.5 py-1 rounded-full bg-[#030A06] border border-[#D5C5AA]/25 text-[#D5C5AA] font-mono text-[11px]">
+                #{me?.code || "..."}
               </span>
             )}
           </div>
         </div>
 
-        <h1 className="font-display text-base sm:text-lg text-[#F7DECA] leading-snug">
-          {snapshot?.activeTopic
-            ? snapshot.activeTopic.title
-            : snapshot?.activeStep?.title || (snapshot?.event.name || "A Nova Moeda")}
-        </h1>
-
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#D5C5AA]/80 pt-1 border-t border-[#D5C5AA]/15">
-          <span>
-            Responsável:{" "}
-            <strong className="text-[#F7DECA]">
-              {snapshot?.activeTopic?.mainSpeaker.name ||
-                snapshot?.activeStep?.responsibleName ||
-                "Organização"}
-            </strong>
-          </span>
-          <span>
-            Fase:{" "}
-            <strong className="text-[#F7DECA]">
-              {snapshot?.activeStep?.phaseLabel ||
-                snapshot?.activeStep?.title ||
-                "Aguardando início"}
-            </strong>
-          </span>
-        </div>
+        {snapshot?.activeTopic ? (
+          <div className="pt-2 border-t border-[#D5C5AA]/15 space-y-1">
+            <h1 className="font-display text-sm sm:text-base text-[#F7DECA] font-bold leading-snug">
+              {snapshot.activeTopic.title}
+            </h1>
+            {snapshot.activeTopic.mainSpeaker && (
+              <div className="flex items-center gap-2 text-xs text-[#D5C5AA]/80">
+                {snapshot.activeTopic.mainSpeaker.photoUrl && (
+                  <img
+                    src={snapshot.activeTopic.mainSpeaker.photoUrl}
+                    alt=""
+                    className="w-4 h-4 rounded-full object-cover border border-[#D5C5AA]/40"
+                  />
+                )}
+                <span>
+                  Palestrante:{" "}
+                  <strong className="text-[#F7DECA]">
+                    {snapshot.activeTopic.mainSpeaker.name}
+                  </strong>
+                </span>
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
 
-      {/* Menu Simples de 5 itens */}
-      <nav className="grid grid-cols-5 gap-1.5 bg-[#0A150D] border border-[#D5C5AA]/25 p-1.5 rounded-2xl text-[11px]">
+      {/* Menu Simples de 4 itens */}
+      <nav className="grid grid-cols-4 gap-2 bg-[#0A150D] border border-[#D5C5AA]/25 p-1.5 rounded-2xl text-[11px]">
         {[
           { key: "inicio", label: "Início", icon: Home },
           { key: "pergunta", label: "Pergunta", icon: MessageSquarePlus },
           {
             key: "votacao",
-            label: isPollOpen ? "Mesa ●" : "Votação",
+            label: isPollOpen ? "Votação ●" : "Votação",
             icon: Vote,
           },
           {
@@ -500,7 +548,6 @@ export default function ParticiparPage() {
             label: `Minhas (${(me?.questions.length ?? 0) + (me?.votes.length ?? 0)})`,
             icon: ListChecks,
           },
-          { key: "info", label: "Evento", icon: Info },
         ].map((item) => {
           const Icon = item.icon;
           const active = activeTab === item.key;
@@ -522,18 +569,20 @@ export default function ParticiparPage() {
         })}
       </nav>
 
-      {/* ABA 1: INÍCIO — Exibe simultaneamente Votação da Mesa-Redonda (quando aberta na Pauta 5) e Pergunta da Pauta */}
+      {/* ABA 1: INÍCIO */}
       {activeTab === "inicio" && (
         <div className="space-y-4">
-          {/* CARD DE VOTAÇÃO DA MESA-REDONDA — Exibido diretamente no Início quando aberto (especialmente durante a Pauta 5) */}
-          {isPollOpen && activePoll && (
+          {/* SE NÃO HOUVER PAUTA ATIVA OU SE FOR APÓS A PAUTA 5: VOTAÇÃO DA MESA-REDONDA GANHA DESTAQUE PRINCIPAL */}
+          {(!snapshot?.activeTopic || isAfterTopic5) && activePoll && (
             <div className="border-2 border-emerald-500/60 bg-[#0A150D] p-5 rounded-2xl space-y-4 shadow-lg">
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="px-2.5 py-1 rounded-full bg-[#14532D] text-white font-bold uppercase tracking-wider flex items-center gap-1.5">
                   <Vote className="w-3.5 h-3.5" />
                   {activePoll.status === "TIE_BREAK"
-                    ? "Desempate Rápido (2 min) · Mesa-Redonda"
-                    : "Votação da Mesa-Redonda Aberta"}
+                    ? "Desempate Rápido · Mesa-Redonda"
+                    : activePoll.status === "CLOSED" || activePoll.status === "RESULTS_PUBLISHED"
+                      ? "Resultado da Votação · Mesa-Redonda"
+                      : "Votação Oficial da Mesa-Redonda"}
                 </span>
                 {myVoteForActivePoll && (
                   <span className="text-[11px] font-semibold text-emerald-300">
@@ -547,9 +596,9 @@ export default function ParticiparPage() {
                   {activePoll.question}
                 </h2>
                 <p className="text-xs text-[#D5C5AA]/80">
-                  Escolha a questão que os 5 especialistas (Paula, Daniel,
-                  Janaína, Denilson e Sérgio) debaterão na Mesa-Redonda. Você
-                  pode alterar seu voto enquanto a votação estiver aberta.
+                  {activePoll.status === "CLOSED" || activePoll.status === "RESULTS_PUBLISHED"
+                    ? "A votação foi encerrada. Veja a questão que guiará a Mesa-Redonda."
+                    : "Escolha qual questão deve guiar o debate entre os 5 especialistas na Mesa-Redonda."}
                 </p>
               </div>
 
@@ -580,11 +629,15 @@ export default function ParticiparPage() {
                       <button
                         key={opt.id}
                         type="button"
-                        disabled={submittingVote}
+                        disabled={
+                          submittingVote ||
+                          activePoll.status === "CLOSED" ||
+                          activePoll.status === "RESULTS_PUBLISHED"
+                        }
                         onClick={() => handleCastVote(opt.id)}
                         className={`w-full p-3.5 rounded-xl border text-left text-xs transition flex flex-col gap-1.5 cursor-pointer ${
                           isSelected
-                            ? "border-emerald-400 bg-emerald-950/40 text-[#F7DECA] font-bold"
+                            ? "border-emerald-400 bg-emerald-950/40 text-[#F7DECA] font-bold shadow-sm"
                             : "border-[#D5C5AA]/25 bg-[#030A06] text-[#F7DECA] hover:border-[#D5C5AA]/50"
                         }`}
                       >
@@ -594,7 +647,12 @@ export default function ParticiparPage() {
                           </span>
                           {isSelected && (
                             <span className="px-2 py-0.5 rounded-full bg-[#14532D] text-white text-[10px] font-bold shrink-0">
-                              Seu voto atual
+                              Seu voto
+                            </span>
+                          )}
+                          {opt.isWinner && (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold shrink-0">
+                              Eleita
                             </span>
                           )}
                         </div>
@@ -606,16 +664,25 @@ export default function ParticiparPage() {
             </div>
           )}
 
-          {/* CARD DE ENVIO OU EDIÇÃO DE PERGUNTA DA PAUTA ATUAL */}
+          {/* 2. CARD PRINCIPAL NO INÍCIO: FORMULAR E ENVIAR PERGUNTA PARA O PALESTRANTE DA PAUTA */}
           <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3.5">
             <div className="flex items-center justify-between text-xs gap-2">
-              <span className="font-bold text-[#F7DECA] flex items-center gap-1.5">
-                <MessageSquarePlus className="w-4 h-4 text-emerald-400" />
-                {activeTopicQuestion
-                  ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
-                  : snapshot?.activeTopic
-                    ? `Pergunta para a Pauta ${snapshot.activeTopic.number} (${snapshot.activeTopic.mainSpeaker.name})`
-                    : "Pergunta para a Pauta Atual"}
+              <span className="font-bold text-[#F7DECA] flex items-center gap-2">
+                {snapshot?.activeTopic?.mainSpeaker?.photoUrl && (
+                  <img
+                    src={snapshot.activeTopic.mainSpeaker.photoUrl}
+                    alt=""
+                    className="w-5 h-5 rounded-full object-cover border border-[#D5C5AA]/40 shrink-0 inline-block"
+                  />
+                )}
+                <MessageSquarePlus className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  {activeTopicQuestion
+                    ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
+                    : snapshot?.activeTopic
+                      ? `Pergunta para a Pauta ${snapshot.activeTopic.number} (${snapshot.activeTopic.mainSpeaker.name})`
+                      : "Pergunta para a Pauta Atual"}
+                </span>
               </span>
               <span className="font-mono text-[11px] text-[#D5C5AA]/75">
                 {activeTopicQuestion
@@ -721,7 +788,26 @@ export default function ParticiparPage() {
             )}
           </div>
 
-          {/* Se a votação da Mesa-Redonda já foi encerrada e há questão vencedora publicada, exibe ao participante */}
+          {/* 3. DURANTE AS PAUTAS 1 A 5: BANNER DISCRETO DE ACESSO À VOTAÇÃO (SEM POLUIR O INÍCIO) */}
+          {!isAfterTopic5 && isPollOpen && activePoll && (
+            <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-3.5 rounded-xl flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-[#D5C5AA]/85 min-w-0">
+                <Vote className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="truncate">
+                  Votação da Mesa-Redonda disponível na aba <strong>Votação</strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab("votacao")}
+                className="px-3 py-1.5 rounded-lg bg-[#14532D] text-white text-[11px] font-semibold hover:bg-emerald-700 transition shrink-0 cursor-pointer"
+              >
+                Abrir Votação
+              </button>
+            </div>
+          )}
+
+          {/* 4. RESULTADO DA VOTAÇÃO SE JÁ APURADO */}
           {activePoll &&
             (activePoll.status === "CLOSED" ||
               activePoll.status === "RESULTS_PUBLISHED") &&
@@ -759,6 +845,26 @@ export default function ParticiparPage() {
               resposta.
             </p>
           </div>
+
+          {snapshot?.activeTopic && (
+            <div className="flex items-center gap-3.5 p-3 rounded-xl bg-[#030A06] border border-[#D5C5AA]/20">
+              {snapshot.activeTopic.mainSpeaker?.photoUrl && (
+                <img
+                  src={snapshot.activeTopic.mainSpeaker.photoUrl}
+                  alt={snapshot.activeTopic.mainSpeaker.name}
+                  className="w-12 h-12 rounded-xl object-cover border border-[#D5C5AA]/30 shrink-0"
+                />
+              )}
+              <div className="space-y-0.5 min-w-0">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                  Pauta {snapshot.activeTopic.number} · {snapshot.activeTopic.mainSpeaker.name}
+                </div>
+                <div className="text-xs font-semibold text-[#F7DECA] truncate">
+                  {snapshot.activeTopic.title}
+                </div>
+              </div>
+            </div>
+          )}
 
           {questionFeedback && (
             <div
@@ -833,10 +939,10 @@ export default function ParticiparPage() {
                 Votação da Mesa-Redonda
               </h2>
               <p className="text-xs text-[#D5C5AA]/75">
-                A votação pública ocorre durante a{" "}
-                <strong>Pauta 5 (Janaína)</strong> para escolher qual das 3
-                questões centrais será debatida pelos 5 especialistas na
-                Mesa-Redonda.
+                Votação aberta para todo o público escolher qual das 3
+                questões centrais será debatida pelos 5 especialistas
+                (Daniel, Janaína, Denilson Carneiro, Sérgio Passos e Dulcila) na
+                Mesa-Redonda sob mediação de Paula.
               </p>
             </div>
           ) : (
@@ -845,11 +951,43 @@ export default function ParticiparPage() {
                 <span className="px-2.5 py-1 rounded-full bg-[#14532D] text-white font-bold">
                   {activePoll.status === "TIE_BREAK"
                     ? "Rodada de Desempate (2 min)"
-                    : "Votação da Mesa-Redonda"}
+                    : "Votação da Mesa-Redonda (Aberta)"}
                 </span>
                 <span className="font-mono text-[#D5C5AA]/80">
                   {isPollOpen ? `Aberta · ${timer.formatted}` : "Encerrada"}
                 </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#030A06] border border-[#D5C5AA]/20 space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA]/80 block">
+                  Debatedores da Mesa-Redonda (Mediação: Paula)
+                </span>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {[
+                    { id: "1", name: "Daniel", photoUrl: "/img/Daniel.jpeg" },
+                    { id: "2", name: "Janaína", photoUrl: "/img/Janaina.jpeg" },
+                    { id: "3", name: "Denilson", photoUrl: "/img/Denilson.png" },
+                    { id: "4", name: "Sérgio", photoUrl: "/img/Sergio.jpeg" },
+                    { id: "5", name: "Dulcila", photoUrl: "/img/Dulcila.jpeg" },
+                  ].map((sp) => (
+                    <div key={sp.id} className="flex flex-col items-center text-center gap-1">
+                      {sp.photoUrl ? (
+                        <img
+                          src={sp.photoUrl}
+                          alt={sp.name}
+                          className="w-10 h-10 rounded-xl object-cover border border-[#D5C5AA]/30"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-[#14532D] text-white flex items-center justify-center font-bold text-xs">
+                          {sp.name.charAt(0)}
+                        </div>
+                      )}
+                      <span className="text-[10px] text-[#F7DECA] font-medium truncate w-full">
+                        {sp.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <h2 className="font-bold text-base text-[#F7DECA] leading-snug">
@@ -1067,47 +1205,6 @@ export default function ParticiparPage() {
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* ABA 5: INFORMAÇÕES DO EVENTO & PRIVACIDADE LGPD */}
-      {activeTab === "info" && (
-        <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-4 text-xs">
-          <div className="space-y-1">
-            <span className="font-semibold uppercase tracking-wider text-emerald-400">
-              Sobre o Evento · Formato Oficial v2.0
-            </span>
-            <h2 className="font-display text-lg text-[#F7DECA]">
-              {snapshot?.event.name || "A Nova Moeda"}
-            </h2>
-            <p className="text-[#D5C5AA]/80">
-              Instituição: {snapshot?.event.institution || "UEFS"} · Duração
-              programada: {snapshot?.event.programmedDurationMin ?? 145} minutos
-              (2h25) · Carga horária certificada:{" "}
-              {snapshot?.event.certifiedHours ?? 4}h · 5 Pautas + Mesa-Redonda.
-            </p>
-          </div>
-
-          <div className="pt-3 border-t border-[#D5C5AA]/15 space-y-2">
-            <div className="font-bold text-[#F7DECA] flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Aviso de Privacidade e Proteção de Dados (LGPD)
-            </div>
-            <p className="text-[#D5C5AA]/80 leading-relaxed">
-              Esta plataforma segue os princípios de minimização, finalidade e
-              transparência da LGPD. Não coletamos nome, CPF, e-mail ou
-              telefone dos participantes na Arena. Sua sessão utiliza apenas um
-              código técnico anônimo (`#{me?.code || "ANM"}`) ou credencial de
-              check-in para garantir unicidade de voto e permitir que você edite
-              sua pergunta no próprio celular.
-            </p>
-            <p className="text-[#D5C5AA]/80 leading-relaxed">
-              No telão público da Arena são exibidos apenas o texto aprovado da
-              pergunta selecionada (com identificação clara se veio da plateia
-              ou da mediação) e a apuração oficial da questão vencedora da
-              Mesa-Redonda.
-            </p>
           </div>
         </div>
       )}

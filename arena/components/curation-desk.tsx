@@ -15,6 +15,8 @@ import {
   upsertAndActivateMediationReserveQuestionAction,
 } from "@/app/actions/curation-and-polls";
 import { toggleQuestionsOpenAction } from "@/app/actions/live-operation";
+import { getSpeakerPhoto } from "@/lib/speakers";
+import { Tabs, SearchBox, EmptyState } from "@/components/admin-ui";
 import {
   BookmarkCheck,
   Check,
@@ -25,12 +27,12 @@ import {
   Filter,
   MonitorPlay,
   MonitorX,
-  Search,
+  Radio,
+  Save,
+  ShieldCheck,
   Sparkles,
   Star,
   XCircle,
-  ShieldCheck,
-  Save,
 } from "lucide-react";
 
 interface CurationQuestion {
@@ -73,12 +75,10 @@ export function CurationDesk() {
   const [topics, setTopics] = useState<CurationTopic[]>([]);
   const [questions, setQuestions] = useState<CurationQuestion[]>([]);
   const [selectedTopicFilter, setSelectedTopicFilter] = useState<string>("ALL");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [statusTab, setStatusTab] = useState<string>("ALL");
   const [sortOrder, setSortOrder] = useState<"DESC" | "ASC">("DESC");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [editingReserveTopicId, setEditingReserveTopicId] = useState<
-    string | null
-  >(null);
+  const [editingReserveTopicId, setEditingReserveTopicId] = useState<string | null>(null);
 
   const fetchCurationData = useCallback(async () => {
     try {
@@ -103,169 +103,155 @@ export function CurationDesk() {
     });
   };
 
-  const activeTopicId = snapshot?.liveState.activeTopicId ?? null;
-  const displayedQuestionId = snapshot?.liveState.selectedQuestionId ?? null;
-  const questionsOpen = snapshot?.liveState.questionsOpen ?? false;
-
   const focusedTopicId =
-    selectedTopicFilter === "ALL"
-      ? activeTopicId || topics[0]?.id || null
-      : selectedTopicFilter;
+    selectedTopicFilter !== "ALL"
+      ? selectedTopicFilter
+      : snapshot?.activeTopic?.id || topics[0]?.id;
 
-  const focusedTopic = topics.find((t) => t.id === focusedTopicId) || null;
+  const focusedTopic = topics.find((t) => t.id === focusedTopicId) || topics[0];
+
   const primaryQuestion = questions.find(
     (q) => q.topicId === focusedTopicId && q.isPrimary
   );
   const reserveQuestion = questions.find(
-    (q) =>
-      q.topicId === focusedTopicId &&
-      (q.isReserve || q.isMediationReserve)
+    (q) => q.topicId === focusedTopicId && q.isReserve
   );
 
-  const filteredQuestions = questions
-    .filter((q) => {
-      if (selectedTopicFilter !== "ALL" && q.topicId !== selectedTopicFilter) {
-        return false;
-      }
-      if (statusFilter !== "ALL" && q.status !== statusFilter) {
-        return false;
-      }
-      const codeStr =
-        q.session?.credentialCode || q.session?.anonymousCode || "Mediação";
-      if (
-        searchQuery.trim() &&
-        !q.text.toLowerCase().includes(searchQuery.trim().toLowerCase()) &&
-        !codeStr.toLowerCase().includes(searchQuery.trim().toLowerCase())
-      ) {
-        return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      const tA = new Date(a.createdAt).getTime();
-      const tB = new Date(b.createdAt).getTime();
-      return sortOrder === "DESC" ? tB - tA : tA - tB;
-    });
+  const questionsOpen = snapshot?.liveState?.questionsOpen ?? false;
+  const displayedQuestionId = snapshot?.selectedQuestion?.id;
+
+  const filteredQuestions = questions.filter((q) => {
+    if (selectedTopicFilter !== "ALL" && q.topicId !== selectedTopicFilter) {
+      return false;
+    }
+    if (statusTab === "UNANALYZED" && q.status !== "RECEIVED") {
+      return false;
+    }
+    if (statusTab === "APPROVED" && !["APPROVED", "SELECTED", "DISPLAYED", "ANSWERED"].includes(q.status)) {
+      return false;
+    }
+    if (statusTab === "SELECTED" && !q.isPrimary && !q.isReserve) {
+      return false;
+    }
+    if (statusTab === "REJECTED" && !["REJECTED", "DUPLICATE"].includes(q.status)) {
+      return false;
+    }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchText = q.text.toLowerCase().includes(query);
+      const matchCred = q.session?.credentialCode?.toLowerCase().includes(query);
+      const matchAnon = q.session?.anonymousCode?.toLowerCase().includes(query);
+      return matchText || matchCred || matchAnon;
+    }
+    return true;
+  }).sort((a, b) => {
+    const da = new Date(a.createdAt).getTime();
+    const db = new Date(b.createdAt).getTime();
+    return sortOrder === "DESC" ? db - da : da - db;
+  });
 
   const unanalyzedCount = questions.filter(
     (q) => !q.isMediationReserve && q.status === "RECEIVED"
   ).length;
 
+  const approvedCount = questions.filter((q) =>
+    ["APPROVED", "SELECTED", "DISPLAYED", "ANSWERED"].includes(q.status)
+  ).length;
+
   return (
     <div className="space-y-6">
-      {/* Barra de Status de Captação e Indicador para o Moderador */}
-      <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-5 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* 1. Barra de Status de Captação e Controles do Telão */}
+      <div className="bg-[#0A120D]/90 border border-white/[0.08] p-4 sm:p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 backdrop-blur-sm shadow-xl">
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <span
-            className={`px-3 py-1 rounded-full font-bold ${
+            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 text-xs transition ${
               questionsOpen
-                ? "bg-emerald-950/30 text-emerald-300 border border-emerald-500/30"
-                : "bg-amber-950/30 text-amber-300 border border-amber-500/30"
+                ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40"
+                : "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/40"
             }`}
           >
-            {questionsOpen
-              ? "Envio de Perguntas ABERTO (Exposição 15 min)"
-              : "Envio de Perguntas ENCERRADO"}
+            <Radio className={`w-3.5 h-3.5 ${questionsOpen ? "animate-pulse text-emerald-400" : "text-amber-400"}`} />
+            {questionsOpen ? "Captação da Plateia ABERTA" : "Captação FECHADA"}
           </span>
 
-          <span className="px-3 py-1 rounded-full bg-sky-900/50 text-sky-200 border border-sky-500/30 font-bold">
-            Não analisadas: {unanalyzedCount}
-          </span>
+          {unanalyzedCount > 0 && (
+            <span className="px-3 py-1.5 rounded-xl bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/40 font-semibold font-mono text-xs">
+              {unanalyzedCount} {unanalyzedCount === 1 ? "pendente" : "pendentes"}
+            </span>
+          )}
 
-          <span className="text-[#D5C5AA]/80">
-            Regra oficial:{" "}
-            <strong className="text-[#F7DECA]">
-              1 pergunta selecionada por pauta (5 min P&amp;R)
-            </strong>
+          <span className="text-[#D5C5AA]/70 text-xs">
+            Regra: <strong className="text-[#F7DECA]">1 pergunta selecionada por pauta</strong> (5 min P&amp;R)
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {displayedQuestionId && (
             <button
               type="button"
               disabled={isPending}
-              onClick={() =>
-                runCurationAction(() => removeQuestionFromArenaAction())
-              }
-              className="px-3.5 py-2 bg-red-600 text-white font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer"
+              onClick={() => runCurationAction(() => removeQuestionFromArenaAction())}
+              className="px-3.5 py-1.5 bg-red-600/90 hover:bg-red-600 text-white font-medium text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm transition"
             >
-              <MonitorX className="w-4 h-4" />
-              <span>Retirar Pergunta do Telão</span>
+              <MonitorX className="w-3.5 h-3.5" />
+              <span>Retirar do Telão</span>
             </button>
           )}
 
           <button
             type="button"
             disabled={isPending}
-            onClick={() =>
-              runCurationAction(() => toggleQuestionsOpenAction(!questionsOpen))
-            }
-            className="px-4 py-2 bg-[#D5C5AA] text-[#030A06] font-semibold text-xs rounded-xl cursor-pointer"
+            onClick={() => runCurationAction(() => toggleQuestionsOpenAction(!questionsOpen))}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
+              questionsOpen
+                ? "bg-white/[0.08] hover:bg-white/[0.12] text-[#F7DECA] ring-1 ring-white/[0.12]"
+                : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm"
+            }`}
           >
-            {questionsOpen
-              ? "Fechar Recebimento Manualmente"
-              : "Reabrir Recebimento de Perguntas"}
+            {questionsOpen ? "Fechar Recebimento" : "Abrir Recebimento"}
           </button>
         </div>
       </div>
 
-      {/* Painel de Seleção para o Mediador: Pergunta Selecionada (Plateia) & Pergunta de Reserva da Mediação */}
+      {/* 2. Painel Duplo em Destaque: Pergunta Oficial da Pauta e Pergunta de Reserva da Mediação */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Pergunta Selecionada para os 5 Minutos de Pergunta e Resposta */}
-        <div className="border-2 border-[#14532D] bg-[#0A150D]/90 p-5 rounded-2xl space-y-3">
+        {/* Pergunta Selecionada para os 5 min de P&R */}
+        <div className="bg-[#0A120D]/90 border border-emerald-500/30 p-5 rounded-2xl space-y-3 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#14532D] uppercase tracking-wider flex items-center gap-1.5">
-              <Star className="w-4 h-4" />
-              Pergunta Selecionada (5 min P&amp;R) ·{" "}
-              {focusedTopic
-                ? `Pauta ${focusedTopic.number} (${focusedTopic.mainSpeaker.name})`
-                : "Pauta Atual"}
+            <span className="font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+              <Star className="w-3.5 h-3.5 fill-emerald-400/20" />
+              Pergunta Selecionada (P&amp;R) · {focusedTopic ? `Pauta ${focusedTopic.number} (${focusedTopic.mainSpeaker.name})` : "Pauta Atual"}
             </span>
             {primaryQuestion ? (
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/30 text-emerald-300 font-bold text-[11px] flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] ring-1 ring-emerald-500/40 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                {primaryQuestion.isMediationReserve
-                  ? "Pergunta da Mediação"
-                  : "Pergunta da Plateia"}
+                {primaryQuestion.isMediationReserve ? "Mediação" : "Plateia"}
               </span>
             ) : (
-              <span className="text-[#D5C5AA]/70">Nenhuma selecionada</span>
+              <span className="text-[#D5C5AA]/50 text-[11px]">Nenhuma selecionada</span>
             )}
           </div>
 
           {primaryQuestion ? (
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-[#F7DECA] bg-[#030A06] p-3.5 rounded-xl border border-[#D5C5AA]/20">
+              <p className="text-sm font-medium text-[#F7DECA] bg-[#050C07] p-3.5 rounded-xl border border-white/[0.06] leading-relaxed">
                 &ldquo;{primaryQuestion.text}&rdquo;
               </p>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div className="space-x-3 text-[#D5C5AA]/75">
-                  <span>
-                    Status:{" "}
-                    <strong>
-                      {QUESTION_STATUS_LABELS[primaryQuestion.status]}
-                    </strong>
-                  </span>
+                <div className="flex items-center gap-3 text-[#D5C5AA]/70 text-[11px]">
+                  <span>Status: <strong className="text-emerald-300">{QUESTION_STATUS_LABELS[primaryQuestion.status]}</strong></span>
                   {primaryQuestion.moderatedBy && (
-                    <span>
-                      Selecionada por:{" "}
-                      <strong className="text-[#F7DECA]">
-                        {primaryQuestion.moderatedBy.fullName}
-                      </strong>
-                    </span>
+                    <span>Mod.: <strong className="text-[#F7DECA]">{primaryQuestion.moderatedBy.fullName}</strong></span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={isPending}
-                    onClick={() =>
-                      runCurationAction(() =>
-                        displayQuestionOnArenaAction(primaryQuestion.id)
-                      )
-                    }
-                    className="px-3.5 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => runCurationAction(() => displayQuestionOnArenaAction(primaryQuestion.id))}
+                    className="px-3 py-1.5 bg-[#D5C5AA] hover:bg-[#F7DECA] text-[#030A06] font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm transition"
                   >
                     <MonitorPlay className="w-3.5 h-3.5" />
                     <span>Exibir na ARENA</span>
@@ -282,7 +268,7 @@ export function CurationDesk() {
                         )
                       )
                     }
-                    className="px-3 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-semibold rounded-xl cursor-pointer"
+                    className="px-3 py-1.5 bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.1] text-[#F7DECA] text-xs font-medium rounded-xl cursor-pointer transition"
                   >
                     Marcar Respondida
                   </button>
@@ -290,36 +276,29 @@ export function CurationDesk() {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-[#D5C5AA]/75">
-              Aprove uma pergunta da plateia abaixo e clique em{" "}
-              <strong>&ldquo;Selecionar para Resposta&rdquo;</strong>, ou acione
-              a <strong>Pergunta de Reserva da Mediação</strong> ao lado.
+            <p className="text-xs text-[#D5C5AA]/60 py-2">
+              Selecione uma pergunta da plateia na fila abaixo ou acione a pergunta de reserva da mediação para garantir os 5 minutos de resposta do especialista.
             </p>
           )}
         </div>
 
-        {/* Pergunta de Reserva da Mediação (§7 — Tratamento quando nenhuma pergunta da plateia for aprovada) */}
-        <div className="border border-[#D5C5AA]/25 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3">
+        {/* Pergunta de Reserva da Mediação */}
+        <div className="bg-[#0A120D]/90 border border-white/[0.08] p-5 rounded-2xl space-y-3 shadow-lg">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#F7DECA] uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#14532D]" />
-              Pergunta de Reserva da Mediação ·{" "}
-              {focusedTopic ? `Pauta ${focusedTopic.number}` : "Pauta Atual"}
+            <span className="font-semibold text-[#F7DECA] uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              Pergunta de Reserva da Mediação · {focusedTopic ? `Pauta ${focusedTopic.number}` : "Pauta Atual"}
             </span>
             <button
               type="button"
               onClick={() =>
                 setEditingReserveTopicId(
-                  editingReserveTopicId === focusedTopicId
-                    ? null
-                    : focusedTopicId
+                  editingReserveTopicId === focusedTopicId ? null : focusedTopicId
                 )
               }
-              className="text-[11px] font-semibold text-[#D5C5AA] underline cursor-pointer"
+              className="text-[11px] font-medium text-emerald-400 hover:text-emerald-300 cursor-pointer transition"
             >
-              {editingReserveTopicId === focusedTopicId
-                ? "Fechar Edição"
-                : "Editar / Cadastrar Reserva"}
+              {editingReserveTopicId === focusedTopicId ? "Fechar" : "Editar / Cadastrar"}
             </button>
           </div>
 
@@ -331,34 +310,35 @@ export function CurationDesk() {
                   setEditingReserveTopicId(null);
                 })
               }
-              className="space-y-2.5 text-xs bg-[#030A06] p-3.5 rounded-xl border border-[#D5C5AA]/25"
+              className="space-y-3 text-xs bg-[#050C07] p-3.5 rounded-xl border border-white/[0.08]"
             >
               <input type="hidden" name="topicId" value={focusedTopicId} />
-              <label className="block font-semibold text-[#D5C5AA]">
-                Texto da Pergunta da Mediação (Nunca atribuída falsamente à
-                plateia):
+              <label className="block text-xs font-medium text-[#D5C5AA]/80">
+                Texto da Pergunta da Mediação:
               </label>
               <textarea
                 name="text"
                 rows={2}
                 required
                 defaultValue={reserveQuestion?.text || ""}
-                className="w-full px-3 py-2 border border-[#D5C5AA]/30 bg-[#0A150D] text-[#F7DECA] rounded-lg"
+                placeholder="Insira a pergunta formulada previamente pela equipe de mediação..."
+                className="w-full px-3 py-2 text-xs rounded-xl bg-[#0A120D] border border-white/[0.1] text-[#F7DECA] focus:outline-none focus:border-emerald-500/60"
               />
               <div className="flex items-center justify-between gap-2">
-                <label className="inline-flex items-center gap-1.5 text-[#D5C5AA] cursor-pointer">
+                <label className="inline-flex items-center gap-2 text-xs text-[#D5C5AA]/80 cursor-pointer">
                   <input
                     type="checkbox"
                     name="activateNow"
                     value="true"
                     defaultChecked
+                    className="accent-emerald-500 rounded"
                   />
-                  <span>Acionar imediatamente como Pergunta Selecionada</span>
+                  <span>Acionar imediatamente como selecionada</span>
                 </label>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-3.5 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold rounded-lg flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-[#D5C5AA] hover:bg-[#F7DECA] text-[#030A06] font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer transition"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Salvar Reserva</span>
@@ -367,43 +347,27 @@ export function CurationDesk() {
             </form>
           ) : reserveQuestion ? (
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-[#F7DECA] bg-[#030A06] p-3.5 rounded-xl border border-[#D5C5AA]/20">
+              <p className="text-sm font-medium text-[#F7DECA] bg-[#050C07] p-3.5 rounded-xl border border-white/[0.06] leading-relaxed">
                 &ldquo;{reserveQuestion.text}&rdquo;
               </p>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[#D5C5AA]/75">
-                  Identificação na ARENA:{" "}
-                  <strong className="text-amber-300">
-                    {reserveQuestion.isMediationReserve
-                      ? "Pergunta da Mediação"
-                      : "Reserva da Plateia"}
-                  </strong>
+                <span className="text-[11px] text-[#D5C5AA]/70">
+                  Origem: <strong className="text-amber-300">Equipe de Mediação</strong>
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={isPending}
-                    onClick={() =>
-                      runCurationAction(() =>
-                        selectTopicQuestionSlotAction(
-                          reserveQuestion.id,
-                          "PRIMARY"
-                        )
-                      )
-                    }
-                    className="px-3 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-semibold rounded-xl cursor-pointer"
+                    onClick={() => runCurationAction(() => selectTopicQuestionSlotAction(reserveQuestion.id, "PRIMARY"))}
+                    className="px-3 py-1.5 bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.1] text-[#F7DECA] text-xs font-medium rounded-xl cursor-pointer transition"
                   >
-                    Acionar para Resposta (5m)
+                    Acionar para Resposta
                   </button>
                   <button
                     type="button"
                     disabled={isPending}
-                    onClick={() =>
-                      runCurationAction(() =>
-                        displayQuestionOnArenaAction(reserveQuestion.id)
-                      )
-                    }
-                    className="px-3.5 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => runCurationAction(() => displayQuestionOnArenaAction(reserveQuestion.id))}
+                    className="px-3 py-1.5 bg-[#D5C5AA] hover:bg-[#F7DECA] text-[#030A06] font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm transition"
                   >
                     <MonitorPlay className="w-3.5 h-3.5" />
                     <span>Exibir no Telão</span>
@@ -412,142 +376,123 @@ export function CurationDesk() {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-[#D5C5AA]/75">
-              Caso nenhuma pergunta da plateia seja aprovada até o fim da
-              exposição, acione a Pergunta de Reserva da Mediação para manter os
-              5 minutos de Pergunta e Resposta.
+            <p className="text-xs text-[#D5C5AA]/60 py-2">
+              Se nenhuma pergunta da plateia for aprovada até o fim da exposição de 15 min, acione a pergunta de reserva da mediação para conduzir o debate.
             </p>
           )}
         </div>
       </div>
 
-      {/* Filtros por Pauta (1 a 5), Busca e Ordenação */}
-      <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs">
-        <div className="sm:col-span-4 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por texto ou credencial..."
-            className="w-full pl-9 pr-3 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
-          />
-        </div>
+      {/* 3. Filtros & Busca */}
+      <div className="space-y-3">
+        <Tabs
+          value={statusTab}
+          onChange={setStatusTab}
+          items={[
+            { key: "ALL", label: "Todas", count: questions.length },
+            { key: "UNANALYZED", label: "Não analisadas", count: unanalyzedCount },
+            { key: "APPROVED", label: "Aprovadas", count: approvedCount },
+            { key: "SELECTED", label: "Selecionadas" },
+            { key: "REJECTED", label: "Recusadas / Duplicadas" },
+          ]}
+          right={
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedTopicFilter}
+                onChange={(e) => setSelectedTopicFilter(e.target.value)}
+                className="px-3 py-1.5 rounded-xl bg-[#050C07] border border-white/[0.08] text-xs text-[#F7DECA] focus:outline-none focus:border-emerald-500/60"
+              >
+                <option value="ALL">Todas as pautas (1 a 5)</option>
+                {topics.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    Pauta {t.number}: {t.mainSpeaker.name}
+                  </option>
+                ))}
+              </select>
 
-        <div className="sm:col-span-3 flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-[#14532D] shrink-0" />
-          <select
-            value={selectedTopicFilter}
-            onChange={(e) => setSelectedTopicFilter(e.target.value)}
-            className="w-full px-2.5 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
-          >
-            <option value="ALL">Todas as Pautas (1 a 5)</option>
-            {topics.map((t) => (
-              <option key={t.id} value={t.id}>
-                Pauta {t.number} — {t.mainSpeaker.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="sm:col-span-3">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-2.5 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
-          >
-            <option value="ALL">Todos os Estados</option>
-            {(
-              Object.entries(QUESTION_STATUS_LABELS) as [
-                QuestionStatusKey,
-                string,
-              ][]
-            ).map(([k, label]) => (
-              <option key={k} value={k}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="sm:col-span-2">
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as "DESC" | "ASC")}
-            className="w-full px-2.5 py-2 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
-          >
-            <option value="DESC">Mais recentes</option>
-            <option value="ASC">Mais antigas</option>
-          </select>
-        </div>
+              <SearchBox
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar pergunta ou credencial..."
+              />
+            </div>
+          }
+        />
       </div>
 
-      {/* Fila de Perguntas em Tempo Real */}
+      {/* 4. Lista de Perguntas */}
       <div className="space-y-3">
         {filteredQuestions.length === 0 ? (
-          <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/80 p-8 rounded-2xl text-center text-xs text-[#D5C5AA]/75">
-            Nenhuma pergunta encontrada para os filtros selecionados.
-          </div>
+          <EmptyState text="Nenhuma pergunta encontrada para os filtros selecionados." />
         ) : (
           filteredQuestions.map((q) => {
             const isUnanalyzed = q.status === "RECEIVED";
             const isOnScreen = displayedQuestionId === q.id;
-            const canSelectOrDisplay = !["REJECTED", "DUPLICATE"].includes(
-              q.status
-            );
+            const canSelectOrDisplay = !["REJECTED", "DUPLICATE"].includes(q.status);
+            const speakerPhoto = getSpeakerPhoto(q.topic.title);
 
             return (
               <div
                 key={q.id}
-                className={`border p-5 rounded-2xl space-y-3.5 transition ${
+                className={`bg-[#0A120D]/90 border rounded-2xl p-4 sm:p-5 space-y-3 transition shadow-md ${
                   isOnScreen
-                    ? "border-2 border-[#14532D] bg-emerald-950/30"
-                    : isUnanalyzed
-                      ? "border-sky-400 bg-[#0A150D]"
-                      : "border-[#D5C5AA]/20 bg-[#0A150D]/85"
+                    ? "border-emerald-500 bg-emerald-950/20 ring-1 ring-emerald-500/50"
+                    : q.isPrimary
+                      ? "border-amber-500/40 bg-amber-950/10"
+                      : isUnanalyzed
+                        ? "border-sky-500/40 bg-[#0A120D]"
+                        : "border-white/[0.08]"
                 }`}
               >
+                {/* Metadados Superiores */}
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#14532D] text-white font-bold">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold text-[11px] ring-1 ring-emerald-500/30">
                       Pauta {q.topic.number}
                     </span>
+
                     <span
-                      className={`px-2.5 py-0.5 rounded-full border font-semibold ${
-                        QUESTION_STATUS_STYLES[q.status]
+                      className={`px-2.5 py-0.5 rounded-lg border font-semibold text-[11px] ${
+                        QUESTION_STATUS_STYLES[q.status] || "border-white/10 text-[#D5C5AA]"
                       }`}
                     >
-                      {QUESTION_STATUS_LABELS[q.status]}
+                      {QUESTION_STATUS_LABELS[q.status] || q.status}
                     </span>
+
                     {q.isMediationReserve ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-900/60 text-amber-200 border border-amber-400/40 font-bold">
-                        ◆ Pergunta da Mediação
+                      <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30 text-[11px] font-semibold">
+                        Mediação
                       </span>
                     ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-[#D5C5AA] font-medium">
-                        Pergunta da Plateia
+                      <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.06] text-[#D5C5AA]/70 text-[11px]">
+                        Plateia
                       </span>
                     )}
+
                     {q.editCount > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-sky-950/60 text-sky-300 text-[10px] font-semibold">
+                      <span className="px-2 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 text-[10px] font-mono">
                         Editada ({q.editCount}x)
                       </span>
                     )}
+
                     {q.isPrimary && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold">
-                        ★ Selecionada para Resposta (5m)
+                      <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/25 text-amber-300 ring-1 ring-amber-500/40 font-semibold text-[11px] flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-amber-400" />
+                        Selecionada para Resposta (5m)
                       </span>
                     )}
+
                     {isOnScreen && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white font-bold">
-                        ● NO TELÃO AGORA
+                      <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500 text-[#030A06] font-bold text-[11px] flex items-center gap-1">
+                        <Radio className="w-3 h-3 animate-pulse" />
+                        NO TELÃO AGORA
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 text-[11px] text-[#D5C5AA]/75 font-mono">
+                  <div className="flex items-center gap-3 text-[11px] text-[#D5C5AA]/60 font-mono">
                     {q.moderatedBy && (
-                      <span className="text-emerald-300">
+                      <span className="text-emerald-400">
                         Mod.: {q.moderatedBy.fullName}
                       </span>
                     )}
@@ -555,81 +500,67 @@ export function CurationDesk() {
                       {q.isMediationReserve
                         ? "Origem: Mediação"
                         : q.session?.credentialCode
-                          ? `Credencial ${q.session.credentialCode}`
-                          : `Sessão #${q.session?.anonymousCode || "Anônima"}`}
+                          ? `Credencial: ${q.session.credentialCode}`
+                          : `Sessão: #${q.session?.anonymousCode || "Anônima"}`}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {new Date(q.createdAt).toLocaleTimeString("pt-BR")}
+                      {new Date(q.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-sm sm:text-base font-medium text-[#F7DECA] leading-relaxed">
+                {/* Pergunta */}
+                <p className="text-sm font-medium text-[#F7DECA] leading-relaxed">
                   {q.text}
                 </p>
 
-                {/* Botões de Moderação e Seleção */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#D5C5AA]/15 text-xs">
+                {/* Botões de Ação */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.06] text-xs">
+                  {/* Moderação de Status */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() =>
-                        runCurationAction(() =>
-                          moderateQuestionStatusAction(q.id, "ANALYZING")
-                        )
-                      }
-                      className="px-2.5 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-medium flex items-center gap-1 cursor-pointer"
+                      onClick={() => runCurationAction(() => moderateQuestionStatusAction(q.id, "ANALYZING"))}
+                      className="px-2.5 py-1 rounded-lg bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.08] text-[#D5C5AA] text-[11px] font-medium flex items-center gap-1 cursor-pointer transition"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-3 h-3" />
                       <span>Em Análise</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() =>
-                        runCurationAction(() =>
-                          moderateQuestionStatusAction(q.id, "APPROVED")
-                        )
-                      }
-                      className="px-3 py-1.5 bg-[#D5C5AA] text-[#030A06] font-bold flex items-center gap-1 cursor-pointer"
+                      onClick={() => runCurationAction(() => moderateQuestionStatusAction(q.id, "APPROVED"))}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 ring-1 ring-emerald-500/40 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition"
                     >
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="w-3 h-3" />
                       <span>Aprovar</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() =>
-                        runCurationAction(() =>
-                          moderateQuestionStatusAction(q.id, "REJECTED")
-                        )
-                      }
-                      className="px-2.5 py-1.5 border border-red-500/30 bg-red-950/30 text-red-300 font-semibold flex items-center gap-1 cursor-pointer"
+                      onClick={() => runCurationAction(() => moderateQuestionStatusAction(q.id, "REJECTED"))}
+                      className="px-2.5 py-1 rounded-lg bg-red-950/30 hover:bg-red-950/50 text-red-300 ring-1 ring-red-500/30 text-[11px] font-medium flex items-center gap-1 cursor-pointer transition"
                     >
-                      <XCircle className="w-3.5 h-3.5" />
+                      <XCircle className="w-3 h-3" />
                       <span>Recusar</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() =>
-                        runCurationAction(() =>
-                          moderateQuestionStatusAction(q.id, "DUPLICATE")
-                        )
-                      }
-                      className="px-2.5 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#D5C5AA] font-medium flex items-center gap-1 cursor-pointer"
+                      onClick={() => runCurationAction(() => moderateQuestionStatusAction(q.id, "DUPLICATE"))}
+                      className="px-2.5 py-1 rounded-lg bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.08] text-[#D5C5AA]/70 text-[11px] font-medium flex items-center gap-1 cursor-pointer transition"
                     >
-                      <CopyX className="w-3.5 h-3.5" />
+                      <CopyX className="w-3 h-3" />
                       <span>Duplicada</span>
                     </button>
                   </div>
 
-                  {/* Seleção Principal (1 por pauta) / Reserva / Exibição no Telão */}
+                  {/* Seleção e Telão */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {canSelectOrDisplay && (
                       <>
@@ -644,18 +575,14 @@ export function CurationDesk() {
                               )
                             )
                           }
-                          className={`px-3 py-1.5 border font-semibold flex items-center gap-1 cursor-pointer ${
+                          className={`px-3 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition ${
                             q.isPrimary
-                              ? "bg-amber-600 text-white border-amber-600"
-                              : "border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
+                              ? "bg-amber-500 text-[#030A06] font-bold shadow-sm"
+                              : "bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.1] text-[#F7DECA]"
                           }`}
                         >
-                          <Star className="w-3.5 h-3.5" />
-                          <span>
-                            {q.isPrimary
-                              ? "Desmarcar Selecionada"
-                              : "Selecionar para Resposta (5m)"}
-                          </span>
+                          <Star className="w-3 h-3" />
+                          <span>{q.isPrimary ? "Desmarcar Selecionada" : "Selecionar para Resposta (5m)"}</span>
                         </button>
 
                         <button
@@ -669,62 +596,43 @@ export function CurationDesk() {
                               )
                             )
                           }
-                          className={`px-3 py-1.5 border font-semibold flex items-center gap-1 cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1 cursor-pointer transition ${
                             q.isReserve
-                              ? "bg-violet-600 text-white border-violet-600"
-                              : "border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA]"
+                              ? "bg-purple-600 text-white font-semibold"
+                              : "bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.08] text-[#D5C5AA]"
                           }`}
                         >
-                          <BookmarkCheck className="w-3.5 h-3.5" />
-                          <span>
-                            {q.isReserve
-                              ? "Desmarcar Reserva"
-                              : "Definir Reserva"}
-                          </span>
+                          <BookmarkCheck className="w-3 h-3" />
+                          <span>{q.isReserve ? "Desmarcar Reserva" : "Definir Reserva"}</span>
                         </button>
 
-                        {[
-                          "APPROVED",
-                          "SELECTED",
-                          "DISPLAYED",
-                          "ANSWERED",
-                        ].includes(q.status) && (
+                        {["APPROVED", "SELECTED", "DISPLAYED", "ANSWERED"].includes(q.status) && (
                           <button
                             type="button"
                             disabled={isPending}
                             onClick={() =>
                               runCurationAction(() =>
-                                isOnScreen
-                                  ? removeQuestionFromArenaAction()
-                                  : displayQuestionOnArenaAction(q.id)
+                                isOnScreen ? removeQuestionFromArenaAction() : displayQuestionOnArenaAction(q.id)
                               )
                             }
-                            className={`px-3 py-1.5 font-bold flex items-center gap-1 cursor-pointer ${
+                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition ${
                               isOnScreen
-                                ? "bg-red-600 text-white"
-                                : "bg-[#D5C5AA] text-[#030A06]"
+                                ? "bg-red-600 text-white hover:bg-red-500 shadow-sm"
+                                : "bg-[#D5C5AA] hover:bg-[#F7DECA] text-[#030A06] shadow-sm"
                             }`}
                           >
-                            <MonitorPlay className="w-3.5 h-3.5" />
-                            <span>
-                              {isOnScreen
-                                ? "Retirar do Telão"
-                                : "Enviar para ARENA"}
-                            </span>
+                            <MonitorPlay className="w-3 h-3" />
+                            <span>{isOnScreen ? "Retirar do Telão" : "Enviar para ARENA"}</span>
                           </button>
                         )}
 
                         <button
                           type="button"
                           disabled={isPending}
-                          onClick={() =>
-                            runCurationAction(() =>
-                              moderateQuestionStatusAction(q.id, "ANSWERED")
-                            )
-                          }
-                          className="px-2.5 py-1.5 border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-medium flex items-center gap-1 cursor-pointer"
+                          onClick={() => runCurationAction(() => moderateQuestionStatusAction(q.id, "ANSWERED"))}
+                          className="px-2.5 py-1 rounded-lg bg-[#050C07] hover:bg-white/[0.05] border border-white/[0.08] text-[#D5C5AA] text-[11px] font-medium flex items-center gap-1 cursor-pointer transition"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#14532D]" />
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span>Respondida</span>
                         </button>
                       </>

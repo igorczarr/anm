@@ -284,7 +284,7 @@ export async function getConsolidatedEventReport(): Promise<ConsolidatedEventRep
       pollQuestion:
         poll?.question ??
         (t.number === 5
-          ? "Votação da Mesa-Redonda (durante Pauta 5)"
+          ? "Exposição + 1 Pergunta e Resposta (5 min) · Votação da Mesa-Redonda Aberta"
           : "Exposição + 1 Pergunta e Resposta (5 min)"),
       optionsDistribution: (poll?.options || []).map((opt) => ({
         order: opt.optionOrder,

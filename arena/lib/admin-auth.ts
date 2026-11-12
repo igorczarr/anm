@@ -75,7 +75,8 @@ export function hasAdminPermission(
     OBSERVER: ["canExportReports"],
   };
 
-  return matrix[user.roleCode]?.includes(permission) ?? false;
+  const role = user.roleCode as AdminRoleType;
+  return matrix[role]?.includes(permission) ?? false;
 }
 
 export async function requireAdminPermission(permission: PermissionKey) {

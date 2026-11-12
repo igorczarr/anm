@@ -11,6 +11,7 @@ import {
   ensureLiveState,
   getPrimaryEvent,
   updateLiveStateAtomic,
+  invalidateStaticEventCache,
 } from "@/lib/live-state";
 import {
   AdjustmentLogEntry,
@@ -208,6 +209,18 @@ export async function startEventAction() {
       actualStartAt: event.actualStartAt ?? new Date(),
     },
   });
+
+  // Votação Oficial da Mesa-Redonda fica aberta desde o início do evento
+  const officialPoll = await prisma.poll.findFirst({
+    where: { eventId: event.id },
+    orderBy: { number: "asc" },
+  });
+  if (officialPoll && (officialPoll.status === "DRAFT" || !officialPoll.openedAt)) {
+    await prisma.poll.update({
+      where: { id: officialPoll.id },
+      data: { status: "OPEN", openedAt: new Date() },
+    });
+  }
 
   const step = await transitionToStep({
     eventId: event.id,
@@ -1087,4 +1100,165 @@ export async function finishEventAction() {
 
   revalidatePath("/admin");
   revalidatePath("/admin/operacao");
+}
+
+/**
+ * Reinicia completamente o evento para permitir múltiplas execuções (testes ou nova rodada).
+ * Retorna o evento para WAITING, zera o cronograma, perguntas de teste e votos,
+ * permitindo executar o evento novamente desde o passo 1.
+ */
+export async function resetEntireEventAction(options?: {
+  clearAudienceQuestions?: boolean;
+  clearAudienceVotes?: boolean;
+}) {
+  const admin = await requireAdminPermission("canOperateTimer");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  const clearQuestions = options?.clearAudienceQuestions ?? true;
+  const clearVotes = options?.clearAudienceVotes ?? true;
+
+  // 1. Resetar o evento para WAITING e desbloquear cronograma
+  await prisma.event.update({
+    where: { id: event.id },
+    data: {
+      status: "WAITING",
+      scheduleLocked: false,
+      actualStartAt: null,
+      actualEndAt: null,
+    },
+  });
+
+  // 2. Resetar todas as etapas operacionais e blocos macro para PENDING
+  await prisma.scheduleStep.updateMany({
+    where: { eventId: event.id },
+    data: {
+      status: "PENDING",
+      actualStartAt: null,
+      actualEndAt: null,
+      actualDurationSec: null,
+      alertTwoMinFired: false,
+      alertThirtySecFired: false,
+      alertZeroFired: false,
+    },
+  });
+
+  // 3. Resetar pautas para PENDING
+  await prisma.topic.updateMany({
+    where: { eventId: event.id },
+    data: {
+      status: "PENDING",
+      primaryQuestionId: null,
+    },
+  });
+
+  // 4. Limpar perguntas da plateia (preservando perguntas de reserva da mediação)
+  if (clearQuestions) {
+    await prisma.question.deleteMany({
+      where: { eventId: event.id, isMediationReserve: false },
+    });
+    await prisma.question.updateMany({
+      where: { eventId: event.id, isMediationReserve: true },
+      data: {
+        status: "APPROVED",
+        isPrimary: false,
+        isReserve: true,
+        displayedAt: null,
+        answeredAt: null,
+        moderatedById: null,
+      },
+    });
+  }
+
+  // 5. Resetar votação e votos
+  if (clearVotes) {
+    await prisma.voteHistory.deleteMany({
+      where: { poll: { eventId: event.id } },
+    });
+    await prisma.vote.deleteMany({
+      where: { poll: { eventId: event.id } },
+    });
+  }
+
+  const poll = await prisma.poll.findFirst({
+    where: { eventId: event.id },
+    orderBy: { number: "asc" },
+  });
+
+  if (poll) {
+    await prisma.pollOption.updateMany({
+      where: { pollId: poll.id },
+      data: { votesCount: 0 },
+    });
+
+    await prisma.poll.update({
+      where: { id: poll.id },
+      data: {
+        status: "OPEN",
+        totalVotes: 0,
+        winningOptionId: null,
+        winningQuestionText: null,
+        isTieBreak: false,
+        tieBreakOptionIds: [],
+        tieBreakJustification: null,
+        openedAt: new Date(),
+        closedAt: null,
+        resultsPublishedAt: null,
+      },
+    });
+  }
+
+  // 6. Limpar sessões de cronômetro
+  await prisma.timerSession.deleteMany({
+    where: { eventId: event.id },
+  });
+
+  // 7. Localizar primeira etapa (Abertura)
+  const firstStep = await prisma.scheduleStep.findFirst({
+    where: { eventId: event.id, isMacroBlock: false },
+    orderBy: { sequenceOrder: "asc" },
+  });
+
+  // 8. Resetar LiveState para WAITING
+  await updateLiveStateAtomic(event.id, "system.initialized", {
+    status: "WAITING",
+    arenaMode: "WAITING",
+    activeStepId: firstStep?.id ?? null,
+    activeTopicId: null,
+    activePollId: poll?.id ?? null,
+    selectedQuestionId: null,
+    questionsOpen: false,
+    timerStatus: "IDLE",
+    timerStartedAt: null,
+    timerPausedAt: null,
+    timerDurationMs: (firstStep?.durationSec ?? 300) * 1000,
+    timerAccumulatedPauseMs: 0,
+    timerAdjustmentMs: 0,
+    emergencyActive: false,
+    emergencyMessage: null,
+  });
+
+  // 9. Invalidar cache em memória
+  invalidateStaticEventCache();
+
+  // 10. Registrar auditoria
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: "EVENT_RESET_FOR_NEW_RUN",
+    entityType: "Event",
+    entityId: event.id,
+    metadata: {
+      clearedQuestions: clearQuestions,
+      clearedVotes: clearVotes,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/operacao");
+  revalidatePath("/admin/cronograma");
+  revalidatePath("/admin/votacoes");
+  revalidatePath("/admin/perguntas");
+  revalidatePath("/arena");
+  revalidatePath("/participar");
 }

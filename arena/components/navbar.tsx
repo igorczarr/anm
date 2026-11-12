@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getAuthenticatedAdmin } from "@/lib/session";
 import { logoutAdminAction } from "@/app/actions/admin-login";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LogOut,
   MonitorPlay,
@@ -13,13 +14,18 @@ import {
 async function AuthControls() {
   const admin = await getAuthenticatedAdmin();
 
-  // Modo cego: se não houver admin autenticado, não exibe atalhos para outras interfaces
+  // Modo cego: se não houver admin autenticado, exibe apenas controle de tema
   if (!admin) {
-    return null;
+    return (
+      <div className="flex items-center gap-2">
+        <ThemeToggle compact />
+      </div>
+    );
   }
 
   return (
     <div className="flex items-center gap-2.5">
+      <ThemeToggle compact />
       <Link
         href="/arena"
         target="_blank"
@@ -64,11 +70,13 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <img
-            src="/icon.svg"
-            alt="A Nova Moeda"
-            className="w-9 h-9 rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-105"
-          />
+          <div className="w-9 h-9 rounded-xl bg-[#0A150D] border border-emerald-500/30 flex items-center justify-center p-1 shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <img
+              src="/img/logo.png"
+              alt="A Nova Moeda"
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div className="flex flex-col">
             <span className="font-bold text-sm tracking-tight text-slate-900 leading-none">
               A Nova Moeda

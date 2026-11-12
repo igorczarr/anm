@@ -237,14 +237,14 @@ async function main() {
   await prisma.question.deleteMany({ where: { eventId: event.id } });
   await prisma.topic.deleteMany({ where: { eventId: event.id } });
 
-  // 4. Cadastro dos 5 Especialistas Oficiais (Paula, Daniel, Janaína, Denilson Carneiro, Sérgio Passos)
+  // 4. Cadastro dos Especialistas Oficiais (Paula, Daniel, Janaína, Denilson Carneiro, Sérgio Passos e Dulcila)
   const speakersInput = [
     {
       slug: "paula",
       name: "Paula",
-      roleTitle: "Especialista · Introdução & Mesa-Redonda",
-      bio: "Contextualiza a economia da solidão, apresenta o problema central do encontro e integra a mesa-redonda final.",
-      photoUrl: "/img/Dulcila.jpeg",
+      roleTitle: "Apresentação & Mediação · Introdução & Mesa-Redonda",
+      bio: "Contextualiza a economia da solidão, apresenta o problema central do encontro e conduz a mediação.",
+      photoUrl: null,
       displayOrder: 1,
     },
     {
@@ -258,8 +258,8 @@ async function main() {
     {
       slug: "janaina",
       name: "Janaína",
-      roleTitle: "Especialista · Pautas 2 e 5 & Mesa-Redonda",
-      bio: "Conduz a Pauta 2 sobre quando a solidão vira mercado, a Pauta 5 sobre a construção de uma economia da conexão e integra a mesa-redonda.",
+      roleTitle: "Especialista · Pauta 2 & Mesa-Redonda",
+      bio: "Conduz a Pauta 2 sobre quando a solidão vira mercado e integra a mesa-redonda.",
       photoUrl: "/img/Janaina.jpeg",
       displayOrder: 3,
     },
@@ -278,6 +278,14 @@ async function main() {
       bio: "Analisa o futuro do trabalho entre aproximação e isolamento profissional na Pauta 4 e participa da mesa-redonda.",
       photoUrl: "/img/Sergio.jpeg",
       displayOrder: 5,
+    },
+    {
+      slug: "dulcila",
+      name: "Dulcila",
+      roleTitle: "Especialista · Pauta 5 & Mesa-Redonda",
+      bio: "Conduz a Pauta 5 sobre a construção de uma economia da conexão e integra a mesa-redonda.",
+      photoUrl: "/img/Dulcila.jpeg",
+      displayOrder: 6,
     },
   ];
 
@@ -343,9 +351,9 @@ async function main() {
       number: 5,
       title: "Podemos construir uma economia da conexão?",
       description:
-        "15 minutos de exposição + 5 minutos de pergunta e resposta. A votação da mesa-redonda ocorre durante esta pauta.",
+        "15 minutos de exposição + 5 minutos de pergunta e resposta.",
       durationSec: 20 * 60,
-      mainSpeakerSlug: "janaina",
+      mainSpeakerSlug: "dulcila",
       mediationReserveQuestion:
         "Qual é o primeiro passo concreto para que organizações e comunidades locais substituam a lógica da transação isolada por uma economia da conexão?",
     },
@@ -485,10 +493,10 @@ async function main() {
       title: "7. Pauta 5 — Podemos construir uma economia da conexão?",
       stepType: StepType.TOPIC_BLOCK,
       arenaMode: ArenaMode.SPEAKER_EXPOSITION,
-      durationSec: 20 * 60, // 15m exposição + 5m P&R (Votação ocorre durante a Pauta 5)
+      durationSec: 20 * 60, // 15m exposição + 5m P&R
       topicId: topicMap[5].id,
-      speakerId: speakerMap["janaina"].id,
-      responsibleName: "Janaína (15m Exposição + 5m P&R · Votação aberta)",
+      speakerId: speakerMap["dulcila"].id,
+      responsibleName: "Dulcila (15m Exposição + 5m P&R)",
     },
     {
       code: "MACRO_8",
@@ -504,13 +512,13 @@ async function main() {
     {
       code: "MACRO_9",
       macroOrder: 9,
-      title: "9. Mesa-redonda",
+      title: "9. Mesa-redonda (Bloco Independente)",
       stepType: StepType.ROUNDTABLE,
       arenaMode: ArenaMode.ROUNDTABLE,
       durationSec: 20 * 60, // 20 min
       topicId: null,
       speakerId: null,
-      responsibleName: "Paula, Daniel, Janaína, Denilson e Sérgio · Mediação",
+      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula",
     },
     {
       code: "MACRO_10",
@@ -627,13 +635,13 @@ async function main() {
     },
     {
       code: "OP_09_MESA_REDONDA",
-      title: "Mesa-redonda — Debate da questão escolhida pelo público",
+      title: "Mesa-redonda — Debate da questão escolhida pelo público (Bloco Independente)",
       stepType: StepType.ROUNDTABLE,
       arenaMode: ArenaMode.ROUNDTABLE,
       durationSec: 20 * 60, // 20:00
       topicId: null,
       speakerId: null,
-      responsibleName: "Paula, Daniel, Janaína, Denilson e Sérgio · Mediação",
+      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula",
       macroOrder: 9,
     },
     {
@@ -669,15 +677,16 @@ async function main() {
     });
   }
 
-  // 8. Votação Única Oficial da Mesa-Redonda (vinculada à Pauta 5, aberta durante a Pauta 5)
+  // 8. Votação Oficial da Mesa-Redonda (independente, aberta desde o início do evento)
   const roundtablePoll = await prisma.poll.create({
     data: {
       eventId: event.id,
-      topicId: topicMap[5].id,
+      topicId: null, // Desvinculada de qualquer pauta específica
       number: 1,
       question: "Qual questão deve orientar a mesa-redonda?",
-      durationSec: 15 * 60,
-      status: "DRAFT",
+      durationSec: 120 * 60,
+      status: "OPEN", // Aberta desde o início do evento!
+      openedAt: new Date(),
     },
   });
 

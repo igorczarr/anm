@@ -7,6 +7,20 @@ import { Prisma } from "@prisma/client";
 
 export const DEFAULT_EVENT_SLUG = "a-nova-moeda-2026";
 
+// Cache em memória de dados estáticos do evento (pautas, speakers, etapas) para navegação instantânea no Admin
+let staticEventCache: {
+  eventId: string;
+  cachedAt: number;
+  allOperationalSteps: any[];
+  allMacroBlocks: any[];
+  allSpeakers: any[];
+  allTopics: any[];
+} | null = null;
+
+export function invalidateStaticEventCache() {
+  staticEventCache = null;
+}
+
 export async function getPrimaryEvent() {
   if (!process.env.DATABASE_URL) {
     return null;
@@ -93,6 +107,7 @@ export async function getArenaSyncSnapshot(options?: {
     nowMs: serverNow,
   });
 
+  // Retorno ultrarrápido quando nada mudou no seq do servidor
   if (
     options?.sinceSeq &&
     options.sinceSeq >= liveState.seq &&
@@ -109,14 +124,70 @@ export async function getArenaSyncSnapshot(options?: {
     };
   }
 
-  const activeCutoff = new Date(serverNow - 1000 * 60 * 3); // últimos 3 min
+  // Carrega ou reaproveita cache estático (revalida a cada 60s ou quando invalidado)
+  const isStaticCacheValid =
+    staticEventCache &&
+    staticEventCache.eventId === event.id &&
+    serverNow - staticEventCache.cachedAt < 60000;
 
+  if (!isStaticCacheValid) {
+    const [opSteps, mbSteps, spkList, topList] = await Promise.all([
+      prisma.scheduleStep.findMany({
+        where: { eventId: event.id, isMacroBlock: false },
+        orderBy: { sequenceOrder: "asc" },
+        include: {
+          speaker: true,
+          topic: {
+            include: { mainSpeaker: true, provoker: true },
+          },
+        },
+      }),
+      prisma.scheduleStep.findMany({
+        where: { eventId: event.id, isMacroBlock: true },
+        orderBy: { macroOrder: "asc" },
+        include: {
+          speaker: true,
+          topic: {
+            include: { mainSpeaker: true },
+          },
+        },
+      }),
+      prisma.speaker.findMany({
+        where: { eventId: event.id },
+        orderBy: { displayOrder: "asc" },
+      }),
+      prisma.topic.findMany({
+        where: { eventId: event.id },
+        include: {
+          mainSpeaker: true,
+          provoker: true,
+        },
+        orderBy: { number: "asc" },
+      }),
+    ]);
+
+    staticEventCache = {
+      eventId: event.id,
+      cachedAt: serverNow,
+      allOperationalSteps: opSteps,
+      allMacroBlocks: mbSteps,
+      allSpeakers: spkList,
+      allTopics: topList,
+    };
+  }
+
+  const { allOperationalSteps, allMacroBlocks, allSpeakers, allTopics } = staticEventCache!;
+
+  const activeTopic = liveState.activeTopicId
+    ? allTopics.find((t) => t.id === liveState.activeTopicId) ?? null
+    : null;
+
+  const activeStep = liveState.activeStepId
+    ? allOperationalSteps.find((s) => s.id === liveState.activeStepId) ?? null
+    : null;
+
+  // Consulta apenas as entidades dinâmicas que mudam em tempo real
   const [
-    activeTopic,
-    activeStep,
-    allOperationalSteps,
-    allMacroBlocks,
-    allSpeakers,
     activePoll,
     selectedQuestionRaw,
     activeScreenMessage,
@@ -126,50 +197,6 @@ export async function getArenaSyncSnapshot(options?: {
     questionsApproved,
     recentTimerSessions,
   ] = await Promise.all([
-    liveState.activeTopicId
-      ? prisma.topic.findUnique({
-          where: { id: liveState.activeTopicId },
-          include: {
-            mainSpeaker: true,
-            provoker: true,
-          },
-        })
-      : null,
-    liveState.activeStepId
-      ? prisma.scheduleStep.findUnique({
-          where: { id: liveState.activeStepId },
-          include: {
-            speaker: true,
-            topic: {
-              include: { mainSpeaker: true, provoker: true },
-            },
-          },
-        })
-      : null,
-    prisma.scheduleStep.findMany({
-      where: { eventId: event.id, isMacroBlock: false },
-      orderBy: { sequenceOrder: "asc" },
-      include: {
-        speaker: true,
-        topic: {
-          include: { mainSpeaker: true, provoker: true },
-        },
-      },
-    }),
-    prisma.scheduleStep.findMany({
-      where: { eventId: event.id, isMacroBlock: true },
-      orderBy: { macroOrder: "asc" },
-      include: {
-        speaker: true,
-        topic: {
-          include: { mainSpeaker: true },
-        },
-      },
-    }),
-    prisma.speaker.findMany({
-      where: { eventId: event.id },
-      orderBy: { displayOrder: "asc" },
-    }),
     liveState.activePollId
       ? prisma.poll.findUnique({
           where: { id: liveState.activePollId },
@@ -201,7 +228,7 @@ export async function getArenaSyncSnapshot(options?: {
     prisma.participantSession.count({
       where: {
         eventId: event.id,
-        lastSeenAt: { gte: activeCutoff },
+        lastSeenAt: { gte: new Date(serverNow - 1000 * 60 * 3) },
       },
     }),
     prisma.question.count({
@@ -235,7 +262,7 @@ export async function getArenaSyncSnapshot(options?: {
             },
           },
           orderBy: { createdAt: "desc" },
-          take: 15,
+          take: 10,
         })
       : Promise.resolve([]),
   ]);

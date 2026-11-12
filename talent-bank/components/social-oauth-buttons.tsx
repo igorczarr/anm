@@ -24,12 +24,19 @@ export function SocialOAuthButtons({
     try {
       const origin = window.location.origin;
       const basePath = "/talentos";
+      if (inviteToken) {
+        try {
+          sessionStorage.setItem("anm_invite_token", inviteToken);
+        } catch {
+          // Ignora se sessionStorage indisponível
+        }
+      }
       const redirectUrl = `${origin}${basePath}/entrar/sso-callback`;
       const redirectUrlComplete = inviteToken
-        ? `${origin}${basePath}/api/auth/post-login?convite=${encodeURIComponent(
+        ? `${origin}${basePath}/entrar/sso-sync?convite=${encodeURIComponent(
             inviteToken
           )}`
-        : `${origin}${basePath}/api/auth/post-login`;
+        : `${origin}${basePath}/entrar/sso-sync`;
 
       if (!clerk.loaded || !clerk.client) {
         setErrorMsg("Aguarde 1 segundo enquanto o Clerk inicializa e tente novamente.");

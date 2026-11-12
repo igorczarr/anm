@@ -31,6 +31,13 @@ export default function RootLayout({
 
   return (
     <html lang="pt-BR" data-theme="light" className="h-full antialiased">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==="string"&&arguments[0].indexOf("Clerk:")!==-1&&arguments[0].indexOf("development keys")!==-1)return;return w.apply(console,arguments);};})();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[#030A06] text-[#D5C5AA]">
         <ClerkProvider
           publishableKey={clerkPublishableKey}
@@ -38,6 +45,7 @@ export default function RootLayout({
           signUpUrl="/talentos/cadastro"
           signInFallbackRedirectUrl="/talentos/painel"
           signUpFallbackRedirectUrl="/talentos/painel"
+          unsafe_disableDevelopmentModeConsoleWarning={true}
         >
           <Navbar />
           <div className="flex-1">{children}</div>

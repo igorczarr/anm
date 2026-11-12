@@ -179,7 +179,7 @@ async function HomeContent() {
             </h2>
           </div>
           <span className="text-xs text-[#D5C5AA]/70">
-            5 especialistas (Paula, Daniel, Janaína, Denilson, Sérgio) · Votação da Mesa-Redonda na Pauta 5
+            5 especialistas (Daniel, Janaína, Denilson, Sérgio, Dulcila) + Mediação: Paula · Votação da Mesa-Redonda Aberta
           </span>
         </div>
 
@@ -207,9 +207,16 @@ async function HomeContent() {
               <div className="pt-3 border-t border-[#D5C5AA]/15 text-xs space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[#D5C5AA]/65">Especialista:</span>
-                  <strong className="text-[#F7DECA]">
-                    {t.mainSpeaker?.name ?? "A definir"}
-                  </strong>
+                  <span className="flex items-center gap-1.5 font-semibold text-[#F7DECA]">
+                    {t.mainSpeaker?.photoUrl && (
+                      <img
+                        src={t.mainSpeaker.photoUrl}
+                        alt=""
+                        className="w-4 h-4 rounded-full object-cover border border-[#D5C5AA]/30"
+                      />
+                    )}
+                    <strong>{t.mainSpeaker?.name ?? "A definir"}</strong>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#D5C5AA]/65">Dinâmica:</span>

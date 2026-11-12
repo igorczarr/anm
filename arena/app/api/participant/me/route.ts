@@ -13,7 +13,15 @@ export async function GET() {
   try {
     const session = await getParticipantSession();
     if (!session) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json(
+        {
+          authenticated: false,
+          questions: [],
+          votes: [],
+          quota: { topicId: null, used: 0, max: 1, charLimit: 400 },
+        },
+        { status: 200 }
+      );
     }
 
     const event = await getPrimaryEvent();
