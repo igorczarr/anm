@@ -413,7 +413,7 @@ export function SettingsManager({
                 </h2>
                 <p className="text-xs text-[#D5C5AA]/70">
                   Cada pauta é conduzida pelo seu especialista (15 min exposição + 5 min P&amp;R).
-                  A Mesa-Redonda é independente e reúne todos os 5 debatedores com mediação de Paula.
+                  A Mesa-Redonda é independente e reúne todos os 5 debatedores com mediação de Paula Melo.
                 </p>
               </div>
             </div>
@@ -558,7 +558,7 @@ export function SettingsManager({
                     Mesa-Redonda Independente
                   </span>
                   <span className="font-semibold text-[#F7DECA]">
-                    Debate Geral dos 5 Especialistas com Mediação de Paula
+                    Debate Geral dos 5 Especialistas com Mediação de Paula Melo
                   </span>
                 </div>
                 <p className="text-[#D5C5AA]/80 max-w-2xl text-xs">
@@ -590,7 +590,7 @@ export function SettingsManager({
                   3. Especialistas Oficiais &amp; Mediação (6 Integrantes)
                 </h2>
                 <p className="text-xs text-[#D5C5AA]/70">
-                  Paula (Apresentação &amp; Mediação) e os 5 Especialistas (Daniel, Janaína, Denilson, Sérgio, Dulcila).
+                  Paula Melo (Apresentação &amp; Mediação) e os 5 Especialistas (Daniel, Janaína, Denilson, Sérgio, Dulcila).
                   As fotos são exibidas no Telão ARENA, Mesa de Palco e no Cronograma.
                 </p>
               </div>

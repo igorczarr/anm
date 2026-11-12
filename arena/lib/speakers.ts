@@ -10,7 +10,8 @@ export const SPEAKER_PHOTOS: Record<string, string> = {
   "Sérgio Passos": "/img/Sergio.jpeg",
   "Sergio": "/img/Sergio.jpeg",
   "Dulcila": "/img/Dulcila.jpeg",
-  "Paula": "/img/auditorio.png",
+  "Paula": "/img/Paula.jpeg",
+  "Paula Melo": "/img/Paula.jpeg",
 };
 
 export function getSpeakerPhoto(name?: string | null, customUrl?: string | null): string {

@@ -34,6 +34,7 @@ function resolveSpeakerPhoto(name?: string | null, photoUrl?: string | null): st
   if (n.includes("denilson")) return "/img/Denilson.png";
   if (n.includes("sergio") || n.includes("sérgio")) return "/img/Sergio.jpeg";
   if (n.includes("dulcila")) return "/img/Dulcila.jpeg";
+  if (n.includes("paula")) return "/img/Paula.jpeg";
   return null;
 }
 
@@ -1028,7 +1029,10 @@ export function ArenaScreen() {
                   <span className="uppercase tracking-wider font-semibold">
                     Debatedores da Mesa-Redonda:
                   </span>
-                  <span className="text-emerald-400 font-medium">Mediação: Paula</span>
+                  <span className="text-emerald-400 font-medium flex items-center gap-1.5">
+                    <img src="/img/Paula.jpeg" alt="Paula Melo" className="w-5 h-5 rounded-full object-cover border border-emerald-400/50" />
+                    <span>Mediação: Paula Melo</span>
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {[

@@ -241,10 +241,10 @@ async function main() {
   const speakersInput = [
     {
       slug: "paula",
-      name: "Paula",
+      name: "Paula Melo",
       roleTitle: "Apresentação & Mediação · Introdução & Mesa-Redonda",
       bio: "Contextualiza a economia da solidão, apresenta o problema central do encontro e conduz a mediação.",
-      photoUrl: null,
+      photoUrl: "/img/Paula.jpeg",
       displayOrder: 1,
     },
     {
@@ -439,7 +439,7 @@ async function main() {
       durationSec: 10 * 60, // 10 min
       topicId: null,
       speakerId: speakerMap["paula"].id,
-      responsibleName: "Paula",
+      responsibleName: "Paula Melo",
     },
     {
       code: "MACRO_3",
@@ -518,7 +518,7 @@ async function main() {
       durationSec: 20 * 60, // 20 min
       topicId: null,
       speakerId: null,
-      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula",
+      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula Melo",
     },
     {
       code: "MACRO_10",
@@ -585,7 +585,7 @@ async function main() {
       durationSec: 10 * 60, // 10:00
       topicId: null,
       speakerId: speakerMap["paula"].id,
-      responsibleName: "Paula",
+      responsibleName: "Paula Melo",
       macroOrder: 2,
     },
   ];
@@ -641,7 +641,7 @@ async function main() {
       durationSec: 20 * 60, // 20:00
       topicId: null,
       speakerId: null,
-      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula",
+      responsibleName: "Daniel, Janaína, Denilson, Sérgio e Dulcila · Mediação: Paula Melo",
       macroOrder: 9,
     },
     {
