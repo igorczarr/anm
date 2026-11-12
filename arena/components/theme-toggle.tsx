@@ -69,22 +69,22 @@ export function ThemeToggle({
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={theme === "light" ? "Mudar para Tema Escuro" : "Mudar para Tema Claro"}
-      title={theme === "light" ? "Mudar para Tema Escuro (Arena)" : "Mudar para Tema Claro"}
+      aria-label={theme === "light" ? "Alternar para Tema Escuro (Arena)" : "Alternar para Tema Claro"}
+      title={theme === "light" ? "Tema Claro ativo (clique para alternar para Escuro)" : "Tema Escuro ativo (clique para alternar para Claro)"}
       className={`p-2 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 select-none ${
         theme === "light"
-          ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-sm"
+          ? "border-slate-300 bg-white text-slate-800 hover:bg-slate-100 shadow-sm"
           : "border-white/10 bg-[#0A150D] text-[#D5C5AA] hover:text-[#F7DECA] hover:border-emerald-500/40"
       } ${className}`}
     >
       {theme === "light" ? (
         <>
-          <Moon className="w-4 h-4 text-emerald-700 shrink-0" />
-          {!compact && <span className="text-xs font-semibold text-slate-700">Tema Claro</span>}
+          <Sun className="w-4 h-4 text-amber-500 shrink-0" />
+          {!compact && <span className="text-xs font-semibold text-slate-800">Tema Claro</span>}
         </>
       ) : (
         <>
-          <Sun className="w-4 h-4 text-amber-300 shrink-0" />
+          <Moon className="w-4 h-4 text-emerald-400 shrink-0" />
           {!compact && <span className="text-xs font-semibold text-[#D5C5AA]">Tema Escuro</span>}
         </>
       )}

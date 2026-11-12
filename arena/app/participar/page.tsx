@@ -556,10 +556,10 @@ export default function ParticiparPage() {
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key as TabKey)}
-              className={`py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 font-semibold cursor-pointer ${
+              className={`py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 font-semibold cursor-pointer transition ${
                 active
-                  ? "bg-[#14532D] text-white"
-                  : "text-[#D5C5AA] hover:bg-[#030A06]"
+                  ? "bg-[#14532D] text-white shadow-xs"
+                  : "text-[#D5C5AA] hover:bg-slate-100 dark:hover:bg-[#030A06]"
               }`}
             >
               <Icon className="w-4 h-4" />

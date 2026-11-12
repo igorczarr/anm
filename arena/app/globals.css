@@ -40,32 +40,48 @@
   font-display: swap;
 }
 
+:root {
+  --font-montserrat: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-editorial: "PlayfairDisplay", Georgia, serif;
+}
+
+/* ========================================================================= */
+/* VARIÁVEIS DE SISTEMA — LIGHT & DARK MODES                                 */
+/* ========================================================================= */
+
+/* TEMA CLARO EXECUTIVO (SaaS Moderno / Linear / Monday / ClickUp) */
 :root,
-html[data-theme="light"] {
-  --bg-page: #F6F7F9;
+html[data-theme="light"],
+html.light {
+  --bg-page: #F8FAFC;
   --bg-card: #FFFFFF;
-  --bg-subtle: #EEF1F5;
+  --bg-subtle: #F1F5F9;
+  --bg-elevated: #FFFFFF;
   --text-main: #0F172A;
-  --text-muted: #475569;
+  --text-muted: #334155;
   --text-soft: #64748B;
   --border-color: #E2E8F0;
+  --border-strong: #CBD5E1;
   --brand-primary: #14532D;
   --brand-primary-hover: #166534;
-  --brand-accent: #B4833E;
+  --brand-accent: #047857;
   --brand-soft: #ECFDF5;
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
   --shadow-hover: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 }
 
+/* TEMA ESCURO INSTITUCIONAL (Arena Noturna Cinematográfica) */
 html[data-theme="dark"],
-:root {
+html.dark {
   --bg-page: #030A06;
   --bg-card: #0A150D;
   --bg-subtle: #0E1E13;
+  --bg-elevated: #0A140E;
   --text-main: #F7DECA;
   --text-muted: #D5C5AA;
   --text-soft: #9E917C;
   --border-color: rgba(213, 197, 170, 0.16);
+  --border-strong: rgba(213, 197, 170, 0.3);
   --brand-primary: #14532D;
   --brand-primary-hover: #166534;
   --brand-accent: #D5C5AA;
@@ -77,174 +93,393 @@ html[data-theme="dark"],
 body {
   background-color: var(--bg-page);
   color: var(--text-main);
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-montserrat);
   min-height: 100vh;
   letter-spacing: -0.01em;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Tipografia moderna e limpa: substitui a fonte decorativa antiga por hierarquia SaaS contemporânea */
+/* Tipografia moderna e limpa */
 .font-display {
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 
 .font-editorial {
-  font-family: "PlayfairDisplay", Georgia, serif;
+  font-family: var(--font-editorial);
 }
 
-/* Adaptação inteligente de toda a plataforma para o Tema Claro (Light Mode Default) e Dark Mode */
-html[data-theme="light"] body:not(.arena-body):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#030A06\]:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#030A06\]\/90:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#030A06\]\/95:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *) {
-  background-color: var(--bg-page) !important;
-  color: var(--text-main) !important;
-}
+/* ========================================================================= */
+/* POLIMENTO TOTAL DO TEMA CLARO (ALTO CONTRASTE WCAG AAA & DESIGN EXECUTIVO) */
+/* ========================================================================= */
 
-html[data-theme="light"] header.bg-\[\#030A06\]\/90:not(.arena-stage *):not(.admin-root *) {
-  background-color: rgba(255, 255, 255, 0.88) !important;
-  border-bottom-color: var(--border-color) !important;
-}
-
-html[data-theme="light"] .bg-\[\#0A150D\]:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/95:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/90:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/80:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/70:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/60:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *),
-html[data-theme="light"] .bg-\[\#0A150D\]\/40:not(.arena-stage):not(.arena-stage *):not(.admin-root):not(.admin-root *) {
-  background-color: var(--bg-card) !important;
-  box-shadow: var(--shadow-card);
-}
-
-/* Cards internos e inputs em Light Mode */
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#0A150D\] .bg-\[\#030A06\],
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#0A150D\]\/90 .bg-\[\#030A06\],
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#0A150D\]\/80 .bg-\[\#030A06\],
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#0A150D\]\/70 .bg-\[\#030A06\],
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#0A150D\]\/60 .bg-\[\#030A06\],
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#030A06\]\/70,
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#030A06\]\/80,
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#030A06\]\/60 {
+/* 1. FUNDOS E SUPERFÍCIES EM TEMA CLARO */
+html[data-theme="light"] body,
+html.light body,
+html[data-theme="light"] .admin-root,
+html.light .admin-root {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
-html[data-theme="light"]:not(:has(.admin-root)) input,
-html[data-theme="light"]:not(:has(.admin-root)) select,
-html[data-theme="light"]:not(:has(.admin-root)) textarea {
+/* Cartões Primários e Modais (Pure White com borda suave e elevação executiva) */
+html[data-theme="light"] [class*="bg-[#0A150D]"],
+html.light [class*="bg-[#0A150D]"],
+html[data-theme="light"] [class*="bg-[#0A120D]"],
+html.light [class*="bg-[#0A120D]"],
+html[data-theme="light"] [class*="bg-[#0A140E]"],
+html.light [class*="bg-[#0A140E]"] {
   background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
   color: #0F172A !important;
-  border-color: #CBD5E1 !important;
-  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 
-html[data-theme="light"]:not(:has(.admin-root)) input:focus,
-html[data-theme="light"]:not(:has(.admin-root)) select:focus,
-html[data-theme="light"]:not(:has(.admin-root)) textarea:focus {
-  border-color: #14532D !important;
-  box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.12) !important;
-}
-
-/* Textos limpos e legíveis em Light Mode */
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#F7DECA\] {
+/* Sub-cartões, Poços, Entradas e Recipientes Internos */
+html[data-theme="light"] [class*="bg-[#030A06]"],
+html.light [class*="bg-[#030A06]"],
+html[data-theme="light"] [class*="bg-[#050C07]"],
+html.light [class*="bg-[#050C07]"],
+html[data-theme="light"] [class*="bg-[#030805]"],
+html.light [class*="bg-[#030805]"],
+html[data-theme="light"] [class*="bg-[#050B07]"],
+html.light [class*="bg-[#050B07]"] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
   color: #0F172A !important;
 }
 
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\],
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/90,
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/85,
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/80 {
+/* Overlays brancos translúcidos que no tema escuro eram transparentes */
+html[data-theme="light"] [class*="bg-white/["],
+html.light [class*="bg-white/["],
+html[data-theme="light"] [class*="bg-white/5"],
+html.light [class*="bg-white/5"] {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
   color: #334155 !important;
 }
 
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/75,
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/70,
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/65,
-html[data-theme="light"]:not(:has(.admin-root)) .text-\[\#D5C5AA\]\/60 {
-  color: #64748B !important;
-}
-
-/* Bordas suaves e cantos arredondados estilo Monday / ClickUp / LinkedIn */
-html[data-theme="light"]:not(:has(.admin-root)) [class*="border-[#D5C5AA]"],
-html[data-theme="light"]:not(:has(.admin-root)) [class*="border-[#57552E]"] {
-  border-color: #E2E8F0 !important;
-}
-
-/* Botões primários imponentes em Verde Floresta Executivo no modo claro */
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#D5C5AA\] {
-  background-color: #14532D !important;
-  color: #FFFFFF !important;
-  border-radius: 10px !important;
-}
-
-html[data-theme="light"]:not(:has(.admin-root)) .bg-\[\#D5C5AA\]:hover {
-  background-color: #166534 !important;
-}
-
-/* Status badges em Light Mode */
-html[data-theme="light"] .text-emerald-300,
-html[data-theme="light"] .text-emerald-200 {
-  color: #047857 !important;
-}
-
-html[data-theme="light"] .bg-emerald-950\/30 {
-  background-color: #ECFDF5 !important;
-}
-
-html[data-theme="light"] .text-amber-300,
-html[data-theme="light"] .text-amber-200 {
-  color: #B45309 !important;
-}
-
-html[data-theme="light"] .bg-amber-950\/30 {
-  background-color: #FFFBEB !important;
-}
-
-html[data-theme="light"] .text-red-300,
-html[data-theme="light"] .text-red-200 {
-  color: #B91C1C !important;
-}
-
-html[data-theme="light"] .bg-red-950\/30 {
-  background-color: #FEF2F2 !important;
-}
-
-/* Suporte Refinado para Barra Lateral e Telas de Gestão no Tema Claro */
-html[data-theme="light"] aside.bg-\[\#050C07\],
-html[data-theme="light"] div.bg-\[\#050C07\] {
-  background-color: #FFFFFF !important;
-  border-color: #E2E8F0 !important;
+/* 2. TIPOGRAFIA E HIERARQUIA DE CONTRASTE RIGOROSO (WCAG AAA) */
+/* Títulos e Cabeçalhos Principais */
+html[data-theme="light"] [class*="text-[#F7DECA]"],
+html.light [class*="text-[#F7DECA]"] {
   color: #0F172A !important;
 }
 
-html[data-theme="light"] aside .bg-\[\#030805\] {
+/* Textos Secundários, Labels e Conteúdo de Leitura */
+html[data-theme="light"] [class*="text-[#D5C5AA]"],
+html.light [class*="text-[#D5C5AA]"],
+html[data-theme="light"] [class*="text-[#9E917C]"],
+html.light [class*="text-[#9E917C]"] {
+  color: #334155 !important;
+}
+
+/* Textos Suaves, Timestamps, Contadores de Caracteres e Micro-labels */
+html[data-theme="light"] [class*="text-[#D5C5AA]/7"],
+html.light [class*="text-[#D5C5AA]/7"],
+html[data-theme="light"] [class*="text-[#D5C5AA]/6"],
+html.light [class*="text-[#D5C5AA]/6"],
+html[data-theme="light"] [class*="text-[#D5C5AA]/5"],
+html.light [class*="text-[#D5C5AA]/5"],
+html[data-theme="light"] [class*="text-[#D5C5AA]/4"],
+html.light [class*="text-[#D5C5AA]/4"],
+html[data-theme="light"] [class*="text-[#D5C5AA]/3"],
+html.light [class*="text-[#D5C5AA]/3"],
+html[data-theme="light"] [class*="text-[#D5C5AA]/2"],
+html.light [class*="text-[#D5C5AA]/2"] {
+  color: #64748B !important;
+}
+
+/* 3. CORES DE STATUS & ACENTOS (ALTA LEGIBILIDADE NO FUNDO CLARO) */
+/* Esmeralda (Sucesso / Ao Vivo / Ativo) */
+html[data-theme="light"] [class*="text-emerald-400"],
+html.light [class*="text-emerald-400"],
+html[data-theme="light"] [class*="text-emerald-300"],
+html.light [class*="text-emerald-300"],
+html[data-theme="light"] [class*="text-emerald-200"],
+html.light [class*="text-emerald-200"] {
+  color: #047857 !important;
+}
+
+html[data-theme="light"] [class*="bg-emerald-950"],
+html.light [class*="bg-emerald-950"] {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+  color: #065F46 !important;
+}
+
+html[data-theme="light"] [class*="bg-emerald-950"] *,
+html.light [class*="bg-emerald-950"] * {
+  color: #065F46 !important;
+}
+
+html[data-theme="light"] [class*="border-emerald-500"],
+html.light [class*="border-emerald-500"],
+html[data-theme="light"] [class*="border-emerald-400"],
+html.light [class*="border-emerald-400"] {
+  border-color: #059669 !important;
+}
+
+/* Âmbar (Avisos / Votação / Questão Eleita) */
+html[data-theme="light"] [class*="text-amber-400"],
+html.light [class*="text-amber-400"],
+html[data-theme="light"] [class*="text-amber-300"],
+html.light [class*="text-amber-300"],
+html[data-theme="light"] [class*="text-amber-200"],
+html.light [class*="text-amber-200"] {
+  color: #92400E !important;
+}
+
+html[data-theme="light"] [class*="bg-amber-950"],
+html.light [class*="bg-amber-950"] {
+  background-color: #FFFBEB !important;
+  border-color: #FDE68A !important;
+  color: #92400E !important;
+}
+
+html[data-theme="light"] [class*="bg-amber-950"] *,
+html.light [class*="bg-amber-950"] * {
+  color: #92400E !important;
+}
+
+html[data-theme="light"] [class*="border-amber-500"],
+html.light [class*="border-amber-500"],
+html[data-theme="light"] [class*="border-amber-400"],
+html.light [class*="border-amber-400"] {
+  border-color: #D97706 !important;
+}
+
+/* Vermelho (Erros / Crítico / Expirado) */
+html[data-theme="light"] [class*="text-red-400"],
+html.light [class*="text-red-400"],
+html[data-theme="light"] [class*="text-red-300"],
+html.light [class*="text-red-300"],
+html[data-theme="light"] [class*="text-red-200"],
+html.light [class*="text-red-200"] {
+  color: #991B1B !important;
+}
+
+html[data-theme="light"] [class*="bg-red-950"],
+html.light [class*="bg-red-950"] {
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
+  color: #991B1B !important;
+}
+
+html[data-theme="light"] [class*="bg-red-950"] *,
+html.light [class*="bg-red-950"] * {
+  color: #991B1B !important;
+}
+
+html[data-theme="light"] [class*="border-red-500"],
+html.light [class*="border-red-500"] {
+  border-color: #DC2626 !important;
+}
+
+/* 4. BORDAS E DIVISORES */
+html[data-theme="light"] [class*="border-[#D5C5AA]"],
+html.light [class*="border-[#D5C5AA]"],
+html[data-theme="light"] [class*="border-[#57552E]"],
+html.light [class*="border-[#57552E]"],
+html[data-theme="light"] [class*="border-white/"],
+html.light [class*="border-white/"] {
+  border-color: #E2E8F0 !important;
+}
+
+/* 5. BOTÕES PRIMÁRIOS IMPONENTES EM VERDE FLORESTA EXECUTIVO */
+html[data-theme="light"] [class*="bg-[#D5C5AA]"],
+html.light [class*="bg-[#D5C5AA]"] {
+  background-color: #14532D !important;
+  color: #FFFFFF !important;
+  border-color: #14532D !important;
+  box-shadow: 0 4px 14px -2px rgba(20, 83, 45, 0.3) !important;
+}
+
+html[data-theme="light"] [class*="bg-[#D5C5AA]"]:hover,
+html.light [class*="bg-[#D5C5AA]"]:hover {
+  background-color: #166534 !important;
+  border-color: #166534 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#D5C5AA]"] *,
+html.light [class*="bg-[#D5C5AA]"] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* 6. ENTRADAS DE DADOS (INPUTS, SELECTS, TEXTAREAS) */
+html[data-theme="light"] input,
+html.light input,
+html[data-theme="light"] select,
+html.light select,
+html[data-theme="light"] textarea,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html[data-theme="light"] input::placeholder,
+html.light input::placeholder,
+html[data-theme="light"] textarea::placeholder,
+html.light textarea::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] input:focus,
+html.light input:focus,
+html[data-theme="light"] select:focus,
+html.light select:focus,
+html[data-theme="light"] textarea:focus,
+html.light textarea:focus {
+  border-color: #14532D !important;
+  box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.15) !important;
+  outline: none !important;
+}
+
+/* 7. ESTADOS INTERATIVOS E HOVER SEGUROS (ZERO DESAPARECIMENTO DE TEXTO NO HOVER) */
+html[data-theme="light"] [class*="hover:text-[#F7DECA]"]:hover,
+html.light [class*="hover:text-[#F7DECA]"]:hover,
+html[data-theme="light"] [class*="hover:text-white"]:hover,
+html.light [class*="hover:text-white"]:hover {
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] [class*="hover:bg-white/"]:hover,
+html.light [class*="hover:bg-white/"]:hover,
+html[data-theme="light"] [class*="hover:bg-[#030A06]"]:hover,
+html.light [class*="hover:bg-[#030A06]"]:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Menu de navegação inferior do participante */
+html[data-theme="light"] nav button:hover:not([class*="bg-[#14532D]"]),
+html.light nav button:hover:not([class*="bg-[#14532D]"]) {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Linhas de tabelas */
+html[data-theme="light"] tbody tr:hover,
+html.light tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* 8. BARRA LATERAL E STATUS STRIP NO ADMIN */
+html[data-theme="light"] aside,
+html.light aside {
+  background-color: #FFFFFF !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+html[data-theme="light"] aside [class*="bg-[#030805]"],
+html.light aside [class*="bg-[#030805]"] {
   background-color: #F8FAFC !important;
   border-top-color: #E2E8F0 !important;
 }
 
-html[data-theme="light"] .admin-root {
-  background-color: #F8F9FA !important;
+html[data-theme="light"] header.h-11,
+html.light header.h-11 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom-color: #E2E8F0 !important;
+}
+
+/* 9. TELÃO DA ARENA EM TEMA CLARO */
+html[data-theme="light"] .arena-stage,
+html.light .arena-stage {
+  background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
-html[data-theme="light"] .admin-root .bg-\[\#030A06\],
-html[data-theme="light"] .admin-root .bg-\[\#0A120D\],
-html[data-theme="light"] .admin-root .bg-\[\#0A150D\] {
+html[data-theme="light"] .arena-stage [class*="bg-[#0A150D]"],
+html.light .arena-stage [class*="bg-[#0A150D]"],
+html[data-theme="light"] .arena-stage [class*="bg-[#0A140E]"],
+html.light .arena-stage [class*="bg-[#0A140E]"],
+html[data-theme="light"] .arena-stage [class*="bg-[#0A120D]"],
+html.light .arena-stage [class*="bg-[#0A120D]"] {
   background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
   color: #0F172A !important;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08) !important;
 }
 
-html[data-theme="light"] .admin-root .text-\[\#F7DECA\] {
+html[data-theme="light"] .arena-stage [class*="bg-amber-950"],
+html.light .arena-stage [class*="bg-amber-950"] {
+  background-color: #FFFBEB !important;
+  border-color: #F59E0B !important;
+  color: #92400E !important;
+  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.15) !important;
+}
+
+html[data-theme="light"] .arena-stage [class*="bg-emerald-950"],
+html.light .arena-stage [class*="bg-emerald-950"] {
+  background-color: #ECFDF5 !important;
+  border-color: #10B981 !important;
+  color: #065F46 !important;
+  box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.15) !important;
+}
+
+html[data-theme="light"] .arena-stage [class*="bg-[#030A06]"],
+html.light .arena-stage [class*="bg-[#030A06]"] {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
   color: #0F172A !important;
 }
 
-html[data-theme="light"] .admin-root .text-\[\#D5C5AA\] {
-  color: #334155 !important;
+html[data-theme="light"] .arena-stage .bg-slate-900,
+html.light .arena-stage .bg-slate-900 {
+  background-color: #E2E8F0 !important;
+  border-color: #CBD5E1 !important;
+}
+
+html[data-theme="light"] .arena-stage circle[stroke="rgba(213, 197, 170, 0.14)"],
+html.light .arena-stage circle[stroke="rgba(213, 197, 170, 0.14)"] {
+  stroke: #E2E8F0 !important;
+}
+
+html[data-theme="light"] .arena-stage [class*="from-emerald-950"],
+html.light .arena-stage [class*="from-emerald-950"] {
+  background: linear-gradient(to right, #ECFDF5, #D1FAE5, #ECFDF5) !important;
+  color: #065F46 !important;
+  border-color: #A7F3D0 !important;
+}
+
+html[data-theme="light"] .arena-stage [class*="from-emerald-950"] *,
+html.light .arena-stage [class*="from-emerald-950"] * {
+  color: #065F46 !important;
+}
+
+html[data-theme="light"] .arena-stage .blur-xl,
+html.light .arena-stage .blur-xl {
+  opacity: 0.25 !important;
+}
+
+html[data-theme="light"] .arena-stage .arena-orb-1,
+html.light .arena-stage .arena-orb-1 {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(241, 245, 249, 0.05) 60%, transparent 80%) !important;
+}
+
+html[data-theme="light"] .arena-stage .arena-orb-2,
+html.light .arena-stage .arena-orb-2 {
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, transparent 70%) !important;
+}
+
+html[data-theme="light"] .arena-stage .arena-orb-accent,
+html.light .arena-stage .arena-orb-accent {
+  background: radial-gradient(circle, rgba(20, 83, 45, 0.06) 0%, transparent 70%) !important;
+}
+
+html[data-theme="light"] .arena-stage .arena-vignette,
+html.light .arena-stage .arena-vignette {
+  background: radial-gradient(circle at center, transparent 65%, rgba(226, 232, 240, 0.6) 100%) !important;
+}
+
+html[data-theme="light"] .arena-stage .arena-grid-mesh,
+html.light .arena-stage .arena-grid-mesh {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px) !important;
 }
 
 /* Arredondamento moderno e redução de caixa-alta excessiva em ambos os temas */
@@ -584,21 +819,19 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
 /* Keyframes */
 @keyframes stageEnter {
   0% {
-    opacity: 0;
-    transform: translateY(22px) scale(0.985);
-    filter: blur(8px);
+    opacity: 0.85;
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
 @keyframes stageItemEnter {
   0% {
-    opacity: 0;
-    transform: translateY(16px);
+    opacity: 0.9;
+    transform: translateY(6px);
   }
   100% {
     opacity: 1;
