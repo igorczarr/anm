@@ -13,6 +13,9 @@ function sanitizeDatabaseUrl() {
     ) {
       url = url.slice(1, -1).trim();
     }
+    if (url.includes("-pooler.") && !url.includes("pgbouncer=true")) {
+      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
+    }
     process.env.DATABASE_URL = url;
   }
 }
@@ -30,7 +33,7 @@ function createPrismaClient() {
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 
-  // Auto-retry em caso de cold-start (scale-to-zero wake-up) ou oscilação momentânea do Neon/Postgres
+  // Auto-retry em caso de cold-start (scale-to-zero wake-up) ou oscilação momentânea do Neon/PgBouncer
   return baseClient.$extends({
     query: {
       $allModels: {
@@ -44,19 +47,27 @@ function createPrismaClient() {
               lastError = error;
               const message =
                 error instanceof Error ? error.message : String(error);
+              const lower = message.toLowerCase();
               const isTransientConnectionError =
-                message.includes("Can't reach database server") ||
-                message.includes("Timed out fetching a new connection") ||
-                message.includes("Closed") ||
-                message.includes("ConnectionReset") ||
-                message.includes("ECONNRESET") ||
-                message.includes("P1001") ||
-                message.includes("P1002");
+                lower.includes("can't reach database server") ||
+                lower.includes("timed out fetching a new connection") ||
+                lower.includes("closed") ||
+                lower.includes("connectionreset") ||
+                lower.includes("econnreset") ||
+                lower.includes("p1001") ||
+                lower.includes("p1002") ||
+                lower.includes("p1017") ||
+                lower.includes("server has closed the connection") ||
+                lower.includes("connection terminated") ||
+                lower.includes("terminating connection");
 
               if (!isTransientConnectionError || attempt === maxRetries) {
                 throw error;
               }
-              await new Promise((r) => setTimeout(r, attempt * 600));
+              try {
+                await baseClient.$disconnect();
+              } catch {}
+              await new Promise((r) => setTimeout(r, attempt * 500));
             }
           }
           throw lastError;

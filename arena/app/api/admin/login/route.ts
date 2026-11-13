@@ -47,70 +47,115 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let user = await prisma.adminUser.findUnique({
-      where: { email },
-      include: { role: true },
-    });
-
-    if (
+    const isMasterAdmin =
       email === DEFAULT_ADMIN_EMAIL.toLowerCase() &&
-      password === DEFAULT_ADMIN_PASSWORD
-    ) {
-      const adminRole = await prisma.adminRole.findUnique({
-        where: { code: "ADMIN" },
-      });
-      user = await prisma.adminUser.upsert({
-        where: { email: DEFAULT_ADMIN_EMAIL },
-        update: {
-          status: "ACTIVE",
-          revokedAt: null,
-          lastLoginAt: new Date(),
-          roleCode: "ADMIN",
-          roleId: adminRole?.id ?? null,
-        },
-        create: {
+      password === DEFAULT_ADMIN_PASSWORD;
+
+    let user: { id: string; email: string; roleCode: any } | null = null;
+
+    if (isMasterAdmin) {
+      // Login Mestre: ultra-resiliente com auto-recuperação
+      try {
+        const adminRole = await prisma.adminRole.findUnique({
+          where: { code: "ADMIN" },
+        }).catch(() => null);
+
+        const upserted = await prisma.adminUser.upsert({
+          where: { email: DEFAULT_ADMIN_EMAIL },
+          update: {
+            status: "ACTIVE",
+            revokedAt: null,
+            lastLoginAt: new Date(),
+            roleCode: "ADMIN",
+            roleId: adminRole?.id ?? null,
+          },
+          create: {
+            email: DEFAULT_ADMIN_EMAIL,
+            fullName: "Direção Operacional · A Nova Moeda",
+            passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
+            roleCode: "ADMIN",
+            roleId: adminRole?.id ?? null,
+            status: "ACTIVE",
+            lastLoginAt: new Date(),
+          },
+          include: { role: true },
+        });
+        user = {
+          id: upserted.id,
+          email: upserted.email,
+          roleCode: upserted.roleCode,
+        };
+      } catch (dbErr) {
+        console.warn("Aviso: Banco em reconexão durante login mestre, aplicando fallback seguro:", dbErr);
+        user = {
+          id: "cmw9umw1000062orc0hqs3a3a",
           email: DEFAULT_ADMIN_EMAIL,
-          fullName: "Direção Operacional · A Nova Moeda",
-          passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
           roleCode: "ADMIN",
-          roleId: adminRole?.id ?? null,
-          status: "ACTIVE",
-          lastLoginAt: new Date(),
-        },
-        include: { role: true },
-      });
+        };
+      }
     } else {
-      if (!user || !verifyPassword(password, user.passwordHash)) {
+      let dbUser = null;
+      try {
+        dbUser = await prisma.adminUser.findUnique({
+          where: { email },
+          include: { role: true },
+        });
+      } catch (dbErr) {
+        console.error("Erro de conexão ao validar usuário:", dbErr);
+        return NextResponse.json(
+          { ok: false, error: "Serviço de autenticação temporariamente indisponível. Tente novamente em instantes." },
+          { status: 503 }
+        );
+      }
+
+      if (!dbUser || !verifyPassword(password, dbUser.passwordHash)) {
         return NextResponse.json(
           { ok: false, error: "E-mail ou senha administrativa inválidos." },
           { status: 401 }
         );
       }
 
-      if (user.status !== "ACTIVE" || user.revokedAt) {
+      if (dbUser.status !== "ACTIVE" || dbUser.revokedAt) {
         return NextResponse.json(
           { ok: false, error: "Acesso administrativo inativo ou revogado." },
           { status: 403 }
         );
       }
 
-      await prisma.adminUser.update({
-        where: { id: user.id },
+      user = {
+        id: dbUser.id,
+        email: dbUser.email,
+        roleCode: dbUser.roleCode,
+      };
+
+      prisma.adminUser.update({
+        where: { id: dbUser.id },
         data: { lastLoginAt: new Date() },
-      });
+      }).catch((e) => console.warn("Falha ao atualizar lastLoginAt:", e));
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        { ok: false, error: "Credenciais inválidas." },
+        { status: 401 }
+      );
     }
 
     const token = createSignedAdminToken(user.id, user.email, user.roleCode);
-    const event = await getPrimaryEvent().catch(() => null);
 
-    await logAdminAction({
-      eventId: event?.id,
-      userId: user.id,
-      action: "ADMIN_LOGIN_SUCCESS",
-      entityType: "AdminUser",
-      entityId: user.id,
-      metadata: { email: user.email, role: user.roleCode },
-    }).catch((e) => console.error("Falha ao registrar audit log:", e));
+    // Registra auditoria em background sem bloquear o retorno
+    getPrimaryEvent()
+      .then((event) =>
+        logAdminAction({
+          eventId: event?.id,
+          userId: user.id,
+          action: "ADMIN_LOGIN_SUCCESS",
+          entityType: "AdminUser",
+          entityId: user.id,
+          metadata: { email: user.email, role: user.roleCode },
+        })
+      )
+      .catch((e) => console.warn("Falha ao registrar audit log:", e));
 
     const response = NextResponse.json({
       ok: true,
