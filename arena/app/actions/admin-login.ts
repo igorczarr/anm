@@ -14,84 +14,98 @@ import { hashPassword, verifyPassword } from "@/lib/session";
 import { getPrimaryEvent } from "@/lib/live-state";
 
 export async function loginAdminAction(formData: FormData) {
-  const email = String(formData.get("email") || "")
-    .trim()
-    .toLowerCase();
-  const password = String(formData.get("password") || "").trim();
+  try {
+    const email = String(formData.get("email") || "")
+      .trim()
+      .toLowerCase();
+    const password = String(formData.get("password") || "").trim();
 
-  if (!email || !password) {
-    redirect("/admin/login?error=credenciais_invalidas");
-  }
-
-  let user = await prisma.adminUser.findUnique({
-    where: { email },
-    include: { role: true },
-  });
-
-  // Se for o admin padrão com a senha mestre, garante o registro ativo
-  if (
-    email === DEFAULT_ADMIN_EMAIL.toLowerCase() &&
-    password === DEFAULT_ADMIN_PASSWORD
-  ) {
-    const adminRole = await prisma.adminRole.findUnique({
-      where: { code: "ADMIN" },
-    });
-    user = await prisma.adminUser.upsert({
-      where: { email: DEFAULT_ADMIN_EMAIL },
-      update: {
-        status: "ACTIVE",
-        revokedAt: null,
-        lastLoginAt: new Date(),
-        roleCode: "ADMIN",
-        roleId: adminRole?.id ?? null,
-      },
-      create: {
-        email: DEFAULT_ADMIN_EMAIL,
-        fullName: "Direção Operacional · A Nova Moeda",
-        passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
-        roleCode: "ADMIN",
-        roleId: adminRole?.id ?? null,
-        status: "ACTIVE",
-        lastLoginAt: new Date(),
-      },
-      include: { role: true },
-    });
-  } else {
-    if (
-      !user ||
-      user.status !== "ACTIVE" ||
-      user.revokedAt ||
-      !verifyPassword(password, user.passwordHash)
-    ) {
+    if (!email || !password) {
       redirect("/admin/login?error=credenciais_invalidas");
     }
 
-    await prisma.adminUser.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+    let user = await prisma.adminUser.findUnique({
+      where: { email },
+      include: { role: true },
     });
+
+    // Se for o admin padrão com a senha mestre, garante o registro ativo
+    if (
+      email === DEFAULT_ADMIN_EMAIL.toLowerCase() &&
+      password === DEFAULT_ADMIN_PASSWORD
+    ) {
+      const adminRole = await prisma.adminRole.findUnique({
+        where: { code: "ADMIN" },
+      });
+      user = await prisma.adminUser.upsert({
+        where: { email: DEFAULT_ADMIN_EMAIL },
+        update: {
+          status: "ACTIVE",
+          revokedAt: null,
+          lastLoginAt: new Date(),
+          roleCode: "ADMIN",
+          roleId: adminRole?.id ?? null,
+        },
+        create: {
+          email: DEFAULT_ADMIN_EMAIL,
+          fullName: "Direção Operacional · A Nova Moeda",
+          passwordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
+          roleCode: "ADMIN",
+          roleId: adminRole?.id ?? null,
+          status: "ACTIVE",
+          lastLoginAt: new Date(),
+        },
+        include: { role: true },
+      });
+    } else {
+      if (
+        !user ||
+        user.status !== "ACTIVE" ||
+        user.revokedAt ||
+        !verifyPassword(password, user.passwordHash)
+      ) {
+        redirect("/admin/login?error=credenciais_invalidas");
+      }
+
+      await prisma.adminUser.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+    }
+
+    const token = createSignedAdminToken(user.id, user.email, user.roleCode);
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+    });
+
+    const event = await getPrimaryEvent().catch(() => null);
+    await logAdminAction({
+      eventId: event?.id,
+      userId: user.id,
+      action: "ADMIN_LOGIN_SUCCESS",
+      entityType: "AdminUser",
+      entityId: user.id,
+      metadata: { email: user.email, role: user.roleCode },
+    }).catch((e) => console.error("Falha ao registrar log de login:", e));
+
+    redirect("/admin/operacao");
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: unknown }).digest === "string" &&
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+    ) {
+      throw err;
+    }
+    console.error("Erro em loginAdminAction:", err);
+    redirect("/admin/login?error=falha_servidor");
   }
-
-  const token = createSignedAdminToken(user.id, user.email, user.roleCode);
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 dias
-  });
-
-  const event = await getPrimaryEvent();
-  await logAdminAction({
-    eventId: event?.id,
-    userId: user.id,
-    action: "ADMIN_LOGIN_SUCCESS",
-    entityType: "AdminUser",
-    entityId: user.id,
-    metadata: { email: user.email, role: user.roleCode },
-  });
-
-  redirect("/admin");
 }
 
 export async function logoutAdminAction() {

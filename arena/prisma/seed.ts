@@ -252,7 +252,7 @@ async function main() {
       name: "Daniel",
       roleTitle: "Especialista · Pauta 1 & Mesa-Redonda",
       bio: "Conduz a Pauta 1 sobre a solidão na era da hiperconexão e participa da mesa-redonda.",
-      photoUrl: "/img/Daniel.jpeg",
+      photoUrl: "/img/Daniel.png",
       displayOrder: 2,
     },
     {
@@ -276,7 +276,7 @@ async function main() {
       name: "Sérgio Passos",
       roleTitle: "Especialista · Pauta 4 & Mesa-Redonda",
       bio: "Analisa o futuro do trabalho entre aproximação e isolamento profissional na Pauta 4 e participa da mesa-redonda.",
-      photoUrl: "/img/Sergio.jpeg",
+      photoUrl: "/img/Sergio.png",
       displayOrder: 5,
     },
     {

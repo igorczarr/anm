@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email } = parsed.data;
-    const credentialCode = parsed.data.credentialCode?.trim().toUpperCase();
+    const explicitCredential = parsed.data.credentialCode?.trim().toUpperCase();
 
     const ip = await getClientIp();
     if (!rateLimit(`session:${ip}`, 30, 10 * 60 * 1000)) {
@@ -69,12 +69,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (credentialCode) {
+    // Se o usuário informou explicitamente uma credencial, valida e vincula
+    if (explicitCredential) {
       const cred = await prisma.participantCredential.findUnique({
         where: {
           eventId_code: {
             eventId: event.id,
-            code: credentialCode,
+            code: explicitCredential,
           },
         },
       });
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             ok: false,
-            error: `Código de credencial "${credentialCode}" não encontrado para este evento.`,
+            error: `Código de credencial "${explicitCredential}" não encontrado para este evento.`,
             code: "INVALID_CREDENTIAL",
           },
           { status: 400 }
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             ok: false,
-            error: `A credencial "${credentialCode}" já está vinculada a outro dispositivo ativo.`,
+            error: `A credencial "${explicitCredential}" já está vinculada a outro dispositivo ativo.`,
             code: "CREDENTIAL_IN_USE",
           },
           { status: 409 }
@@ -133,12 +134,74 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Se o participante ainda não possui credencial atribuída, gera ou aloca automaticamente
+    let assignedCredential = session.credentialCode;
+    if (!assignedCredential) {
+      // 1. Tentar alocar uma credencial livre pré-cadastrada
+      const availableCred = await prisma.participantCredential.findFirst({
+        where: { eventId: event.id, isUsed: false },
+        orderBy: { createdAt: "asc" },
+      });
+
+      if (availableCred) {
+        await prisma.$transaction([
+          prisma.participantCredential.update({
+            where: { id: availableCred.id },
+            data: {
+              isUsed: true,
+              sessionId: session.id,
+              validatedAt: new Date(),
+            },
+          }),
+          prisma.participantSession.update({
+            where: { id: session.id },
+            data: { credentialCode: availableCred.code },
+          }),
+        ]);
+        assignedCredential = availableCred.code;
+      } else {
+        // 2. Gerar credencial aleatória única (ex: ANM-742)
+        let generatedCode = "";
+        for (let i = 0; i < 10; i++) {
+          const candidate = `ANM-${Math.floor(100 + Math.random() * 900)}`;
+          const exists = await prisma.participantCredential.findUnique({
+            where: { eventId_code: { eventId: event.id, code: candidate } },
+          });
+          if (!exists) {
+            generatedCode = candidate;
+            break;
+          }
+        }
+        if (!generatedCode) {
+          generatedCode = `ANM-${Date.now().toString().slice(-4)}`;
+        }
+
+        await prisma.$transaction([
+          prisma.participantCredential.create({
+            data: {
+              eventId: event.id,
+              code: generatedCode,
+              label: `Credencial Automática ${generatedCode}`,
+              isUsed: true,
+              sessionId: session.id,
+              validatedAt: new Date(),
+            },
+          }),
+          prisma.participantSession.update({
+            where: { id: session.id },
+            data: { credentialCode: generatedCode },
+          }),
+        ]);
+        assignedCredential = generatedCode;
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       code: session.anonymousCode,
       name: session.name,
       email: session.email,
-      credentialCode: session.credentialCode ?? null,
+      credentialCode: assignedCredential,
     });
   } catch (error) {
     console.error("POST /api/participant/session:", error);

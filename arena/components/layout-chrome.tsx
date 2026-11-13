@@ -18,7 +18,15 @@ export function LayoutChrome({
 
   // O Telão ARENA, o App do Participante e todas as telas do ADMIN operam de forma isolada,
   // sem o navbar institucional nem o rodapé público que geravam poluição e redundância.
-  if (isArenaScreen || isParticiparScreen || isAdminScreen) {
+  if (isArenaScreen) {
+    return (
+      <div className="h-screen max-h-screen w-full overflow-hidden bg-[var(--bg-page,#030A06)] text-[var(--text-main,#D5C5AA)]">
+        {children}
+      </div>
+    );
+  }
+
+  if (isParticiparScreen || isAdminScreen) {
     return (
       <div className="min-h-screen w-full bg-[var(--bg-page,#030A06)] text-[var(--text-main,#D5C5AA)] transition-colors duration-200">
         {children}

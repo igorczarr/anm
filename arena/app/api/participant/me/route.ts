@@ -25,6 +25,47 @@ export async function GET() {
     }
 
     const event = await getPrimaryEvent();
+
+    // Garante que o participante possua sempre uma credencial única atribuída
+    if (event && !session.credentialCode) {
+      const availableCred = await prisma.participantCredential.findFirst({
+        where: { eventId: event.id, isUsed: false },
+        orderBy: { createdAt: "asc" },
+      });
+      if (availableCred) {
+        await prisma.$transaction([
+          prisma.participantCredential.update({
+            where: { id: availableCred.id },
+            data: { isUsed: true, sessionId: session.id, validatedAt: new Date() },
+          }),
+          prisma.participantSession.update({
+            where: { id: session.id },
+            data: { credentialCode: availableCred.code },
+          }),
+        ]);
+        session.credentialCode = availableCred.code;
+      } else {
+        const candidate = `ANM-${Math.floor(100 + Math.random() * 900)}`;
+        await prisma.participantCredential.upsert({
+          where: { eventId_code: { eventId: event.id, code: candidate } },
+          update: { isUsed: true, sessionId: session.id, validatedAt: new Date() },
+          create: {
+            eventId: event.id,
+            code: candidate,
+            label: `Credencial Automática ${candidate}`,
+            isUsed: true,
+            sessionId: session.id,
+            validatedAt: new Date(),
+          },
+        });
+        await prisma.participantSession.update({
+          where: { id: session.id },
+          data: { credentialCode: candidate },
+        });
+        session.credentialCode = candidate;
+      }
+    }
+
     let topicId = event?.liveState?.activeTopicId ?? null;
     if (!topicId && event) {
       const firstTopic = await prisma.topic.findFirst({

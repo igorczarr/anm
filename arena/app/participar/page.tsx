@@ -81,7 +81,6 @@ export default function ParticiparPage() {
   const [enterError, setEnterError] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
-  const [credentialInput, setCredentialInput] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("inicio");
 
   // Estado do formulário de pergunta (envio ou edição da pergunta ativa da pauta)
@@ -173,7 +172,6 @@ export default function ParticiparPage() {
         body: JSON.stringify({
           name: nameInput.trim(),
           email: emailInput.trim(),
-          credentialCode: credentialInput.trim() || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -183,7 +181,6 @@ export default function ParticiparPage() {
         );
         return;
       }
-      setCredentialInput("");
       await fetchMe();
     } finally {
       setEntering(false);
@@ -377,12 +374,12 @@ export default function ParticiparPage() {
               {snapshot?.event.name || "A Nova Moeda"}
             </h1>
             <p className="text-xs sm:text-sm text-[#D5C5AA]/85 leading-relaxed">
-              Identifique-se para enviar perguntas para as 5 exposições e votar na questão que será
-              debatida pelos especialistas na Mesa-Redonda.
+              Identifique-se para enviar perguntas para as exposições e votar na questão que será
+              debatida pelos 6 especialistas na Mesa-Redonda.
             </p>
           </div>
 
-          <form onSubmit={handleEnterArena} className="space-y-3 text-left">
+          <form onSubmit={handleEnterArena} className="space-y-4 text-left">
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA]">
                 Seu Nome Completo *
@@ -408,24 +405,6 @@ export default function ParticiparPage() {
                 placeholder="Ex.: maria@exemplo.com"
                 required
                 className="w-full px-3.5 py-3 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] text-sm outline-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA] flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
-                <span>
-                  Credencial de Check-in{" "}
-                  {requireCredential ? "(Obrigatória)" : "(Opcional · ex: ANM-001)"}
-                </span>
-              </label>
-              <input
-                type="text"
-                value={credentialInput}
-                onChange={(e) => setCredentialInput(e.target.value.toUpperCase())}
-                placeholder="Ex.: ANM-001"
-                required={requireCredential}
-                className="w-full px-3.5 py-3 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-mono text-sm uppercase outline-none"
               />
             </div>
 
@@ -598,7 +577,7 @@ export default function ParticiparPage() {
                 <p className="text-xs text-[#D5C5AA]/80">
                   {activePoll.status === "CLOSED" || activePoll.status === "RESULTS_PUBLISHED"
                     ? "A votação foi encerrada. Veja a questão que guiará a Mesa-Redonda."
-                    : "Escolha qual questão deve guiar o debate entre os 5 especialistas na Mesa-Redonda."}
+                    : "Escolha qual questão deve guiar o debate entre os 6 especialistas na Mesa-Redonda."}
                 </p>
               </div>
 
@@ -939,10 +918,9 @@ export default function ParticiparPage() {
                 Votação da Mesa-Redonda
               </h2>
               <p className="text-xs text-[#D5C5AA]/75">
-                Votação aberta para todo o público escolher qual das 3
-                questões centrais será debatida pelos 5 especialistas
-                (Daniel, Janaína, Denilson Carneiro, Sérgio Passos e Dulcila) na
-                Mesa-Redonda sob mediação de Paula.
+                Votação aberta para todo o público escolher qual questão central será debatida pelos 6 especialistas
+                (Daniel Pereira, Janaína Silva, Denilson Carneiro, Sérgio Passos, Dulcila e Paula Melo) na
+                Mesa-Redonda.
               </p>
             </div>
           ) : (
@@ -960,25 +938,26 @@ export default function ParticiparPage() {
 
               <div className="p-3 rounded-xl bg-[#030A06] border border-[#D5C5AA]/20 space-y-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA]/80 block">
-                  Debatedores da Mesa-Redonda (Mediação: Paula)
+                  Os 6 Especialistas da Mesa-Redonda
                 </span>
-                <div className="grid grid-cols-5 gap-1.5">
+                <div className="grid grid-cols-6 gap-1.5">
                   {[
-                    { id: "1", name: "Daniel", photoUrl: "/img/Daniel.jpeg" },
+                    { id: "1", name: "Daniel", photoUrl: "/img/Daniel.png" },
                     { id: "2", name: "Janaína", photoUrl: "/img/Janaina.jpeg" },
                     { id: "3", name: "Denilson", photoUrl: "/img/Denilson.png" },
-                    { id: "4", name: "Sérgio", photoUrl: "/img/Sergio.jpeg" },
+                    { id: "4", name: "Sérgio", photoUrl: "/img/Sergio.png" },
                     { id: "5", name: "Dulcila", photoUrl: "/img/Dulcila.jpeg" },
+                    { id: "6", name: "Paula", photoUrl: "/img/Paula.jpeg" },
                   ].map((sp) => (
                     <div key={sp.id} className="flex flex-col items-center text-center gap-1">
                       {sp.photoUrl ? (
                         <img
                           src={sp.photoUrl}
                           alt={sp.name}
-                          className="w-10 h-10 rounded-xl object-cover border border-[#D5C5AA]/30"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover object-top border border-[#D5C5AA]/30"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-[#14532D] text-white flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#14532D] text-white flex items-center justify-center font-bold text-xs">
                           {sp.name.charAt(0)}
                         </div>
                       )}
@@ -1087,45 +1066,20 @@ export default function ParticiparPage() {
       {/* ABA 4: MINHAS PARTICIPAÇÕES & VINCULAÇÃO DE CREDENCIAL */}
       {activeTab === "minhas" && (
         <div className="space-y-4">
-          {/* Vinculação opcional de Credencial de Check-in */}
-          <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3 text-xs">
+          {/* Informações da Credencial Ativa */}
+          <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-4 sm:p-5 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[#F7DECA] flex items-center gap-1.5">
                 <KeyRound className="w-4 h-4 text-emerald-400" />
-                Credencial de Check-in
+                Credencial de Acesso
               </span>
-              <span className="font-mono text-[#D5C5AA]/80">
-                {me?.credentialCode
-                  ? `Validada: ${me.credentialCode}`
-                  : `Sessão: #${me?.code || "..."}`}
+              <span className="font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-xs">
+                #{me?.credentialCode || me?.code}
               </span>
             </div>
-            {!me?.credentialCode && (
-              <form
-                onSubmit={handleEnterArena}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={credentialInput}
-                  onChange={(e) =>
-                    setCredentialInput(e.target.value.toUpperCase())
-                  }
-                  placeholder="Código do check-in (ex.: ANM-001)"
-                  className="flex-1 px-3 py-2 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] font-mono text-xs uppercase outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={entering || !credentialInput.trim()}
-                  className="px-3.5 py-2 rounded-xl bg-[#14532D] text-white font-bold text-xs cursor-pointer disabled:opacity-50"
-                >
-                  Validar
-                </button>
-              </form>
-            )}
-            {enterError && (
-              <p className="text-red-300 text-[11px]">{enterError}</p>
-            )}
+            <p className="text-[11px] text-[#D5C5AA]/70 leading-relaxed">
+              Credencial gerada e vinculada automaticamente a este dispositivo para validação de votos e perguntas na Arena.
+            </p>
           </div>
 
           <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3">

@@ -703,15 +703,27 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ========================================================================= */
-/* TELÃO DA ARENA (MODO APRESENTAÇÃO IMERSIVO v2.5)                          */
+/* TELÃO DA ARENA (MODO APRESENTAÇÃO IMERSIVO v2.5 - NO SCROLL)             */
 /* ========================================================================= */
+
+html:has(.arena-stage),
+body:has(.arena-stage) {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
 
 .arena-stage {
   background-color: #030A06 !important;
   color: #F7DECA !important;
   position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
   isolation: isolate;
+  box-sizing: border-box !important;
 }
 
 /* Orbes dinâmicos de luz ambiente */

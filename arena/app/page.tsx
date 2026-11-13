@@ -179,7 +179,7 @@ async function HomeContent() {
             </h2>
           </div>
           <span className="text-xs text-[#D5C5AA]/70">
-            5 especialistas (Daniel, Janaína, Denilson, Sérgio, Dulcila) + Mediação: Paula · Votação da Mesa-Redonda Aberta
+            6 especialistas (Daniel, Janaína, Denilson, Sérgio, Dulcila, Paula) · Votação da Mesa-Redonda Aberta
           </span>
         </div>
 
