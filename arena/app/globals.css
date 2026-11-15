@@ -1032,4 +1032,22 @@ html.light .brand-logo-light-theme {
   display: block !important;
 }
 
+/* ========================================================================= */
+/* PASSE SOCIAL EDITORIAL "EU FAÇO PARTE DA A NOVA MOEDA" (DARK & LIGHT)     */
+/* ========================================================================= */
+html[data-theme="light"] .anm-editorial-pass,
+html.light .anm-editorial-pass {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 55%, #ECFDF5 100%) !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.14) !important;
+}
+
+html[data-theme="light"] .anm-editorial-spotlight,
+html.light .anm-editorial-spotlight {
+  background: linear-gradient(180deg, #ECFDF5 0%, #FFFFFF 100%) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 4px 16px -4px rgba(16, 185, 129, 0.12) !important;
+}
+
+
 

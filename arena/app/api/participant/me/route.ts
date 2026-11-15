@@ -162,14 +162,12 @@ export async function GET() {
         questions: mappedQuestions,
         activeTopicQuestion,
         votes: votes.map((v) => ({
+          id: v.id,
           pollId: v.pollId,
           pollNumber: v.poll.number,
           pollQuestion: v.poll.question,
           pollStatus: v.poll.status,
-          optionId: v.optionId,
-          optionLabel: v.option.label,
-          optionThemeLabel: v.option.themeLabel,
-          optionOrder: v.option.optionOrder,
+          votedAt: (v.updatedAt ?? v.createdAt).toISOString(),
         })),
         quota: {
           topicId,

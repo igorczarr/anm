@@ -31,7 +31,7 @@ const SIX_SPECIALISTS = [
     name: "Daniel Pereira",
     role: "Pauta 1",
     sub: "Hiperconexão",
-    photoUrl: "/img/Daniel.png",
+    photoUrl: "/img/Daniel.png?v=3",
   },
   {
     name: "Janaína Silva",
@@ -49,7 +49,7 @@ const SIX_SPECIALISTS = [
     name: "Sérgio Passos",
     role: "Pauta 4",
     sub: "Futuro do Trabalho",
-    photoUrl: "/img/Sergio.png",
+    photoUrl: "/img/Sergio.png?v=3",
   },
   {
     name: "Dulcila",
@@ -66,15 +66,15 @@ const SIX_SPECIALISTS = [
 ];
 
 function resolveSpeakerPhoto(name?: string | null, photoUrl?: string | null): string | null {
-  if (photoUrl && photoUrl.trim()) return photoUrl;
-  if (!name) return null;
-  const n = name.toLowerCase();
-  if (n.includes("daniel")) return "/img/Daniel.png";
+  if (!name && photoUrl && photoUrl.trim()) return photoUrl;
+  const n = (name || "").toLowerCase();
+  if (n.includes("daniel")) return "/img/Daniel.png?v=3";
   if (n.includes("janaina") || n.includes("janaína")) return "/img/Janaina.jpeg";
   if (n.includes("denilson")) return "/img/Denilson.png";
-  if (n.includes("sergio") || n.includes("sérgio")) return "/img/Sergio.png";
+  if (n.includes("sergio") || n.includes("sérgio")) return "/img/Sergio.png?v=3";
   if (n.includes("dulcila")) return "/img/Dulcila.jpeg";
   if (n.includes("paula")) return "/img/Paula.jpeg";
+  if (photoUrl && photoUrl.trim()) return photoUrl;
   return null;
 }
 
@@ -505,18 +505,25 @@ export function ArenaScreen() {
 
     const target = snapshot?.event?.scheduledStartAt
       ? new Date(snapshot.event.scheduledStartAt).getTime()
-      : null;
+      : new Date("2026-11-17T21:30:00.000Z").getTime();
 
     const updateTicker = () => {
       const now = Date.now();
-      if (target && target > now && target - now <= 2 * 3600 * 1000) {
+      if (target && target > now) {
         const diff = target - now;
         const totalSec = Math.floor(diff / 1000);
-        const mins = Math.floor(totalSec / 60);
+        const hours = Math.floor(totalSec / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
         const secs = totalSec % 60;
-        setCountdownText(
-          `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
-        );
+        if (hours > 0) {
+          setCountdownText(
+            `${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`
+          );
+        } else {
+          setCountdownText(
+            `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+          );
+        }
       } else {
         setCountdownText(timer.formatted || "05:00");
       }
