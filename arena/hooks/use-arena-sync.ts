@@ -219,7 +219,7 @@ export function useArenaSync(options?: {
     alertLevel: "NORMAL",
   });
   const [connected, setConnected] = useState<boolean>(true);
-  const [lastSyncedAt, setLastSyncedAt] = useState<number>(Date.now());
+  const [lastSyncedAt, setLastSyncedAt] = useState<number>(0);
 
   const seqRef = useRef<number>(0);
   const clockOffsetMsRef = useRef<number>(0);

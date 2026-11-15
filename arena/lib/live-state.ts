@@ -22,9 +22,6 @@ export function invalidateStaticEventCache() {
 }
 
 export async function getPrimaryEvent() {
-  if (!process.env.DATABASE_URL) {
-    return null;
-  }
   try {
     const event = await prisma.event.findUnique({
       where: { slug: DEFAULT_EVENT_SLUG },
@@ -35,11 +32,36 @@ export async function getPrimaryEvent() {
 
     if (event) return event;
 
-    return await prisma.event.findFirst({
+    const firstEvent = await prisma.event.findFirst({
       include: {
         liveState: true,
       },
       orderBy: { createdAt: "asc" },
+    });
+
+    if (firstEvent) return firstEvent;
+
+    // Auto-provisionamento de segurança caso o banco esteja vazio
+    return await prisma.event.create({
+      data: {
+        slug: DEFAULT_EVENT_SLUG,
+        name: "A Nova Moeda",
+        theme: "Economia da Solidão",
+        institution: "UEFS — Universidade Estadual de Feira de Santana (Auditório 2)",
+        formatDescription: "5 Pautas + Mesa-Redonda",
+        scheduledStartAt: new Date("2026-11-17T21:30:00.000Z"),
+        liveState: {
+          create: {
+            seq: 1,
+            lastEventType: "system.initialized",
+            status: "WAITING",
+            arenaMode: "WAITING",
+          },
+        },
+      },
+      include: {
+        liveState: true,
+      },
     });
   } catch (err) {
     console.warn("getPrimaryEvent: Banco de dados inacessível ou não configurado:", err);

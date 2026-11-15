@@ -98,9 +98,10 @@ export default function ParticiparPage() {
   // Estado do formulário de pergunta (envio ou edição da pergunta ativa da pauta)
   const [questionText, setQuestionText] = useState("");
   const [isEditingExisting, setIsEditingExisting] = useState(false);
-  const [pendingRequestId, setPendingRequestId] = useState<string>(() =>
-    makeClientRequestId()
-  );
+  const [pendingRequestId, setPendingRequestId] = useState<string>("");
+  useEffect(() => {
+    setPendingRequestId(makeClientRequestId());
+  }, []);
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [questionFeedback, setQuestionFeedback] = useState<{
     type: "success" | "error";
@@ -374,14 +375,23 @@ export default function ParticiparPage() {
     questionsOpen &&
     (!activeTopicQuestion || Boolean(activeTopicQuestion.canEdit));
 
-  // Contagem regressiva em Horas e Minutos até o início oficial do evento
-  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  // Contagem regressiva em Horas e Minutos até o início oficial do evento (hidratado no cliente para evitar React error #418)
+  const [nowMs, setNowMs] = useState<number | null>(null);
   useEffect(() => {
+    setNowMs(Date.now());
     const id = setInterval(() => setNowMs(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
   const eventCountdown = useMemo(() => {
+    if (nowMs === null) {
+      return {
+        hours: "48",
+        minutes: "00",
+        seconds: "00",
+        formattedHM: "48h 00min",
+      };
+    }
     const target = snapshot?.event?.scheduledStartAt
       ? new Date(snapshot.event.scheduledStartAt).getTime()
       : new Date("2026-11-17T21:30:00.000Z").getTime();

@@ -65,16 +65,19 @@ export async function getParticipantSession() {
 
 export async function createParticipantSession(
   eventId: string,
-  data?: { name?: string; email?: string }
+  data?: { name?: string; email?: string; credentialCode?: string }
 ) {
   const ip = await getClientIp();
   const h = await headers();
   const code = crypto.randomBytes(3).toString("hex").toUpperCase();
+  const autoCredential =
+    data?.credentialCode?.trim() || `ANM-${Math.floor(100 + Math.random() * 900)}`;
   const session = await prisma.participantSession.create({
     data: {
       eventId,
       sessionToken: crypto.randomUUID(),
       anonymousCode: code,
+      credentialCode: autoCredential,
       name: data?.name?.trim() || null,
       email: data?.email?.trim().toLowerCase() || null,
       userAgent: (h.get("user-agent") || "").slice(0, 200),
