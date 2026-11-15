@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAdminAction } from "@/app/actions/admin-login";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   CalendarClock,
   ChevronRight,
@@ -102,11 +103,7 @@ export function AdminSidebar() {
         <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
           <Link href="/admin/operacao" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-xl bg-[#0A120D] border border-emerald-500/40 p-1 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
-              <img
-                src="/img/logo.png"
-                alt="A Nova Moeda"
-                className="w-full h-full object-contain"
-              />
+              <BrandLogo className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="font-display font-bold text-sm text-[#F7DECA] leading-tight">
@@ -244,11 +241,7 @@ export function AdminSidebar() {
       <div className="md:hidden bg-[#050C07] border-b border-white/[0.08] p-3 flex items-center justify-between">
         <Link href="/admin/operacao" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-[#0A120D] border border-emerald-500/30 p-0.5 flex items-center justify-center overflow-hidden">
-            <img
-              src="/img/logo.png"
-              alt="A Nova Moeda"
-              className="w-full h-full object-contain"
-            />
+            <BrandLogo className="w-full h-full object-contain" />
           </div>
           <span className="font-display font-bold text-sm text-[#F7DECA]">
             A Nova Moeda

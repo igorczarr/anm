@@ -269,7 +269,11 @@ export async function getArenaSyncSnapshot(options?: {
 
   let nextStep = null;
   let prevStep = null;
-  if (activeStep) {
+  if (liveState.status === "WAITING" || liveState.arenaMode === "WAITING") {
+    // Quando o evento está na sala de espera (não iniciado), a etapa a iniciar é a Etapa 1 (Abertura)
+    nextStep = allOperationalSteps[0] ?? null;
+    prevStep = null;
+  } else if (activeStep) {
     nextStep =
       allOperationalSteps.find(
         (s) => s.sequenceOrder > activeStep.sequenceOrder

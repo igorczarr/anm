@@ -1012,3 +1012,24 @@ body:has(.arena-stage) {
   }
 }
 
+/* ========================================================================= */
+/* LOGOMARCA INTELIGENTE: TEMA ESCURO (CLARA) vs TEMA CLARO (ESCURA)        */
+/* ========================================================================= */
+.brand-logo-dark-theme {
+  display: block;
+}
+.brand-logo-light-theme {
+  display: none;
+}
+
+html[data-theme="light"] .brand-logo-dark-theme,
+html.light .brand-logo-dark-theme {
+  display: none !important;
+}
+
+html[data-theme="light"] .brand-logo-light-theme,
+html.light .brand-logo-light-theme {
+  display: block !important;
+}
+
+

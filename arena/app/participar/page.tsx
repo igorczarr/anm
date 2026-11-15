@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useArenaSync } from "@/hooks/use-arena-sync";
 import { PUBLIC_STATUS_LABELS } from "@/lib/question-status";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   AlertCircle,
   ArrowRight,
@@ -81,6 +82,7 @@ export default function ParticiparPage() {
   const [enterError, setEnterError] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
+  const [selectedEntryOptionId, setSelectedEntryOptionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("inicio");
 
   // Estado do formulário de pergunta (envio ou edição da pergunta ativa da pauta)
@@ -181,6 +183,24 @@ export default function ParticiparPage() {
         );
         return;
       }
+
+      // Se o usuário selecionou uma opção na tela de entrada, computa o voto imediatamente
+      if (selectedEntryOptionId && activePoll) {
+        try {
+          await fetch("/api/participant/vote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              pollId: activePoll.id,
+              optionId: selectedEntryOptionId,
+              clientRequestId: makeClientRequestId(),
+            }),
+          });
+        } catch {
+          // ignora falha de voto silenciosa, o usuário poderá votar na tela principal
+        }
+      }
+
       await fetchMe();
     } finally {
       setEntering(false);
@@ -353,34 +373,106 @@ export default function ParticiparPage() {
   // Tela Inicial de Entrada (antes de iniciar sessão)
   if (!loadingSession && me && !me.authenticated) {
     return (
-      <div className="max-w-md mx-auto px-4 py-8 space-y-3">
+      <div className="max-w-lg mx-auto px-4 py-6 sm:py-8 space-y-4">
         <div className="flex justify-end">
           <ThemeToggle compact />
         </div>
-        <div className="border border-[#D5C5AA]/30 bg-[#0A150D]/95 p-7 rounded-2xl space-y-6 text-center shadow-lg">
+        <div className="border border-[#D5C5AA]/30 bg-[#0A150D]/95 p-6 sm:p-7 rounded-2xl space-y-5 text-center shadow-xl backdrop-blur-md">
+          {/* Logo Inteligente (Clara no tema escuro, escura no tema claro) */}
           <div className="w-16 h-16 mx-auto rounded-2xl bg-[#0A150D] border border-emerald-500/40 p-2 flex items-center justify-center shadow-xl">
-            <img
-              src="/img/logo.png"
-              alt="A Nova Moeda"
-              className="w-full h-full object-contain filter drop-shadow"
-            />
+            <BrandLogo className="w-full h-full object-contain filter drop-shadow" />
           </div>
 
-          <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-              {snapshot?.event.institution || "UEFS"} · Participação em Tempo Real
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 block">
+              {snapshot?.event.institution || "Universidade Estadual de Feira de Santana"} · Auditório 2
             </span>
-            <h1 className="font-display text-2xl sm:text-3xl text-[#F7DECA]">
-              {snapshot?.event.name || "A Nova Moeda"}
+            <h1 className="font-display text-2xl sm:text-3xl text-[#F7DECA] font-bold">
+              {snapshot?.event.name || "A Nova Moeda"}: Economia da Solidão
             </h1>
-            <p className="text-xs sm:text-sm text-[#D5C5AA]/85 leading-relaxed">
-              Identifique-se para enviar perguntas para as exposições e votar na questão que será
-              debatida pelos 6 especialistas na Mesa-Redonda.
-            </p>
           </div>
 
-          <form onSubmit={handleEnterArena} className="space-y-4 text-left">
-            <div className="space-y-1.5">
+          {/* Destaque: Evento ainda não começou, mas a votação está ABERTA */}
+          <div className="border-2 border-emerald-500/50 bg-emerald-950/30 p-4 rounded-xl text-left space-y-2 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-300">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+              </span>
+              <span className="uppercase tracking-wider">Votação da Mesa-Redonda Aberta</span>
+            </div>
+            <p className="text-xs text-[#D5C5AA]/95 leading-relaxed font-medium">
+              O evento ainda não começou efetivamente, mas a escolha da questão que guiará os 6 especialistas na Mesa-Redonda já está aberta para você votar antecipadamente!
+            </p>
+            <div className="pt-2 border-t border-emerald-500/20 flex items-center justify-between text-[11px] text-[#D5C5AA]/75">
+              <span>Programação oficial no Auditório 2</span>
+              <span className="text-emerald-400 font-semibold font-mono">
+                {timer.formatted || "05:00"}
+              </span>
+            </div>
+          </div>
+
+          {/* Questões da Mesa-Redonda Disponíveis para Votação Imediata */}
+          {activePoll && (
+            <div className="space-y-2.5 text-left pt-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#F7DECA]">
+                  Escolha a questão da Mesa-Redonda:
+                </span>
+                <span className="text-[10px] text-emerald-400 font-medium">
+                  {selectedEntryOptionId ? "1 questão selecionada" : "Selecione uma opção"}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {activePoll.options.map((opt) => {
+                  const isSelected = selectedEntryOptionId === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() =>
+                        setSelectedEntryOptionId(isSelected ? null : opt.id)
+                      }
+                      className={`w-full p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-2.5 ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-950/40 text-emerald-200 shadow-md ring-1 ring-emerald-500"
+                          : "border-white/10 bg-[#030A06] text-[#D5C5AA]/85 hover:border-[#D5C5AA]/40"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full border mt-0.5 shrink-0 flex items-center justify-center ${
+                          isSelected
+                            ? "border-emerald-400 bg-emerald-500"
+                            : "border-[#D5C5AA]/40"
+                        }`}
+                      >
+                        {isSelected && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-black" />
+                        )}
+                      </div>
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block truncate">
+                          {opt.themeLabel || `Questão ${opt.optionOrder}`}
+                        </span>
+                        <p className="text-xs text-[#F7DECA] font-medium leading-relaxed">
+                          {opt.label}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Formulário de Identificação e Validação do Voto */}
+          <form onSubmit={handleEnterArena} className="space-y-3.5 text-left pt-1">
+            <div className="text-xs text-[#D5C5AA]/80 font-medium">
+              Informe seu nome e e-mail para validar seu acesso e confirmar seu voto:
+            </div>
+
+            <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA]">
                 Seu Nome Completo *
               </label>
@@ -394,7 +486,7 @@ export default function ParticiparPage() {
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#D5C5AA]">
                 Seu E-mail *
               </label>
@@ -421,12 +513,18 @@ export default function ParticiparPage() {
               className="w-full py-4 px-6 bg-[#D5C5AA] text-[#030A06] font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-md cursor-pointer hover:opacity-95 transition"
             >
               <ArrowRight className="w-4 h-4" />
-              <span>{entering ? "Conectando à Arena..." : "Entrar na Arena"}</span>
+              <span>
+                {entering
+                  ? "Registrando e Conectando..."
+                  : selectedEntryOptionId
+                    ? "Confirmar Voto e Entrar na Sala de Espera"
+                    : "Entrar para Votar na Mesa-Redonda"}
+              </span>
             </button>
           </form>
 
-          <p className="text-[11px] text-[#D5C5AA]/70 leading-relaxed">
-            Seus dados são utilizados exclusivamente para identificação das perguntas e validação dos votos na Arena.
+          <p className="text-[11px] text-[#D5C5AA]/70 leading-relaxed text-center">
+            Sua credencial de participação será gerada automaticamente para validar seus votos e perguntas com total segurança.
           </p>
         </div>
       </div>
@@ -451,11 +549,7 @@ export default function ParticiparPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#0A150D] border border-emerald-500/40 p-1 flex items-center justify-center shadow-sm shrink-0">
-              <img
-                src="/img/logo.png"
-                alt="A Nova Moeda"
-                className="w-full h-full object-contain filter drop-shadow"
-              />
+              <BrandLogo className="w-full h-full object-contain filter drop-shadow" />
             </div>
             <div>
               <div className="font-display font-bold text-sm sm:text-base text-[#F7DECA] leading-tight">
@@ -551,7 +645,36 @@ export default function ParticiparPage() {
       {/* ABA 1: INÍCIO */}
       {activeTab === "inicio" && (
         <div className="space-y-4">
-          {/* SE NÃO HOUVER PAUTA ATIVA OU SE FOR APÓS A PAUTA 5: VOTAÇÃO DA MESA-REDONDA GANHA DESTAQUE PRINCIPAL */}
+          {/* MODO SALA DE ESPERA (QUANDO AINDA NÃO HÁ PAUTA ATIVA NO PALCO) */}
+          {!snapshot?.activeTopic && (
+            <div className="border border-white/10 bg-[#0A150D]/95 p-5 sm:p-6 rounded-2xl space-y-3.5 text-center shadow-xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>SALA DE ESPERA · AUDITÓRIO 2 (UEFS)</span>
+              </div>
+              <div className="space-y-1">
+                <h2 className="font-display text-xl sm:text-2xl text-[#F7DECA] font-bold">
+                  A Nova Moeda: Economia da Solidão
+                </h2>
+                <p className="text-xs text-[#D5C5AA]/80 max-w-sm mx-auto leading-relaxed">
+                  O evento ainda não começou efetivamente, mas a votação oficial da Mesa-Redonda já está aberta para você participar antecipadamente! Escolha sua questão prioritária logo abaixo.
+                </p>
+              </div>
+              <div className="border border-white/10 bg-[#030A06] p-4 rounded-xl max-w-xs mx-auto">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400 block mb-1">
+                  Tempo para Início Oficial
+                </span>
+                <div className="font-mono font-bold text-3xl sm:text-4xl text-[#F7DECA] tracking-wider">
+                  {timer.formatted || "05:00"}
+                </div>
+                <span className="text-[10px] text-[#D5C5AA]/60 block mt-1">
+                  Abertura Institucional &amp; Orientações
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* VOTAÇÃO OFICIAL DA MESA-REDONDA (ABERTA E ACESSÍVEL IMEDIATAMENTE NA SALA DE ESPERA) */}
           {(!snapshot?.activeTopic || isAfterTopic5) && activePoll && (
             <div className="border-2 border-emerald-500/60 bg-[#0A150D] p-5 rounded-2xl space-y-4 shadow-lg">
               <div className="flex items-center justify-between gap-2 text-xs">
@@ -643,129 +766,171 @@ export default function ParticiparPage() {
             </div>
           )}
 
-          {/* 2. CARD PRINCIPAL NO INÍCIO: FORMULAR E ENVIAR PERGUNTA PARA O PALESTRANTE DA PAUTA */}
-          <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3.5">
-            <div className="flex items-center justify-between text-xs gap-2">
-              <span className="font-bold text-[#F7DECA] flex items-center gap-2">
-                {snapshot?.activeTopic?.mainSpeaker?.photoUrl && (
-                  <img
-                    src={snapshot.activeTopic.mainSpeaker.photoUrl}
-                    alt=""
-                    className="w-5 h-5 rounded-full object-cover border border-[#D5C5AA]/40 shrink-0 inline-block"
-                  />
-                )}
-                <MessageSquarePlus className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  {activeTopicQuestion
-                    ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
-                    : snapshot?.activeTopic
-                      ? `Pergunta para a Pauta ${snapshot.activeTopic.number} (${snapshot.activeTopic.mainSpeaker.name})`
-                      : "Pergunta para a Pauta Atual"}
-                </span>
-              </span>
-              <span className="font-mono text-[11px] text-[#D5C5AA]/75">
-                {activeTopicQuestion
-                  ? activeTopicQuestion.canEdit
-                    ? "Editável (15m)"
-                    : PUBLIC_STATUS_LABELS[activeTopicQuestion.status] ||
-                      "Em curadoria"
-                  : questionsOpen
-                    ? "Captação aberta (15m)"
-                    : "Captação fechada"}
-              </span>
-            </div>
-
-            {questionFeedback && (
-              <div
-                className={`p-3 rounded-xl text-xs flex items-start gap-2 border ${
-                  questionFeedback.type === "success"
-                    ? "bg-emerald-950/30 text-emerald-200 border-emerald-500/30"
-                    : "bg-red-950/30 text-red-200 border-red-500/30"
-                }`}
-              >
-                {questionFeedback.type === "success" ? (
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                )}
-                <span>{questionFeedback.message}</span>
-              </div>
-            )}
-
-            {activeTopicQuestion && !activeTopicQuestion.canEdit ? (
-              <div className="border border-[#D5C5AA]/20 bg-[#030A06] p-4 rounded-xl space-y-2 text-xs">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-[#D5C5AA]/75 flex items-center gap-1">
-                    <Lock className="w-3.5 h-3.5" />
-                    Edição encerrada
+          {/* SE ESTIVER NA SALA DE ESPERA: MOSTRA A GRADE DOS 6 ESPECIALISTAS E AVISO AMIGÁVEL */}
+          {!snapshot?.activeTopic && (
+            <>
+              <div className="p-4 rounded-2xl bg-[#0A150D]/90 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                    Os 6 Especialistas da Mesa-Redonda
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 font-semibold">
-                    {PUBLIC_STATUS_LABELS[activeTopicQuestion.status] ||
-                      "Recebida"}
-                  </span>
+                  <span className="text-[10px] text-[#D5C5AA]/60">UEFS · Auditório 2</span>
                 </div>
-                <p className="text-[#F7DECA] leading-relaxed">
-                  {activeTopicQuestion.text}
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {[
+                    { id: "1", name: "Daniel", role: "Pauta 1", photoUrl: "/img/Daniel.png" },
+                    { id: "2", name: "Janaína", role: "Pauta 2", photoUrl: "/img/Janaina.jpeg" },
+                    { id: "3", name: "Denilson", role: "Pauta 3", photoUrl: "/img/Denilson.png" },
+                    { id: "4", name: "Sérgio", role: "Pauta 4", photoUrl: "/img/Sergio.png" },
+                    { id: "5", name: "Dulcila", role: "Pauta 5", photoUrl: "/img/Dulcila.jpeg" },
+                    { id: "6", name: "Paula", role: "Mediação", photoUrl: "/img/Paula.jpeg" },
+                  ].map((sp) => (
+                    <div key={sp.id} className="flex flex-col items-center text-center gap-1">
+                      <img
+                        src={sp.photoUrl}
+                        alt={sp.name}
+                        className="w-10 h-10 rounded-xl object-cover object-top border border-[#D5C5AA]/30"
+                      />
+                      <span className="text-[10px] text-[#F7DECA] font-medium truncate w-full">
+                        {sp.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-4 rounded-xl text-center space-y-1">
+                <span className="text-[11px] font-bold text-emerald-400 block">
+                  Envio de Perguntas aos Palestrantes
+                </span>
+                <p className="text-xs text-[#D5C5AA]/70 leading-relaxed">
+                  A captação de perguntas individuais será ativada automaticamente assim que a primeira pauta for iniciada no palco. Fique atento(a)!
                 </p>
               </div>
-            ) : (
-              <form onSubmit={handleSendOrEditQuestion} className="space-y-3">
-                <textarea
-                  rows={3}
-                  maxLength={charLimit}
-                  value={questionText}
-                  onChange={(e) => {
-                    setQuestionText(e.target.value);
-                    if (activeTopicQuestion) setIsEditingExisting(true);
-                  }}
-                  disabled={!canSendOrEditQuestion}
-                  placeholder={
-                    !questionsOpen
-                      ? "O envio de perguntas abre durante os 15 minutos de Exposição de cada pauta."
-                      : "Escreva aqui sua pergunta para o especialista da pauta..."
-                  }
-                  className="w-full p-3 text-xs border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] rounded-xl outline-none"
-                />
-                <div className="flex items-center justify-between text-xs gap-2">
-                  <span className="font-mono text-[11px] text-[#D5C5AA]/70">
-                    {questionText.length} / {charLimit} caracteres
-                    {activeTopicQuestion?.editCount
-                      ? ` · ${activeTopicQuestion.editCount} edição(ões)`
-                      : ""}
+            </>
+          )}
+
+          {/* QUANDO UMA PAUTA ESTIVER AO VIVO: FORMULAR E ENVIAR PERGUNTA PARA O PALESTRANTE DA PAUTA */}
+          {snapshot?.activeTopic && (
+            <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl space-y-3.5">
+              <div className="flex items-center justify-between text-xs gap-2">
+                <span className="font-bold text-[#F7DECA] flex items-center gap-2">
+                  {snapshot?.activeTopic?.mainSpeaker?.photoUrl && (
+                    <img
+                      src={snapshot.activeTopic.mainSpeaker.photoUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full object-cover border border-[#D5C5AA]/40 shrink-0 inline-block"
+                    />
+                  )}
+                  <MessageSquarePlus className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {activeTopicQuestion
+                      ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
+                      : `Pergunta para a Pauta ${snapshot.activeTopic.number} (${snapshot.activeTopic.mainSpeaker.name})`}
                   </span>
-                  <button
-                    type="submit"
-                    disabled={
-                      submittingQuestion ||
-                      !canSendOrEditQuestion ||
-                      !questionText.trim()
-                    }
-                    className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    {activeTopicQuestion ? (
-                      <>
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>
-                          {submittingQuestion
-                            ? "Salvando..."
-                            : "Salvar Edição da Pergunta"}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-3.5 h-3.5" />
-                        <span>
-                          {submittingQuestion
-                            ? "Enviando..."
-                            : "Enviar Pergunta"}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                </span>
+                <span className="font-mono text-[11px] text-[#D5C5AA]/75">
+                  {activeTopicQuestion
+                    ? activeTopicQuestion.canEdit
+                      ? "Editável (15m)"
+                      : PUBLIC_STATUS_LABELS[activeTopicQuestion.status] || "Em curadoria"
+                    : questionsOpen
+                      ? "Captação aberta (15m)"
+                      : "Captação fechada"}
+                </span>
+              </div>
+
+              {questionFeedback && (
+                <div
+                  className={`p-3 rounded-xl text-xs flex items-start gap-2 border ${
+                    questionFeedback.type === "success"
+                      ? "bg-emerald-950/30 text-emerald-200 border-emerald-500/30"
+                      : "bg-red-950/30 text-red-200 border-red-500/30"
+                  }`}
+                >
+                  {questionFeedback.type === "success" ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  )}
+                  <span>{questionFeedback.message}</span>
                 </div>
-              </form>
-            )}
-          </div>
+              )}
+
+              {activeTopicQuestion && !activeTopicQuestion.canEdit ? (
+                <div className="border border-[#D5C5AA]/20 bg-[#030A06] p-4 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-[#D5C5AA]/75 flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" />
+                      Edição encerrada
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 font-semibold">
+                      {PUBLIC_STATUS_LABELS[activeTopicQuestion.status] || "Recebida"}
+                    </span>
+                  </div>
+                  <p className="text-[#F7DECA] leading-relaxed">
+                    {activeTopicQuestion.text}
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleSendOrEditQuestion} className="space-y-3">
+                  <textarea
+                    rows={3}
+                    maxLength={charLimit}
+                    value={questionText}
+                    onChange={(e) => {
+                      setQuestionText(e.target.value);
+                      if (activeTopicQuestion) setIsEditingExisting(true);
+                    }}
+                    disabled={!canSendOrEditQuestion}
+                    placeholder={
+                      !questionsOpen
+                        ? "O envio de perguntas abre durante os 15 minutos de Exposição de cada pauta."
+                        : "Escreva aqui sua pergunta para o especialista da pauta..."
+                    }
+                    className="w-full p-3 text-xs border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] rounded-xl outline-none"
+                  />
+                  <div className="flex items-center justify-between text-xs gap-2">
+                    <span className="font-mono text-[11px] text-[#D5C5AA]/70">
+                      {questionText.length} / {charLimit} caracteres
+                      {activeTopicQuestion?.editCount
+                        ? ` · ${activeTopicQuestion.editCount} edição(ões)`
+                        : ""}
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={
+                        submittingQuestion ||
+                        !canSendOrEditQuestion ||
+                        !questionText.trim()
+                      }
+                      className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {activeTopicQuestion ? (
+                        <>
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>
+                            {submittingQuestion
+                              ? "Salvando..."
+                              : "Salvar Edição da Pergunta"}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>
+                            {submittingQuestion
+                              ? "Enviando..."
+                              : "Enviar Pergunta"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
 
           {/* 3. DURANTE AS PAUTAS 1 A 5: BANNER DISCRETO DE ACESSO À VOTAÇÃO (SEM POLUIR O INÍCIO) */}
           {!isAfterTopic5 && isPollOpen && activePoll && (

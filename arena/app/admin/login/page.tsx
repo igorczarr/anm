@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { loginAdminAction } from "@/app/actions/admin-login";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import { Lock, ShieldCheck, AlertTriangle, Loader2, ArrowRight } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -53,11 +54,7 @@ export default function AdminLoginPage() {
         {/* Cabeçalho Institucional */}
         <div className="text-center space-y-2.5">
           <div className="w-14 h-14 mx-auto rounded-2xl border border-emerald-500/40 bg-[#030A06] flex items-center justify-center p-2 shadow-lg">
-            <img
-              src="/img/logo.png"
-              alt="A Nova Moeda"
-              className="w-full h-full object-contain"
-            />
+            <BrandLogo className="w-full h-full object-contain" />
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold tracking-wide">
             <ShieldCheck className="w-3.5 h-3.5" />

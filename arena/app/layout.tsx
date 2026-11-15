@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
 import { LayoutChrome } from "@/components/layout-chrome";
+import { BrandLogo } from "@/components/brand-logo";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -25,11 +26,9 @@ export default function RootLayout({
     <footer className="border-t border-[#D5C5AA]/15 bg-[#0A150D] py-6 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#D5C5AA]/70">
         <div className="flex items-center gap-2.5">
-          <img
-            src="/img/logo.png"
-            alt="A Nova Moeda"
-            className="w-5 h-6 object-contain"
-          />
+          <div className="w-5 h-6">
+            <BrandLogo className="w-full h-full object-contain" />
+          </div>
           <span className="font-semibold text-[#F7DECA]">
             A Nova Moeda
           </span>

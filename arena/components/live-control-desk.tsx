@@ -471,8 +471,28 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
           </button>
         </div>
 
-        {/* Acesso Rápido ao Telão ARENA */}
-        <div className="flex items-center gap-2 text-xs">
+        {/* Acesso Rápido ao Telão ARENA e Reinício para Sala de Espera */}
+        <div className="flex items-center gap-2 text-xs flex-wrap">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() =>
+              askConfirm({
+                title: "Reiniciar Evento para a Sala de Espera (Início)",
+                description:
+                  "Isso colocará a Arena em modo SALA DE ESPERA (Aguardando), com a Etapa 1: Abertura (05:00) pronta e a votação da Mesa-Redonda aberta para os participantes. Confirmar reinício?",
+                confirmLabel: "Reiniciar para Início",
+                danger: true,
+                execute: () => resetEntireEventAction({ clearAudienceQuestions: false, clearAudienceVotes: false }),
+              })
+            }
+            className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-950/40 flex items-center gap-1.5 transition cursor-pointer"
+            title="Voltar ao início do evento (Sala de Espera)"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Voltar ao Início (Espera)</span>
+          </button>
+
           <a
             href="/arena"
             target="_blank"
@@ -551,22 +571,34 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
 
                 <div className="space-y-1 min-w-0 flex-1">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block truncate">
-                    {activeTopic
-                      ? `Pauta ${activeTopic.number} de 5 · ${activeTopic.title}`
-                      : "Programação Oficial da Arena"}
+                    {ls?.status === "WAITING"
+                      ? "Sala de Espera · Recepção dos Participantes"
+                      : activeTopic
+                        ? `Pauta ${activeTopic.number} de 5 · ${activeTopic.title}`
+                        : "Programação Oficial da Arena"}
                   </span>
                   <h2 className="font-display text-xl sm:text-2xl text-[#F7DECA] font-bold leading-tight line-clamp-2">
-                    {activeStep ? activeStep.title : "Abertura Institucional"}
+                    {ls?.status === "WAITING"
+                      ? "Sala de Espera da Arena (Aguardando Abertura)"
+                      : activeStep ? activeStep.title : "Abertura Institucional"}
                   </h2>
                   <p className="text-xs text-[#D5C5AA]/70 truncate">
-                    Com a palavra:{" "}
-                    <strong className="text-[#F7DECA] font-semibold">
-                      {speakerName || "Coordenação"}
-                    </strong>
-                    {activeTopic && (
-                      <span className="text-[#D5C5AA]/50 ml-1.5">
-                        · 15m exposição + 5m P&amp;R
+                    {ls?.status === "WAITING" ? (
+                      <span className="text-[#D5C5AA]/85">
+                        Público ingressando no Auditório 2 via QR Code · Votação antecipada aberta
                       </span>
+                    ) : (
+                      <>
+                        Com a palavra:{" "}
+                        <strong className="text-[#F7DECA] font-semibold">
+                          {speakerName || "Coordenação"}
+                        </strong>
+                        {activeTopic && (
+                          <span className="text-[#D5C5AA]/50 ml-1.5">
+                            · 15m exposição + 5m P&amp;R
+                          </span>
+                        )}
+                      </>
                     )}
                   </p>
                 </div>
@@ -650,7 +682,7 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
                     {ls?.status === "WAITING" || ls?.timerStatus === "IDLE" ? (
                       <>
                         <Play className="w-5 h-5 fill-current" />
-                        <span>Iniciar Evento · Abertura Oficial (05:00)</span>
+                        <span>Iniciar Programação Oficial · Etapa 1: Abertura (05:00)</span>
                       </>
                     ) : timer.alertLevel === "EXPIRED" ? (
                       <>

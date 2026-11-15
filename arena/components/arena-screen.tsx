@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useArenaSync } from "@/hooks/use-arena-sync";
 import { ARENA_MODE_LABELS, formatSecondsMMSS } from "@/lib/events";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   AlertTriangle,
   ArrowRight,
@@ -590,7 +591,13 @@ export function ArenaScreen() {
           <div>
             PRÓXIMA ETAPA:{" "}
             <strong className="text-[#F7DECA]">
-              {nextStep ? `${nextStep.title} (${nextStep.responsibleName})` : "Encerramento"}
+              {currentMode === "WAITING"
+                ? nextStep
+                  ? `${nextStep.title} (${nextStep.responsibleName})`
+                  : "Abertura — Apresentação do evento e orientações ao público (Organização)"
+                : nextStep
+                  ? `${nextStep.title} (${nextStep.responsibleName})`
+                  : "Encerramento"}
             </strong>
           </div>
           <div className="flex items-center gap-5">
@@ -665,11 +672,7 @@ export function ArenaScreen() {
       <header className="relative z-20 shrink-0 flex items-center justify-between border-b border-white/10 pb-3">
         <div className="flex items-center gap-3 sm:gap-3.5">
           <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#0A150D] border border-white/10 p-1.5 flex items-center justify-center shadow-md shrink-0">
-            <img
-              src="/img/Ativo 1.png"
-              alt="A Nova Moeda"
-              className="w-full h-full object-contain"
-            />
+            <BrandLogo className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="font-display font-bold text-lg sm:text-xl text-[#F7DECA] tracking-tight leading-tight">
@@ -737,7 +740,7 @@ export function ArenaScreen() {
                   <span className="text-emerald-400">Economia da Solidão</span>
                 </h1>
                 <p className="text-xs sm:text-sm lg:text-base text-[#D5C5AA]/90 max-w-2xl leading-relaxed pt-0.5">
-                  Sejam bem-vindos à Arena de debates. Uma reflexão coletiva sobre conexões humanas, capital social, novas tecnologias e os sentidos do tempo na era contemporânea.
+                  Sejam bem-vindos à Arena de debates. Uma reflexão coletiva sobre conexões humanas, capital social e o mercado da solidão. A votação da Mesa-Redonda já está aberta no celular: aponte a câmera para votar antes do início oficial!
                 </p>
               </div>
 
@@ -800,8 +803,8 @@ export function ArenaScreen() {
             {/* Coluna Direita: QR Code Nobre de Acesso Imediato */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center">
               <ParticipateNowCard
-                title="Participe pelo Celular"
-                subtitle="Aponte a câmera para enviar perguntas aos debatedores e votar na Mesa-Redonda."
+                title="Votação Aberta no Celular"
+                subtitle="Aponte a câmera para votar na questão da Mesa-Redonda agora mesmo."
                 size="hero"
               />
             </div>
@@ -1316,7 +1319,13 @@ export function ArenaScreen() {
             Próxima Etapa:
           </span>
           <strong className="text-[#F7DECA] text-xs font-semibold">
-            {nextStep ? `${nextStep.title} (${nextStep.responsibleName})` : "Encerramento Oficial"}
+            {currentMode === "WAITING"
+              ? nextStep
+                ? `${nextStep.title} (${nextStep.responsibleName})`
+                : "Abertura — Apresentação do evento e orientações ao público (Organização)"
+              : nextStep
+                ? `${nextStep.title} (${nextStep.responsibleName})`
+                : "Encerramento Oficial"}
           </strong>
         </div>
 
