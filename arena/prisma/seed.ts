@@ -693,21 +693,21 @@ async function main() {
   const pollOptions = [
     {
       optionOrder: 1,
-      themeLabel: "Questão 1 — Tecnologia e responsabilidade",
+      themeLabel: "TECNOLOGIA E RESPONSABILIDADE",
       label:
-        "Se as plataformas digitais lucram com o tempo de atenção, como criar soluções tecnológicas que combatam a solidão sem repetir o mesmo modelo de dependência?",
+        "A tecnologia que lucra com a sua atenção também pode combater a sua solidão ou está apenas criando novas dependências?",
     },
     {
       optionOrder: 2,
-      themeLabel: "Questão 2 — Mercado e relações humanas",
+      themeLabel: "MERCADO E RELAÇÕES HUMANAS",
       label:
-        "Quando experiências de convivência, acolhimento e pertencimento passam a ser vendidas, o mercado está resolvendo a solidão ou transformando vínculos humanos em produto?",
+        "Se até o pertencimento virou produto, o mercado está combatendo a solidão ou lucrando com ela?",
     },
     {
       optionOrder: 3,
-      themeLabel: "Questão 3 — Trabalho e sociedade",
+      themeLabel: "TRABALHO E SOCIEDADE",
       label:
-        "Diante da hiperconexão e das novas formas de trabalho, o isolamento contemporâneo é uma escolha individual ou o resultado de como organizamos a vida econômica e profissional?",
+        "Estamos cada vez mais conectados, mas também mais isolados. A culpa é das nossas escolhas ou da forma como a sociedade funciona?",
     },
   ];
 
