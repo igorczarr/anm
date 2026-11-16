@@ -1115,8 +1115,9 @@ export async function resetEntireEventAction(options?: {
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
-  const clearQuestions = options?.clearAudienceQuestions ?? true;
-  const clearVotes = options?.clearAudienceVotes ?? true;
+  const clearQuestions = options?.clearAudienceQuestions ?? false;
+  // TRAVA DE PROTEÇÃO ATIVA: Votos do público NUNCA são apagados ao finalizar ensaio ou reiniciar o palco
+  const clearVotes = false;
 
   // 1. Resetar o evento para WAITING e desbloquear cronograma
   await prisma.event.update({
@@ -1170,38 +1171,37 @@ export async function resetEntireEventAction(options?: {
     });
   }
 
-  // 5. Resetar votação e votos
-  if (clearVotes) {
-    await prisma.voteHistory.deleteMany({
-      where: { poll: { eventId: event.id } },
-    });
-    await prisma.vote.deleteMany({
-      where: { poll: { eventId: event.id } },
-    });
-  }
-
+  // 5. Reabrir votação para estado pré-evento PRESERVANDO 100% DOS VOTOS REAIS COMPUTADOS
   const poll = await prisma.poll.findFirst({
     where: { eventId: event.id },
     orderBy: { number: "asc" },
+    include: { options: true },
   });
 
   if (poll) {
-    await prisma.pollOption.updateMany({
-      where: { pollId: poll.id },
-      data: { votesCount: 0 },
-    });
+    let realTotalVotes = 0;
+    for (const opt of poll.options) {
+      const optionVoteCount = await prisma.vote.count({
+        where: { pollId: poll.id, optionId: opt.id },
+      });
+      await prisma.pollOption.update({
+        where: { id: opt.id },
+        data: { votesCount: optionVoteCount },
+      });
+      realTotalVotes += optionVoteCount;
+    }
 
     await prisma.poll.update({
       where: { id: poll.id },
       data: {
         status: "OPEN",
-        totalVotes: 0,
+        totalVotes: realTotalVotes,
         winningOptionId: null,
         winningQuestionText: null,
         isTieBreak: false,
         tieBreakOptionIds: [],
         tieBreakJustification: null,
-        openedAt: new Date(),
+        openedAt: poll.openedAt ?? new Date(),
         closedAt: null,
         resultsPublishedAt: null,
       },

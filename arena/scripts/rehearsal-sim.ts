@@ -101,6 +101,16 @@ async function runRehearsal() {
     "Verificação do Fluxo Oficial v2.0 (10 Etapas Macro, 5 Pautas de 15m+5m, 1 Votação da Mesa-Redonda): APROVADO"
   );
 
+  // TRAVA DE PROTEÇÃO DE VOTOS REAIS:
+  const existingVotesCount = await prisma.vote.count({
+    where: { poll: { eventId: event.id } },
+  });
+  if (existingVotesCount > 0 && process.env.ALLOW_DESTRUCTIVE_SIM !== "true") {
+    throw new Error(
+      `TRAVA DE SEGURANÇA ATIVA: Existem ${existingVotesCount} votos reais computados no banco. O script destrutivo de CLI foi bloqueado para proteger os votos. Use o painel /admin/operacao para realizar o ensaio com proteção de votos.`
+    );
+  }
+
   // 1.2 Limpar dados transitórios anteriores do ensaio (preservando perguntas de reserva da mediação do seed)
   logStep("Higienizando dados transitórios de ensaios anteriores...");
   await prisma.voteHistory.deleteMany({

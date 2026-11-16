@@ -688,36 +688,48 @@ export async function resetPollVotesAction(pollId: string) {
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");
 
-  await prisma.$transaction([
-    prisma.voteHistory.deleteMany({ where: { pollId } }),
-    prisma.vote.deleteMany({ where: { pollId } }),
-    prisma.pollOption.updateMany({
-      where: { pollId },
-      data: { votesCount: 0 },
-    }),
-    prisma.poll.update({
-      where: { id: pollId },
-      data: {
-        totalVotes: 0,
-        status: "DRAFT",
-        isTieBreak: false,
-        tieBreakOptionIds: [],
-        tieBreakJustification: null,
-        winningOptionId: null,
-        winningQuestionText: null,
-        openedAt: null,
-        closedAt: null,
-        resultsPublishedAt: null,
-      },
-    }),
-  ]);
+  // TRAVA DE PROTEÇÃO DE VOTOS ATIVA:
+  // Reinicia apenas o estado de apuração/desempate do ensaio para OPEN, preservando 100% dos votos do público
+  const poll = await prisma.poll.findUnique({
+    where: { id: pollId },
+    include: { options: true },
+  });
+  if (!poll) throw new Error("Votação não encontrada");
+
+  let realTotalVotes = 0;
+  for (const opt of poll.options) {
+    const count = await prisma.vote.count({
+      where: { pollId: poll.id, optionId: opt.id },
+    });
+    await prisma.pollOption.update({
+      where: { id: opt.id },
+      data: { votesCount: count },
+    });
+    realTotalVotes += count;
+  }
+
+  await prisma.poll.update({
+    where: { id: pollId },
+    data: {
+      totalVotes: realTotalVotes,
+      status: "OPEN",
+      isTieBreak: false,
+      tieBreakOptionIds: [],
+      tieBreakJustification: null,
+      winningOptionId: null,
+      winningQuestionText: null,
+      openedAt: poll.openedAt ?? new Date(),
+      closedAt: null,
+      resultsPublishedAt: null,
+    },
+  });
 
   await updateLiveStateAtomic(event.id, "config.updated", {});
 
   await logAdminAction({
     eventId: event.id,
     userId: admin.id,
-    action: "POLL_VOTES_RESET",
+    action: "POLL_REHEARSAL_RESET_VOTES_PRESERVED",
     entityType: "Poll",
     entityId: pollId,
   });

@@ -463,23 +463,23 @@ export function PollsDesk() {
                   <span>Editar 3 Questões</span>
                 </button>
 
-                {poll.totalVotes > 0 && !isOpen && (
+                {!isOpen && (
                   <button
                     type="button"
                     disabled={isPending}
                     onClick={() => {
                       if (
                         window.confirm(
-                          `Deseja zerar os ${poll.totalVotes} votos desta votação para reiniciar ensaio?`
+                          `Deseja reabrir a votação pós-ensaio mantendo todos os ${poll.totalVotes} votos salvos intactos?`
                         )
                       ) {
                         runPollAction(() => resetPollVotesAction(poll.id));
                       }
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-red-950/20 hover:bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-1 cursor-pointer transition"
+                    className="px-3 py-1.5 rounded-xl bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/40 text-amber-200 text-xs flex items-center gap-1.5 cursor-pointer transition font-semibold"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Zerar Ensaio</span>
+                    <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Finalizar Ensaio (Preservar Votos)</span>
                   </button>
                 )}
               </div>

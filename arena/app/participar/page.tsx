@@ -25,6 +25,7 @@ import {
   Send,
   Sparkles,
   Trophy,
+  Users,
   Vote,
   WifiOff,
 } from "lucide-react";
@@ -473,6 +474,35 @@ export default function ParticiparPage() {
     );
   }, [snapshot?.activeStep, snapshot?.liveState?.arenaMode]);
 
+  const myWinningPrizes = useMemo(() => {
+    if (!snapshot?.giveaways?.prizes || !me) return [];
+    return snapshot.giveaways.prizes.filter((prize) => {
+      if (!prize.winner) return false;
+      const w = prize.winner;
+      return Boolean(
+        (w.participantId && w.participantId === me.id) ||
+        (w.credentialCode && (w.credentialCode === me.credentialCode || w.credentialCode === me.code)) ||
+        (me.name && w.name && w.name.trim().toLowerCase() === me.name.trim().toLowerCase())
+      );
+    });
+  }, [snapshot?.giveaways?.prizes, me]);
+
+  const isRoundtableOrResults = useMemo(() => {
+    const mode = snapshot?.liveState?.arenaMode;
+    const stepType = snapshot?.activeStep?.stepType;
+    return Boolean(
+      mode === "POLL_RESULTS" ||
+      mode === "SELECTED_QUESTION" ||
+      mode === "ROUNDTABLE" ||
+      stepType === "ROUNDTABLE"
+    );
+  }, [snapshot?.liveState?.arenaMode, snapshot?.activeStep?.stepType]);
+
+  const activeSpecialist = useMemo(() => {
+    if (!snapshot?.activeTopic) return null;
+    return SIX_SPECIALISTS.find((s) => s.role === `Pauta ${snapshot.activeTopic?.number}`) || null;
+  }, [snapshot?.activeTopic]);
+
   const canSendOrEditQuestion =
     questionsOpen &&
     (!activeTopicQuestion || Boolean(activeTopicQuestion.canEdit));
@@ -528,7 +558,7 @@ export default function ParticiparPage() {
     return (
       <div
         style={{ borderRadius: "20px" }}
-        className={`border bg-white dark:bg-[#0A150D] p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden transition-colors ${
+        className={`flex-1 min-h-0 border bg-white dark:bg-[#0A150D] p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden transition-colors ${
           selectedPollOption
             ? "border-emerald-500/60 shadow-md dark:shadow-[0_0_20px_rgba(16,185,129,0.15)]"
             : "border-slate-200 dark:border-[#D5C5AA]/25"
@@ -818,7 +848,7 @@ export default function ParticiparPage() {
   // PASSO 2: APÓS O LOGIN — VOTAÇÃO EM EVIDÊNCIA E COMPROVANTE EM 100% NO-SCROLL
   // ============================================================================
   return (
-    <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 py-2.5 flex flex-col justify-start gap-2 overflow-hidden">
+    <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col justify-between gap-2 overflow-hidden relative">
       {/* Cabeçalho Limpo sem retângulo que envolve */}
       <header className="px-1 py-0.5 shrink-0 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -833,7 +863,7 @@ export default function ParticiparPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
               <span className="truncate">
                 {snapshot?.activeTopic
-                  ? `Pauta ${snapshot.activeTopic.number} · ${snapshot.activeTopic.mainSpeaker?.name || ""}`
+                  ? `Pauta ${snapshot.activeTopic.number} · ${snapshot.activeTopic.mainSpeaker?.name || activeSpecialist?.name || ""}`
                   : `Olá, ${me.name?.split(" ")[0] || "Participante"}`}
               </span>
             </div>
@@ -863,63 +893,100 @@ export default function ParticiparPage() {
       </header>
 
       {/* ÁREA DE CONTEÚDO PRINCIPAL (100% NO-SCROLL) */}
-      <div className="flex-1 min-h-0 flex flex-col justify-start gap-2.5 overflow-hidden">
-        {/* ABA 1: INÍCIO */}
+      <div className="flex-1 min-h-0 flex flex-col justify-start gap-2 overflow-hidden">
+        {/* ABA 1: INÍCIO (HUB DINÂMICO COMPLETO DO EVENTO) */}
         {activeTab === "inicio" && (
-          <div className="flex-1 min-h-0 flex flex-col justify-start gap-2.5 overflow-hidden">
-            {/* Faixa Compacta: Contagem Regressiva Reduzida + 6 Especialistas */}
-            {!snapshot?.activeTopic && (
-              <CompactWaitingStrip
-                hours={eventCountdown.hours}
-                minutes={eventCountdown.minutes}
-                seconds={eventCountdown.seconds}
-              />
-            )}
-
-            {/* VOTAÇÃO EM EVIDÊNCIA (APÓS LOGIN) OU COMPROVANTE INSTAGRAMÁVEL */}
-            {(!snapshot?.activeTopic || isAfterTopic5) && activePoll && (
-              <div className="flex-1 min-h-0 flex flex-col justify-start overflow-hidden">
-                {myVoteForActivePoll && !changingSecretVote ? (
-                  <InstagramVoteReceiptCard
-                    participantName={me?.name}
-                    credentialCode={me?.credentialCode}
-                    anonymousCode={me?.code}
-                    voteId={myVoteForActivePoll.id}
-                    votedAt={myVoteForActivePoll.votedAt}
-                    isPollOpen={isPollOpen}
-                    onChangeVoteRequest={() => {
-                      setChangingSecretVote(true);
-                      setSelectedPollOptionId(null);
-                    }}
-                    onOpenStoryModal={() => setShowStoryModal(true)}
-                  />
-                ) : (
-                  renderPollVotingBox()
-                )}
+          <div className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
+            {/* NOTIFICAÇÃO FESTIVA: SE O PARTICIPANTE FOR SORTEADO */}
+            {myWinningPrizes.length > 0 && (
+              <div
+                style={{ borderRadius: "16px" }}
+                className="border-2 border-amber-500 dark:border-amber-400 bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 p-2.5 shadow-lg flex items-center justify-between gap-2.5 shrink-0 animate-pulse"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-sm">
+                    <Trophy className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 truncate">
+                      PARABÉNS! VOCÊ FOI SORTEADO(A)!
+                    </div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-[#F7DECA] truncate">
+                      {myWinningPrizes[0]?.title}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("sorteio")}
+                  className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-extrabold shrink-0 shadow-sm cursor-pointer"
+                >
+                  Ver Brinde
+                </button>
               </div>
             )}
 
-            {/* QUANDO UMA PAUTA ESTIVER AO VIVO */}
-            {snapshot?.activeTopic && (
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-2.5 overflow-hidden">
-                <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 p-4 rounded-2xl space-y-3 shadow-md">
-                  <div className="flex items-center justify-between text-xs gap-2">
-                    <span className="font-bold text-slate-900 dark:text-[#F7DECA] flex items-center gap-2 truncate">
+            {/* CENÁRIO 1: PAUTA AO VIVO NO PALCO */}
+            {snapshot?.activeTopic ? (
+              <div className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
+                {/* Card do Palestrante Ao Vivo */}
+                <div
+                  style={{ borderRadius: "18px" }}
+                  className="border border-emerald-500/40 bg-white/95 dark:bg-[#0A150D]/95 p-3 flex items-center gap-3 shadow-md shrink-0"
+                >
+                  <div className="relative shrink-0">
+                    <img
+                      src={
+                        snapshot.activeTopic.mainSpeaker?.photoUrl ||
+                        activeSpecialist?.photoUrl ||
+                        "/img/Daniel.png?v=3"
+                      }
+                      alt={snapshot.activeTopic.mainSpeaker?.name || "Palestrante"}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 dark:border-emerald-400 shadow-sm"
+                    />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0A150D] animate-pulse" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[9.5px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+                        Pauta {snapshot.activeTopic.number} · Ao Vivo no Palco
+                      </span>
+                      <span className="font-mono text-[9px] text-slate-500 dark:text-[#D5C5AA]/70 shrink-0">
+                        {questionsOpen ? "Captação aberta" : "Captação encerrada"}
+                      </span>
+                    </div>
+                    <h3 className="font-display font-extrabold text-sm text-slate-900 dark:text-[#F7DECA] truncate leading-tight">
+                      {snapshot.activeTopic.mainSpeaker?.name || activeSpecialist?.fullName}
+                    </h3>
+                    <p className="text-[10.5px] text-slate-600 dark:text-[#D5C5AA]/80 truncate">
+                      {snapshot.activeTopic.title}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Caixa de Pergunta Individual Integrada diretamente na tela inicial */}
+                <div
+                  style={{ borderRadius: "18px" }}
+                  className="flex-1 min-h-0 border border-slate-200 dark:border-[#D5C5AA]/25 bg-white dark:bg-[#0A150D]/90 p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden"
+                >
+                  <div className="flex items-center justify-between text-xs gap-2 shrink-0">
+                    <span className="font-bold text-slate-900 dark:text-[#F7DECA] flex items-center gap-1.5 truncate">
                       <MessageSquarePlus className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                       <span className="truncate">
                         {activeTopicQuestion
                           ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
-                          : `Pergunta · Pauta ${snapshot.activeTopic.number}`}
+                          : `Enviar Pergunta para o Especialista`}
                       </span>
                     </span>
-                    <span className="font-mono text-[10px] text-slate-600 dark:text-[#D5C5AA]/75 shrink-0">
-                      {questionsOpen ? "Captação aberta" : "Captação fechada"}
+                    <span className="font-mono text-[9.5px] text-slate-600 dark:text-[#D5C5AA]/75 shrink-0">
+                      1 pergunta por pauta
                     </span>
                   </div>
 
                   {questionFeedback && (
                     <div
-                      className={`p-2.5 rounded-xl text-[11px] flex items-center gap-2 border ${
+                      className={`p-2 rounded-xl text-[10.5px] flex items-center gap-1.5 border shrink-0 ${
                         questionFeedback.type === "success"
                           ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-500/30"
                           : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-200 border-red-300 dark:border-red-500/30"
@@ -931,8 +998,8 @@ export default function ParticiparPage() {
                   )}
 
                   {activeTopicQuestion && !activeTopicQuestion.canEdit ? (
-                    <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#030A06] p-3.5 rounded-xl space-y-1.5 text-xs">
-                      <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex-1 min-h-0 border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#030A06] p-3 rounded-xl flex flex-col justify-between gap-2 text-xs overflow-hidden">
+                      <div className="flex items-center justify-between text-[10px] shrink-0">
                         <span className="text-slate-600 dark:text-[#D5C5AA]/75 flex items-center gap-1">
                           <Lock className="w-3 h-3" />
                           Edição encerrada
@@ -941,12 +1008,15 @@ export default function ParticiparPage() {
                           {PUBLIC_STATUS_LABELS[activeTopicQuestion.status] || "Recebida"}
                         </span>
                       </div>
-                      <p className="text-slate-900 dark:text-[#F7DECA] leading-relaxed line-clamp-4">
+                      <p className="text-slate-900 dark:text-[#F7DECA] leading-relaxed line-clamp-3 overflow-y-auto">
                         {activeTopicQuestion.text}
                       </p>
+                      <div className="text-[10px] text-slate-500 dark:text-[#D5C5AA]/60 shrink-0">
+                        Pergunta em análise pela curadoria do evento.
+                      </div>
                     </div>
                   ) : (
-                    <form onSubmit={handleSendOrEditQuestion} className="space-y-2.5">
+                    <form onSubmit={handleSendOrEditQuestion} className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
                       <textarea
                         rows={3}
                         maxLength={charLimit}
@@ -959,11 +1029,11 @@ export default function ParticiparPage() {
                         placeholder={
                           !questionsOpen
                             ? "O envio de perguntas abre durante a exposição de cada pauta."
-                            : "Escreva aqui sua pergunta para o especialista..."
+                            : "Escreva aqui sua pergunta com clareza para o especialista..."
                         }
-                        className="w-full p-3 text-xs border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] rounded-xl outline-none placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40 focus:border-emerald-500"
+                        className="flex-1 min-h-[70px] w-full p-2.5 text-xs border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] rounded-xl outline-none placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40 focus:border-emerald-500 resize-none"
                       />
-                      <div className="flex items-center justify-between text-xs gap-2">
+                      <div className="flex items-center justify-between text-xs gap-2 shrink-0">
                         <span className="font-mono text-[10px] text-slate-600 dark:text-[#D5C5AA]/70">
                           {questionText.length}/{charLimit}
                         </span>
@@ -974,7 +1044,7 @@ export default function ParticiparPage() {
                             !canSendOrEditQuestion ||
                             !questionText.trim()
                           }
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-[#D5C5AA] text-white dark:text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition"
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-[#D5C5AA] text-white dark:text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition shadow-xs"
                         >
                           <Send className="w-3.5 h-3.5" />
                           <span>
@@ -990,20 +1060,129 @@ export default function ParticiparPage() {
                   )}
                 </div>
 
-                {!isAfterTopic5 && isPollOpen && activePoll && (
-                  <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#0A150D]/60 p-3 rounded-xl flex items-center justify-between gap-2 text-xs shrink-0 shadow-sm">
-                    <span className="text-slate-800 dark:text-[#D5C5AA]/85 truncate">
-                      Votação da Mesa-Redonda aberta
+                {/* Status / Atalho para Votação da Mesa-Redonda */}
+                {isPollOpen && (
+                  <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#0A150D]/60 px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-xs shrink-0 shadow-sm">
+                    <span className="text-slate-800 dark:text-[#D5C5AA]/85 truncate text-[11px]">
+                      {myVoteForActivePoll
+                        ? "✓ Seu voto na Mesa-Redonda está registrado e concorrendo ao sorteio"
+                        : "Votação da Mesa-Redonda aberta · Vote para concorrer ao sorteio"}
                     </span>
                     <button
                       type="button"
                       onClick={() => setActiveTab("votacao")}
-                      className="px-3 py-1.5 rounded-lg bg-[#14532D] text-white text-[11px] font-semibold shrink-0 cursor-pointer shadow-xs"
+                      className="px-2.5 py-1 rounded-lg bg-[#14532D] text-white text-[10.5px] font-semibold shrink-0 cursor-pointer shadow-xs"
                     >
-                      Votar Agora
+                      {myVoteForActivePoll ? "Ver Voto" : "Votar Agora"}
                     </button>
                   </div>
                 )}
+              </div>
+            ) : isRoundtableOrResults ? (
+              /* CENÁRIO 2: MESA-REDONDA OU RESULTADO DA VOTAÇÃO AO VIVO */
+              <div className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
+                {/* Destaque Mesa-Redonda Ao Vivo */}
+                <div
+                  style={{ borderRadius: "18px" }}
+                  className="border border-emerald-500/40 bg-white/95 dark:bg-[#0A150D]/95 p-3 flex items-center justify-between gap-3 shadow-md shrink-0"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+                        Mesa-Redonda com os 6 Especialistas Ao Vivo
+                      </span>
+                    </div>
+                    <h2 className="font-display font-extrabold text-sm text-slate-900 dark:text-[#F7DECA] truncate">
+                      {snapshot?.activeStep?.title || "Debate Central da Mesa-Redonda"}
+                    </h2>
+                  </div>
+
+                  <div className="flex -space-x-2 shrink-0">
+                    {SIX_SPECIALISTS.slice(0, 4).map((s) => (
+                      <img
+                        key={s.id}
+                        src={s.photoUrl}
+                        alt={s.name}
+                        className="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-[#0A150D] shadow-xs"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Comprovante de Votação do Participante */}
+                <div className="flex-1 min-h-0 flex flex-col justify-start overflow-hidden">
+                  {myVoteForActivePoll && !changingSecretVote ? (
+                    <InstagramVoteReceiptCard
+                      participantName={me?.name}
+                      credentialCode={me?.credentialCode}
+                      anonymousCode={me?.code}
+                      voteId={myVoteForActivePoll.id}
+                      votedAt={myVoteForActivePoll.votedAt}
+                      isPollOpen={isPollOpen}
+                      onChangeVoteRequest={() => {
+                        setChangingSecretVote(true);
+                        setSelectedPollOptionId(null);
+                      }}
+                      onOpenStoryModal={() => setShowStoryModal(true)}
+                    />
+                  ) : (
+                    renderPollVotingBox()
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* CENÁRIO 3: PRÉ-EVENTO / ESPERA — CONTAGEM REGRESSIVA + VOTAÇÃO / COMPROVANTE */
+              <div className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
+                {/* Faixa Compacta: Contagem Regressiva Autoral + 6 Especialistas empilhados na horizontal */}
+                <CompactWaitingStrip
+                  hours={eventCountdown.hours}
+                  minutes={eventCountdown.minutes}
+                  seconds={eventCountdown.seconds}
+                />
+
+                {/* Status de Elegibilidade ao Sorteio */}
+                <div
+                  style={{ borderRadius: "14px" }}
+                  className={`px-3 py-1.5 border text-center shrink-0 text-[10.5px] transition ${
+                    me?.votes && me.votes.length > 0
+                      ? "border-emerald-500/40 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200"
+                      : "border-amber-500/40 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-200"
+                  }`}
+                >
+                  {me?.votes && me.votes.length > 0 ? (
+                    <span className="flex items-center justify-center gap-1.5 font-bold">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Credencial #{me?.credentialCode || me?.code} validada e concorrendo aos sorteios!</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-1.5">
+                      <Gift className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>Vote na pauta abaixo para validar sua credencial (#{me?.credentialCode || me?.code}) para o sorteio.</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* CÉDULA DE VOTAÇÃO OU COMPROVANTE INSTAGRAMÁVEL */}
+                <div className="flex-1 min-h-0 flex flex-col justify-start overflow-hidden">
+                  {myVoteForActivePoll && !changingSecretVote ? (
+                    <InstagramVoteReceiptCard
+                      participantName={me?.name}
+                      credentialCode={me?.credentialCode}
+                      anonymousCode={me?.code}
+                      voteId={myVoteForActivePoll.id}
+                      votedAt={myVoteForActivePoll.votedAt}
+                      isPollOpen={isPollOpen}
+                      onChangeVoteRequest={() => {
+                        setChangingSecretVote(true);
+                        setSelectedPollOptionId(null);
+                      }}
+                      onOpenStoryModal={() => setShowStoryModal(true)}
+                    />
+                  ) : (
+                    renderPollVotingBox()
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -1418,10 +1597,10 @@ export default function ParticiparPage() {
       </div>
 
       {/* BARRA DE NAVEGAÇÃO INFERIOR: BOTTOM PILLOW FLUTUANTE */}
-      <div className="shrink-0 pt-0.5 pb-0.5">
+      <div className="mt-auto shrink-0 pt-1 pb-1 w-full z-40 max-w-sm mx-auto">
         <nav
           style={{ borderRadius: "9999px" }}
-          className="grid grid-cols-5 gap-1 bg-white/95 dark:bg-[#0A150D]/95 backdrop-blur-xl border border-slate-300 dark:border-emerald-500/35 p-1 rounded-full shadow-lg dark:shadow-[0_10px_25px_rgba(0,0,0,0.6)] ring-1 ring-slate-200 dark:ring-white/10 text-[9px] sm:text-[10px]"
+          className="flex items-center justify-between gap-1 bg-white/95 dark:bg-[#0A150D]/95 backdrop-blur-xl border border-slate-300 dark:border-emerald-500/35 p-1 rounded-full shadow-xl dark:shadow-[0_10px_25px_rgba(0,0,0,0.6)] ring-1 ring-slate-200 dark:ring-white/10"
         >
           {[
             { key: "inicio", label: "Início", icon: Home },
@@ -1438,7 +1617,7 @@ export default function ParticiparPage() {
             },
             {
               key: "minhas",
-              label: `Minhas (${(me?.questions.length ?? 0) + (me?.votes.length ?? 0)})`,
+              label: "Minhas",
               icon: ListChecks,
             },
           ].map((item) => {
@@ -1449,15 +1628,20 @@ export default function ParticiparPage() {
                 key={item.key}
                 type="button"
                 onClick={() => setActiveTab(item.key as TabKey)}
+                title={item.label}
                 style={{ borderRadius: "9999px" }}
-                className={`py-1.5 px-1 rounded-full flex items-center justify-center gap-1 font-bold cursor-pointer transition ${
+                className={`flex items-center justify-center cursor-pointer transition-all duration-200 ${
                   active
-                    ? "bg-[#14532D] text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#D5C5AA] dark:hover:bg-white/5"
+                    ? "bg-[#14532D] text-white px-3.5 py-1.5 font-bold text-xs shadow-sm flex-1 gap-1.5 min-w-0"
+                    : "p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#D5C5AA] dark:hover:bg-white/5 shrink-0"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <Icon className="w-4 h-4 shrink-0" />
+                {active && (
+                  <span className="truncate whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
+                    {item.label}
+                  </span>
+                )}
               </button>
             );
           })}

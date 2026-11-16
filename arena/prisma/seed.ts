@@ -224,17 +224,27 @@ async function main() {
     },
   });
 
-  // Limpa dados antigos de cronograma/pautas/votações para garantir fidelidade 100% ao formato v2.0
+  // Limpa dados antigos de cronograma/pautas (PROTEGENDO VOTOS REAIS JÁ COMPUTADOS)
+  const existingVotesCount = await prisma.vote.count({
+    where: { poll: { eventId: event.id } },
+  });
+
   await prisma.timerSession.deleteMany({ where: { eventId: event.id } });
   await prisma.scheduleStep.deleteMany({ where: { eventId: event.id } });
-  await prisma.voteHistory.deleteMany({
-    where: { poll: { eventId: event.id } },
+  if (existingVotesCount === 0) {
+    await prisma.voteHistory.deleteMany({
+      where: { poll: { eventId: event.id } },
+    });
+    await prisma.vote.deleteMany({
+      where: { poll: { eventId: event.id } },
+    });
+    await prisma.poll.deleteMany({ where: { eventId: event.id } });
+  } else {
+    console.log(`🔒 TRAVA DE PROTEÇÃO DE VOTOS ATIVA NO SEED: Preservando ${existingVotesCount} votos computados.`);
+  }
+  await prisma.question.deleteMany({
+    where: { eventId: event.id, isMediationReserve: true },
   });
-  await prisma.vote.deleteMany({
-    where: { poll: { eventId: event.id } },
-  });
-  await prisma.poll.deleteMany({ where: { eventId: event.id } });
-  await prisma.question.deleteMany({ where: { eventId: event.id } });
   await prisma.topic.deleteMany({ where: { eventId: event.id } });
 
   // 4. Cadastro dos Especialistas Oficiais (Paula, Daniel, Janaína, Denilson Carneiro, Sérgio Passos e Dulcila)
@@ -678,8 +688,19 @@ async function main() {
   }
 
   // 8. Votação Oficial da Mesa-Redonda (independente, aberta desde o início do evento)
-  const roundtablePoll = await prisma.poll.create({
-    data: {
+  const roundtablePoll = await prisma.poll.upsert({
+    where: {
+      eventId_number: {
+        eventId: event.id,
+        number: 1,
+      },
+    },
+    update: {
+      question: "Qual questão deve orientar a mesa-redonda?",
+      durationSec: 120 * 60,
+      status: "OPEN",
+    },
+    create: {
       eventId: event.id,
       topicId: null, // Desvinculada de qualquer pauta específica
       number: 1,
@@ -712,8 +733,18 @@ async function main() {
   ];
 
   for (const opt of pollOptions) {
-    await prisma.pollOption.create({
-      data: {
+    await prisma.pollOption.upsert({
+      where: {
+        pollId_optionOrder: {
+          pollId: roundtablePoll.id,
+          optionOrder: opt.optionOrder,
+        },
+      },
+      update: {
+        themeLabel: opt.themeLabel,
+        label: opt.label,
+      },
+      create: {
         pollId: roundtablePoll.id,
         optionOrder: opt.optionOrder,
         themeLabel: opt.themeLabel,

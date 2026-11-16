@@ -471,26 +471,34 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
           </button>
         </div>
 
-        {/* Acesso Rápido ao Telão ARENA e Reinício para Sala de Espera */}
+        {/* Acesso Rápido ao Telão ARENA e Finalizar Ensaio com Trava de Proteção de Votos */}
         <div className="flex items-center gap-2 text-xs flex-wrap">
+          <span
+            className="px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 text-emerald-300 font-semibold text-[11px] flex items-center gap-1.5"
+            title="Trava de segurança ativa: Nenhuma ação de ensaio ou reinício apaga os votos reais do público"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Trava de Votos Ativa ({snapshot?.metrics?.activePollVotes ?? 0} salvos)</span>
+          </span>
+
           <button
             type="button"
             disabled={isPending}
             onClick={() =>
               askConfirm({
-                title: "Reiniciar Evento para a Sala de Espera (Início)",
+                title: "Finalizar Ensaio · Voltar à Sala de Espera (Votos Protegidos)",
                 description:
-                  "Isso colocará a Arena em modo SALA DE ESPERA (Aguardando), com a Etapa 1: Abertura (05:00) pronta e a votação da Mesa-Redonda aberta para os participantes. Confirmar reinício?",
-                confirmLabel: "Reiniciar para Início",
-                danger: true,
+                  "Isso encerrará o ensaio e colocará a Arena de volta em modo SALA DE ESPERA (Aguardando), resetando o cronômetro para a Etapa 1: Abertura (05:00) e mantendo 100% dos votos do público preservados e abertos. Confirmar finalização do ensaio?",
+                confirmLabel: "Finalizar Ensaio (Preservar Votos)",
+                danger: false,
                 execute: () => resetEntireEventAction({ clearAudienceQuestions: false, clearAudienceVotes: false }),
               })
             }
-            className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-950/40 flex items-center gap-1.5 transition cursor-pointer"
-            title="Voltar ao início do evento (Sala de Espera)"
+            className="px-3.5 py-1.5 rounded-lg border border-amber-500/40 bg-amber-950/30 text-amber-200 hover:bg-amber-950/50 font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+            title="Finalizar ensaio e voltar ao início preservando 100% dos votos computados"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Voltar ao Início (Espera)</span>
+            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+            <span>Finalizar Ensaio</span>
           </button>
 
           <a
