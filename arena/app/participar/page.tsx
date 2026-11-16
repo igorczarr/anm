@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Clock,
   Edit3,
+  Gift,
   Home,
   KeyRound,
   ListChecks,
@@ -22,11 +23,13 @@ import {
   LogOut,
   MessageSquarePlus,
   Send,
+  Sparkles,
+  Trophy,
   Vote,
   WifiOff,
 } from "lucide-react";
 
-type TabKey = "inicio" | "pergunta" | "votacao" | "minhas";
+type TabKey = "inicio" | "pergunta" | "votacao" | "sorteio" | "minhas";
 
 const SIX_SPECIALISTS = [
   { id: "1", name: "Daniel", fullName: "Daniel Pereira", role: "Pauta 1", photoUrl: "/img/Daniel.png?v=3" },
@@ -62,6 +65,7 @@ interface MyVoteItem {
 
 interface MePayload {
   authenticated: boolean;
+  id?: string;
   code?: string;
   name?: string | null;
   email?: string | null;
@@ -86,7 +90,8 @@ function makeClientRequestId(): string {
 }
 
 /**
- * Bloco Compacto (No-Scroll): Contagem Regressiva Reduzida + 6 Especialistas Confirmados
+ * Cronômetro Autoral de Alta Precisão (100% No-Scroll, Livre de Retângulos e Molduras):
+ * Design autêntico, robusto e inovador integrado diretamente ao fundo, com tipografia pura e avatares empilhados
  */
 function CompactWaitingStrip({
   hours,
@@ -99,58 +104,80 @@ function CompactWaitingStrip({
 }) {
   return (
     <div
-      style={{ borderRadius: "18px" }}
-      className="border border-emerald-500/35 bg-[#0A150D]/95 px-3 py-2.5 space-y-2 shadow-md shrink-0"
+      className="relative overflow-hidden shrink-0 flex flex-col justify-center gap-1.5 py-1.5 px-2 select-none"
     >
-      {/* Linha 1: Selo de Contagem Regressiva + Relógio Compacto (Horas / Minutos / Segundos) */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Brilho radial etéreo e autoral, sem retângulos ou molduras */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.06)_0%,transparent_70%)] pointer-events-none" />
+
+      {/* Linha Superior: Rótulo com Live Pulse + Avatares dos Especialistas Sem Texto */}
+      <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 truncate">
-            Início do Evento em:
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 truncate">
+            Inicio do ANM em:
           </span>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <div className="px-2 py-0.5 rounded-lg bg-[#030A06] border border-emerald-500/40 flex items-baseline gap-0.5">
-            <span className="font-mono font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-none">
-              {hours}
-            </span>
-            <span className="text-[9px] font-bold text-emerald-400 uppercase">h</span>
-          </div>
-          <span className="font-mono text-xs font-bold text-emerald-400">:</span>
-          <div className="px-2 py-0.5 rounded-lg bg-[#030A06] border border-emerald-500/40 flex items-baseline gap-0.5">
-            <span className="font-mono font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-none">
-              {minutes}
-            </span>
-            <span className="text-[9px] font-bold text-emerald-400 uppercase">m</span>
-          </div>
-          <span className="font-mono text-xs font-bold text-[#D5C5AA]/50">:</span>
-          <div className="px-1.5 py-0.5 rounded-lg bg-[#030A06] border border-white/10 flex items-baseline gap-0.5">
-            <span className="font-mono font-bold text-[11px] sm:text-xs text-[#D5C5AA] leading-none">
-              {seconds}
-            </span>
-            <span className="text-[8px] font-semibold text-[#D5C5AA]/60 uppercase">s</span>
-          </div>
+        {/* Fotos dos Especialistas Empilhadas na Horizontal (Avatar Stack puro, sem texto) */}
+        <div className="flex -space-x-2.5 overflow-hidden items-center py-0.5 shrink-0">
+          {SIX_SPECIALISTS.map((sp) => (
+            <img
+              key={sp.id}
+              src={sp.photoUrl}
+              alt={sp.fullName}
+              title={`${sp.name} · ${sp.fullName}`}
+              style={{ borderRadius: "9999px" }}
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover object-top border-2 border-[#0A150D] ring-1 ring-emerald-400/40 shadow-xs transition-transform hover:scale-110 hover:z-20"
+            />
+          ))}
         </div>
       </div>
 
-      {/* Linha 2: Fotos Compactas dos 6 Especialistas que participarão */}
-      <div className="pt-1.5 border-t border-white/10 flex items-center justify-between gap-2">
-        <div className="grid grid-cols-6 gap-1 w-full">
-          {SIX_SPECIALISTS.map((sp) => (
-            <div key={sp.id} className="flex flex-col items-center text-center gap-0.5 min-w-0">
-              <img
-                src={sp.photoUrl}
-                alt={sp.fullName}
-                style={{ borderRadius: "9999px" }}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover object-top border border-emerald-500/60 shadow-xs"
-              />
-              <span className="text-[8.5px] text-[#F7DECA] font-bold truncate w-full leading-tight">
-                {sp.name}
-              </span>
-            </div>
-          ))}
+      {/* Linha Central: Cronômetro Monumental, Autoral e Inovador (100% livre de retângulos) */}
+      <div className="relative z-10 flex items-center justify-center gap-4 sm:gap-6 py-0.5">
+        {/* Horas */}
+        <div className="flex flex-col items-center">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-[#F7DECA] tracking-tighter leading-none drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
+            {hours}
+          </span>
+          <span className="text-[8px] font-black tracking-[0.25em] text-[#D5C5AA]/60 uppercase mt-0.5">
+            HORAS
+          </span>
+        </div>
+
+        {/* Separador com pontos de pulso luminoso */}
+        <div className="flex flex-col items-center justify-center gap-1.5 pb-2.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
+        </div>
+
+        {/* Minutos */}
+        <div className="flex flex-col items-center">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-[#F7DECA] tracking-tighter leading-none drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
+            {minutes}
+          </span>
+          <span className="text-[8px] font-black tracking-[0.25em] text-[#D5C5AA]/60 uppercase mt-0.5">
+            MINUTOS
+          </span>
+        </div>
+
+        {/* Separador com pontos de pulso luminoso */}
+        <div className="flex flex-col items-center justify-center gap-1.5 pb-2.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_#10B981]" />
+        </div>
+
+        {/* Segundos em Destaque Vivo */}
+        <div className="flex flex-col items-center">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-emerald-400 tracking-tighter leading-none drop-shadow-[0_0_16px_rgba(16,185,129,0.5)]">
+            {seconds}
+          </span>
+          <span className="text-[8px] font-black tracking-[0.25em] text-emerald-400/80 uppercase mt-0.5">
+            SEGUNDOS
+          </span>
         </div>
       </div>
     </div>
@@ -181,6 +208,7 @@ export default function ParticiparPage() {
   } | null>(null);
 
   // Estado da votação da Mesa-Redonda e Comprovante Instagramável
+  const [selectedPollOptionId, setSelectedPollOptionId] = useState<string | null>(null);
   const [submittingVote, setSubmittingVote] = useState(false);
   const [changingSecretVote, setChangingSecretVote] = useState(false);
   const [showStoryModal, setShowStoryModal] = useState(false);
@@ -296,6 +324,7 @@ export default function ParticiparPage() {
       quota: { topicId: null, used: 0, max: 1, charLimit: 400 },
     });
     setChangingSecretVote(false);
+    setSelectedPollOptionId(null);
   }
 
   async function handleSendOrEditQuestion(e: React.FormEvent) {
@@ -402,6 +431,7 @@ export default function ParticiparPage() {
       }
 
       setChangingSecretVote(false);
+      setSelectedPollOptionId(null);
       setVoteFeedback(null);
       await fetchMe();
       setShowStoryModal(true);
@@ -485,6 +515,187 @@ export default function ParticiparPage() {
       seconds: parts[1] || "00",
     };
   }, [snapshot?.event?.scheduledStartAt, nowMs, timer.formatted]);
+
+  const selectedPollOption = useMemo(
+    () =>
+      activePoll?.options.find((opt) => opt.id === selectedPollOptionId) ?? null,
+    [activePoll?.options, selectedPollOptionId]
+  );
+
+  function renderPollVotingBox() {
+    if (!activePoll) return null;
+
+    return (
+      <div
+        style={{ borderRadius: "20px" }}
+        className={`border bg-[#0A150D] p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden transition-colors ${
+          selectedPollOption
+            ? "border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+            : "border-[#D5C5AA]/25"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2 text-[10px] shrink-0">
+          <span
+            className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${
+              selectedPollOption
+                ? "bg-[#14532D] text-white shadow-xs"
+                : "bg-[#030A06] border border-white/10 text-[#D5C5AA]"
+            }`}
+          >
+            <Vote className="w-3 h-3 text-emerald-400" />
+            <span>
+              {activePoll.status === "TIE_BREAK"
+                ? "Desempate · Mesa-Redonda"
+                : "Votação da Mesa-Redonda"}
+            </span>
+          </span>
+          {changingSecretVote && (
+            <button
+              type="button"
+              onClick={() => {
+                setChangingSecretVote(false);
+                setSelectedPollOptionId(null);
+              }}
+              className="text-[10px] font-semibold text-emerald-300 underline cursor-pointer"
+            >
+              Voltar ao Comprovante
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-0.5 shrink-0">
+          <h2 className="font-display text-sm sm:text-base font-extrabold text-[#F7DECA] leading-snug">
+            {activePoll.question}
+          </h2>
+          <p className="text-[11px] text-[#D5C5AA]/75 leading-tight">
+            {selectedPollOption
+              ? "Opção selecionada! Confirme sua escolha abaixo:"
+              : "Toque em uma das questões para selecionar o tema da Mesa-Redonda:"}
+          </p>
+        </div>
+
+        {voteFeedback && (
+          <div className="p-2 rounded-xl text-[11px] flex items-center gap-1.5 border bg-red-950/40 text-red-200 border-red-500/40 shrink-0">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{voteFeedback.message}</span>
+          </div>
+        )}
+
+        {/* Opções de Voto: Sem cor no estado neutro, com cor no estado selecionado */}
+        <div className="space-y-1.5 overflow-hidden">
+          {activePoll.options
+            .filter(
+              (opt) =>
+                activePoll.status !== "TIE_BREAK" ||
+                !activePoll.tieBreakOptionIds?.length ||
+                activePoll.tieBreakOptionIds.includes(opt.id)
+            )
+            .map((opt) => {
+              const isSelected = selectedPollOptionId === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={
+                    submittingVote ||
+                    activePoll.status === "CLOSED" ||
+                    activePoll.status === "RESULTS_PUBLISHED"
+                  }
+                  onClick={() => {
+                    setSelectedPollOptionId(isSelected ? null : opt.id);
+                    setVoteFeedback(null);
+                  }}
+                  className={`w-full p-2.5 sm:p-3 rounded-xl text-left transition flex flex-col gap-1 cursor-pointer ${
+                    isSelected
+                      ? "border-2 border-emerald-400 bg-emerald-950/60 ring-1 ring-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.22)]"
+                      : "border border-white/10 bg-[#030A06] hover:border-white/25 hover:bg-white/[0.02]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider truncate ${
+                        isSelected ? "text-emerald-400 font-extrabold" : "text-[#D5C5AA]/65"
+                      }`}
+                    >
+                      {opt.themeLabel || `Questão ${opt.optionOrder}`}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 transition ${
+                        isSelected
+                          ? "bg-emerald-400 text-[#030A06] flex items-center gap-1 shadow-xs"
+                          : "border border-white/10 bg-white/5 text-[#D5C5AA]/60 font-medium"
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <CheckCircle2 className="w-2.5 h-2.5 stroke-[3]" />
+                          <span>Selecionada</span>
+                        </>
+                      ) : (
+                        "Toque p/ escolher"
+                      )}
+                    </span>
+                  </div>
+                  <p
+                    className={`text-[11px] sm:text-xs leading-snug ${
+                      isSelected ? "font-semibold text-[#F7DECA]" : "font-normal text-[#D5C5AA]/85"
+                    }`}
+                  >
+                    {opt.label}
+                  </p>
+                </button>
+              );
+            })}
+        </div>
+
+        {/* Mensagem e Confirmação de Voto */}
+        {selectedPollOption ? (
+          <div className="p-2.5 rounded-xl border-2 border-emerald-400 bg-emerald-950/90 space-y-2 shadow-lg shrink-0 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between gap-2">
+              <div className="space-y-0.5 min-w-0">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="truncate">
+                    {selectedPollOption.themeLabel || `Questão ${selectedPollOption.optionOrder}`}
+                  </span>
+                </span>
+                <p className="text-xs font-bold text-[#F7DECA] leading-snug">
+                  Você realmente quer essa opção para a Mesa-Redonda?
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPollOptionId(null)}
+                className="text-[10px] text-[#D5C5AA]/70 hover:text-white underline cursor-pointer shrink-0"
+              >
+                Trocar
+              </button>
+            </div>
+
+            <button
+              type="button"
+              disabled={submittingVote || !isPollOpen}
+              onClick={() => handleCastVote(selectedPollOption.id)}
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#030A06] font-extrabold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition active:scale-[0.99] disabled:opacity-60"
+            >
+              <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+              <span>
+                {submittingVote
+                  ? "Confirmando seu voto..."
+                  : "Sim, confirmar meu voto nesta opção"}
+              </span>
+            </button>
+          </div>
+        ) : (
+          <div className="py-2 px-3 rounded-xl border border-white/5 bg-[#030A06]/60 text-center shrink-0">
+            <p className="text-[10.5px] text-[#D5C5AA]/60">
+              Toque em uma das questões acima para selecionar.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // ============================================================================
   // PASSO 1: TELA DE LOGIN EXCLUSIVA (EXIGE PRIMEIRO O LOGIN, SEM VOTAÇÃO JUNTO)
@@ -608,11 +819,8 @@ export default function ParticiparPage() {
   // ============================================================================
   return (
     <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 py-2.5 flex flex-col justify-start gap-2 overflow-hidden">
-      {/* Cabeçalho Enxuto do Participante Autenticado */}
-      <header
-        style={{ borderRadius: "16px" }}
-        className="border border-[#D5C5AA]/20 bg-[#0A150D]/95 px-3 py-2 shadow-md backdrop-blur-md shrink-0 flex items-center justify-between gap-2"
-      >
+      {/* Cabeçalho Limpo sem retângulo que envolve */}
+      <header className="px-1 py-0.5 shrink-0 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 flex items-center justify-center shrink-0">
             <BrandLogo className="w-full h-full object-contain drop-shadow-xs" />
@@ -654,42 +862,6 @@ export default function ParticiparPage() {
         </div>
       </header>
 
-      {/* Menu Compacto Horizontal de 4 Abas */}
-      <nav className="grid grid-cols-4 gap-1.5 bg-[#0A150D] border border-[#D5C5AA]/25 p-1 rounded-xl text-[10px] shrink-0">
-        {[
-          { key: "inicio", label: "Início", icon: Home },
-          { key: "pergunta", label: "Pergunta", icon: MessageSquarePlus },
-          {
-            key: "votacao",
-            label: isPollOpen ? "Votação ●" : "Votação",
-            icon: Vote,
-          },
-          {
-            key: "minhas",
-            label: `Minhas (${(me?.questions.length ?? 0) + (me?.votes.length ?? 0)})`,
-            icon: ListChecks,
-          },
-        ].map((item) => {
-          const Icon = item.icon;
-          const active = activeTab === item.key;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setActiveTab(item.key as TabKey)}
-              className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 font-bold cursor-pointer transition ${
-                active
-                  ? "bg-[#14532D] text-white shadow-xs"
-                  : "text-[#D5C5AA] hover:bg-slate-100 dark:hover:bg-[#030A06]"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
       {/* ÁREA DE CONTEÚDO PRINCIPAL (100% NO-SCROLL) */}
       <div className="flex-1 min-h-0 flex flex-col justify-start gap-2.5 overflow-hidden">
         {/* ABA 1: INÍCIO */}
@@ -715,89 +887,14 @@ export default function ParticiparPage() {
                     voteId={myVoteForActivePoll.id}
                     votedAt={myVoteForActivePoll.votedAt}
                     isPollOpen={isPollOpen}
-                    onChangeVoteRequest={() => setChangingSecretVote(true)}
+                    onChangeVoteRequest={() => {
+                      setChangingSecretVote(true);
+                      setSelectedPollOptionId(null);
+                    }}
                     onOpenStoryModal={() => setShowStoryModal(true)}
                   />
                 ) : (
-                  <div
-                    style={{ borderRadius: "20px" }}
-                    className="border-2 border-emerald-400 bg-[#0A150D] p-3.5 sm:p-4 flex flex-col justify-between gap-2.5 shadow-[0_0_25px_rgba(16,185,129,0.18)] overflow-hidden"
-                  >
-                    <div className="flex items-center justify-between gap-2 text-[10px] shrink-0">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#14532D] text-white font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-                        <span className="relative flex h-1.5 w-1.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-                        </span>
-                        <Vote className="w-3 h-3" />
-                        <span>
-                          {activePoll.status === "TIE_BREAK"
-                            ? "Desempate · Mesa-Redonda"
-                            : "Votação da Mesa-Redonda"}
-                        </span>
-                      </span>
-                      {changingSecretVote && (
-                        <button
-                          type="button"
-                          onClick={() => setChangingSecretVote(false)}
-                          className="text-[10px] font-semibold text-emerald-300 underline cursor-pointer"
-                        >
-                          Voltar ao Comprovante
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="space-y-0.5 shrink-0">
-                      <h2 className="font-display text-sm sm:text-base font-extrabold text-[#F7DECA] leading-snug">
-                        {activePoll.question}
-                      </h2>
-                      <p className="text-[11px] text-[#D5C5AA]/80 leading-snug">
-                        Toque na questão que deve guiar a Mesa-Redonda e gere seu comprovante para os Stories:
-                      </p>
-                    </div>
-
-                    {voteFeedback && (
-                      <div className="p-2 rounded-xl text-[11px] flex items-center gap-1.5 border bg-red-950/40 text-red-200 border-red-500/40 shrink-0">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{voteFeedback.message}</span>
-                      </div>
-                    )}
-
-                    <div className="space-y-2 overflow-hidden">
-                      {activePoll.options
-                        .filter(
-                          (opt) =>
-                            activePoll.status !== "TIE_BREAK" ||
-                            !activePoll.tieBreakOptionIds?.length ||
-                            activePoll.tieBreakOptionIds.includes(opt.id)
-                        )
-                        .map((opt) => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            disabled={
-                              submittingVote ||
-                              activePoll.status === "CLOSED" ||
-                              activePoll.status === "RESULTS_PUBLISHED"
-                            }
-                            onClick={() => handleCastVote(opt.id)}
-                            className="w-full p-2.5 sm:p-3 rounded-xl border border-emerald-500/35 bg-[#030A06] text-[#F7DECA] hover:border-emerald-400 hover:bg-emerald-950/30 text-left transition flex flex-col gap-1 cursor-pointer shadow-xs"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 truncate">
-                                {opt.themeLabel || `Questão ${opt.optionOrder}`}
-                              </span>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[9px] font-bold text-emerald-300 shrink-0">
-                                Votar →
-                              </span>
-                            </div>
-                            <p className="text-[11px] sm:text-xs leading-snug font-medium">
-                              {opt.label}
-                            </p>
-                          </button>
-                        ))}
-                    </div>
-                  </div>
+                  renderPollVotingBox()
                 )}
               </div>
             )}
@@ -1021,77 +1118,216 @@ export default function ParticiparPage() {
                   voteId={myVoteForActivePoll.id}
                   votedAt={myVoteForActivePoll.votedAt}
                   isPollOpen={isPollOpen}
-                  onChangeVoteRequest={() => setChangingSecretVote(true)}
+                  onChangeVoteRequest={() => {
+                    setChangingSecretVote(true);
+                    setSelectedPollOptionId(null);
+                  }}
                   onOpenStoryModal={() => setShowStoryModal(true)}
                 />
               ) : (
-                <div
-                  style={{ borderRadius: "20px" }}
-                  className="border-2 border-emerald-400 bg-[#0A150D] p-3.5 sm:p-4 flex flex-col justify-between gap-2.5 shadow-lg overflow-hidden"
-                >
-                  <div className="flex items-center justify-between text-[10px] shrink-0">
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#14532D] text-white font-bold uppercase tracking-wider">
-                      {activePoll.status === "TIE_BREAK"
-                        ? "Rodada de Desempate"
-                        : "Votação Aberta · Mesa-Redonda"}
-                    </span>
-                    {changingSecretVote && (
-                      <button
-                        type="button"
-                        onClick={() => setChangingSecretVote(false)}
-                        className="text-[10px] font-semibold text-emerald-300 underline cursor-pointer"
-                      >
-                        Voltar ao Comprovante
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-0.5 shrink-0">
-                    <h2 className="font-display font-extrabold text-sm sm:text-base text-[#F7DECA] leading-snug">
-                      {activePoll.question}
-                    </h2>
-                    <p className="text-[11px] text-[#D5C5AA]/75 leading-snug">
-                      Vote em sigilo na questão que deve conduzir o debate:
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 overflow-hidden">
-                    {activePoll.options
-                      .filter(
-                        (opt) =>
-                          activePoll.status !== "TIE_BREAK" ||
-                          !activePoll.tieBreakOptionIds?.length ||
-                          activePoll.tieBreakOptionIds.includes(opt.id)
-                      )
-                      .map((opt) => (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          disabled={submittingVote || !isPollOpen}
-                          onClick={() => handleCastVote(opt.id)}
-                          className="w-full p-2.5 sm:p-3 rounded-xl border border-[#D5C5AA]/25 bg-[#030A06] text-[#F7DECA] hover:border-emerald-400 text-left transition flex flex-col gap-1 cursor-pointer disabled:cursor-default"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 truncate">
-                              {opt.themeLabel || `Questão ${opt.optionOrder}`}
-                            </span>
-                            <span className="text-[9px] font-bold text-emerald-300 shrink-0">
-                              Toque para votar →
-                            </span>
-                          </div>
-                          <p className="text-[11px] sm:text-xs leading-snug font-medium">
-                            {opt.label}
-                          </p>
-                        </button>
-                      ))}
-                  </div>
-                </div>
+                renderPollVotingBox()
               )}
             </div>
           </div>
         )}
 
-        {/* ABA 4: MINHAS PARTICIPAÇÕES & COMPROVANTE */}
+        {/* ABA 4: SORTEIOS DO EVENTO (HABILITAÇÃO AUTOMÁTICA POR VOTO) */}
+        {activeTab === "sorteio" && (
+          <div className="flex-1 min-h-0 flex flex-col justify-start gap-2 overflow-hidden">
+            {/* Card de Status de Elegibilidade do Participante */}
+            <div
+              style={{ borderRadius: "18px" }}
+              className={`border p-3 space-y-1.5 shadow-md shrink-0 transition ${
+                Boolean(me?.votes && me.votes.length > 0)
+                  ? "border-emerald-500/50 bg-emerald-950/50"
+                  : "border-amber-500/40 bg-amber-950/25"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1 ${
+                    Boolean(me?.votes && me.votes.length > 0)
+                      ? "bg-emerald-500 text-[#030A06]"
+                      : "bg-amber-400 text-[#030A06]"
+                  }`}
+                >
+                  {Boolean(me?.votes && me.votes.length > 0) ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
+                      <span>Habilitado(a) para o Sorteio</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-3 h-3 stroke-[2.5]" />
+                      <span>Habilitação Pendente</span>
+                    </>
+                  )}
+                </span>
+                <span className="font-mono text-[9.5px] text-[#D5C5AA]/70">
+                  Credencial #{me?.credentialCode || me?.code}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-[#F7DECA] leading-snug">
+                  {Boolean(me?.votes && me.votes.length > 0) ? (
+                    <>
+                      Seu voto na Mesa-Redonda foi validado! Você está concorrendo automaticamente a todos os brindes oficiais.
+                    </>
+                  ) : (
+                    <>
+                      Para se habilitar e concorrer aos brindes, registre seu voto na Mesa-Redonda.
+                    </>
+                  )}
+                </p>
+
+                {!Boolean(me?.votes && me.votes.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("votacao")}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-[10px] font-extrabold shrink-0 shadow-sm flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Votar Agora</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Lista dos Brindes Disponíveis para Sorteio */}
+            <div className="flex-1 min-h-0 flex flex-col justify-start gap-1.5 overflow-hidden">
+              <div className="flex items-center justify-between px-1 shrink-0">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Brindes Oficiais do Evento</span>
+                </span>
+                <span className="text-[10px] text-[#D5C5AA]/70">
+                  {snapshot?.giveaways?.prizes?.filter((p) => p.status === "DRAWN").length ?? 0} de {snapshot?.giveaways?.prizes?.length ?? 3} sorteados
+                </span>
+              </div>
+
+              <div className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-0.5">
+                {(snapshot?.giveaways?.prizes && snapshot.giveaways.prizes.length > 0
+                  ? snapshot.giveaways.prizes
+                  : [
+                      {
+                        id: "p1",
+                        title: 'Livro "A Nova Moeda: Economia da Solidão"',
+                        description: "Exemplar impresso oficial autografado pelos autores e especialistas.",
+                        sponsor: "Coordenação Geral ANM",
+                        status: "PENDING",
+                        winner: null,
+                      },
+                      {
+                        id: "p2",
+                        title: "Kit Oficial Exclusivo A Nova Moeda",
+                        description: "Ecobag institucional, caderno comemorativo de anotações e credencial de honra.",
+                        sponsor: "UEFS & Vértice",
+                        status: "PENDING",
+                        winner: null,
+                      },
+                      {
+                        id: "p3",
+                        title: "Acesso VIP à Mentoria com Especialistas",
+                        description: "Sessão online exclusiva pós-evento com a mesa de especialistas.",
+                        sponsor: "Mesa de Especialistas",
+                        status: "PENDING",
+                        winner: null,
+                      },
+                    ]
+                ).map((prize, idx) => {
+                  const isWinnerThisUser = Boolean(
+                    prize.winner &&
+                      ((prize.winner.participantId && prize.winner.participantId === me?.id) ||
+                        (prize.winner.credentialCode &&
+                          (prize.winner.credentialCode === me?.credentialCode ||
+                            prize.winner.credentialCode === me?.code)) ||
+                        (me?.name && prize.winner.name && prize.winner.name.trim().toLowerCase() === me.name.trim().toLowerCase()))
+                  );
+
+                  return (
+                    <div
+                      key={prize.id}
+                      style={{ borderRadius: "16px" }}
+                      className={`border p-3 space-y-1.5 transition ${
+                        isWinnerThisUser
+                          ? "border-2 border-amber-400 bg-gradient-to-b from-amber-950/70 via-emerald-950/50 to-[#0A150D] shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/50"
+                          : prize.status === "DRAWN"
+                            ? "border-emerald-500/40 bg-emerald-950/30"
+                            : "border-white/10 bg-[#0A150D]/90"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-400">
+                              Brinde #{idx + 1}
+                            </span>
+                            {prize.sponsor && (
+                              <span className="text-[9px] text-[#D5C5AA]/60 truncate">
+                                · {prize.sponsor}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-display font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-snug">
+                            {prize.title}
+                          </h3>
+                          {prize.description && (
+                            <p className="text-[10.5px] text-[#D5C5AA]/75 leading-tight">
+                              {prize.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            prize.status === "DRAWN"
+                              ? "bg-emerald-500 text-[#030A06]"
+                              : "border border-white/10 bg-white/5 text-[#D5C5AA]/70"
+                          }`}
+                        >
+                          {prize.status === "DRAWN" ? "Sorteado ✓" : "Ao vivo no palco"}
+                        </span>
+                      </div>
+
+                      {/* Notificação Festiva caso este usuário tenha vencido */}
+                      {isWinnerThisUser && (
+                        <div className="p-2.5 rounded-xl border border-amber-400/80 bg-amber-950/80 text-center space-y-1 animate-pulse">
+                          <div className="text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                            <span>PARABÉNS! VOCÊ É O(A) GANHADOR(A)!</span>
+                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                          </div>
+                          <p className="text-[10px] text-[#F7DECA] leading-tight">
+                            Apresente sua credencial (#{me?.credentialCode || me?.code}) à organização no final do evento para retirar seu brinde!
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Se foi sorteado para outro participante */}
+                      {prize.status === "DRAWN" && prize.winner && !isWinnerThisUser && (
+                        <div className="p-2 rounded-xl border border-emerald-500/30 bg-[#030A06] flex items-center justify-between gap-2 text-[10px]">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[#D5C5AA]/75 truncate">Ganhador(a):</span>
+                            <strong className="text-emerald-300 font-bold truncate">
+                              {prize.winner.name}
+                            </strong>
+                          </div>
+                          <span className="font-mono text-[9.5px] text-[#D5C5AA]/70 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                            #{prize.winner.credentialCode}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ABA 5: MINHAS PARTICIPAÇÕES & COMPROVANTE */}
         {activeTab === "minhas" && (
           <div className="flex-1 min-h-0 flex flex-col justify-start gap-2.5 overflow-hidden">
             <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs shrink-0">
@@ -1124,6 +1360,7 @@ export default function ParticiparPage() {
                   isPollOpen={isPollOpen}
                   onChangeVoteRequest={() => {
                     setChangingSecretVote(true);
+                    setSelectedPollOptionId(null);
                     setActiveTab("votacao");
                   }}
                   onOpenStoryModal={() => setShowStoryModal(true)}
@@ -1132,6 +1369,53 @@ export default function ParticiparPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* BARRA DE NAVEGAÇÃO INFERIOR: BOTTOM PILLOW FLUTUANTE */}
+      <div className="shrink-0 pt-0.5 pb-0.5">
+        <nav
+          style={{ borderRadius: "9999px" }}
+          className="grid grid-cols-5 gap-1 bg-[#0A150D]/95 backdrop-blur-xl border border-emerald-500/35 p-1 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.6)] ring-1 ring-white/10 text-[9px] sm:text-[10px]"
+        >
+          {[
+            { key: "inicio", label: "Início", icon: Home },
+            { key: "pergunta", label: "Pergunta", icon: MessageSquarePlus },
+            {
+              key: "votacao",
+              label: isPollOpen ? "Votação ●" : "Votação",
+              icon: Vote,
+            },
+            {
+              key: "sorteio",
+              label: me?.votes && me.votes.length > 0 ? "Sorteio ✓" : "Sorteio",
+              icon: Gift,
+            },
+            {
+              key: "minhas",
+              label: `Minhas (${(me?.questions.length ?? 0) + (me?.votes.length ?? 0)})`,
+              icon: ListChecks,
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setActiveTab(item.key as TabKey)}
+                style={{ borderRadius: "9999px" }}
+                className={`py-1.5 px-1 rounded-full flex items-center justify-center gap-1 font-bold cursor-pointer transition ${
+                  active
+                    ? "bg-[#14532D] text-white shadow-xs"
+                    : "text-[#D5C5AA] hover:bg-white/5"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* MODAL VERTICAL 9:16 PARA STORIES DO INSTAGRAM */}

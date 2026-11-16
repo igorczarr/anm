@@ -121,6 +121,32 @@ export interface SyncPollInfo {
   }>;
 }
 
+export interface SyncGiveawayPrize {
+  id: string;
+  title: string;
+  description: string;
+  sponsor?: string;
+  photoUrl?: string;
+  quantity: number;
+  order: number;
+  status: "PENDING" | "DRAWING" | "DRAWN";
+  drawnAt?: string | null;
+  winner?: {
+    participantId: string;
+    name: string;
+    credentialCode: string;
+    emailMasked: string;
+    drawnAt: string;
+  } | null;
+}
+
+export interface SyncGiveawaySnapshot {
+  prizes: SyncGiveawayPrize[];
+  totalEligibleCount: number;
+  lastDrawnPrizeId?: string | null;
+  updatedAt: string;
+}
+
 export interface ArenaFullSnapshot {
   initialized: boolean;
   unchanged?: boolean;
@@ -199,6 +225,7 @@ export interface ArenaFullSnapshot {
     questionsApproved: number;
     activePollVotes: number;
   };
+  giveaways?: SyncGiveawaySnapshot;
   operationalSteps?: SyncStepInfo[];
   recentTimerSessions?: SyncTimerSessionRecord[];
 }

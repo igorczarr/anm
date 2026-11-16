@@ -126,6 +126,7 @@ export async function GET() {
     return NextResponse.json(
       {
         authenticated: true,
+        id: session.id,
         code: session.anonymousCode,
         name: session.name ?? null,
         email: session.email ?? null,

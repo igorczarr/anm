@@ -4,6 +4,7 @@ import {
   computeServerTimerSnapshot,
 } from "@/lib/events";
 import { Prisma } from "@prisma/client";
+import { getGiveawaysSnapshot } from "@/lib/giveaway";
 
 export const DEFAULT_EVENT_SLUG = "a-nova-moeda-2026";
 export const FALLBACK_PRIMARY_EVENT_ID = "cmw9umwil000b2orcp07nnui6";
@@ -612,6 +613,7 @@ export async function getArenaSyncSnapshot(options?: {
       questionsApproved,
       activePollVotes: activePoll?.totalVotes ?? 0,
     },
+    giveaways: await getGiveawaysSnapshot(),
     ...(options?.includeAdminStats
       ? {
           operationalSteps: allOperationalSteps.map((st) => ({
@@ -651,4 +653,21 @@ export async function getArenaSyncSnapshot(options?: {
         }
       : {}),
   };
+}
+
+export async function bumpLiveStateSeq(eventType: string = "giveaway.updated") {
+  try {
+    const event = await getPrimaryEvent();
+    if (event?.liveState?.id) {
+      await prisma.liveState.update({
+        where: { id: event.liveState.id },
+        data: {
+          seq: { increment: 1 },
+          lastEventType: eventType,
+        },
+      });
+    }
+  } catch (err) {
+    console.warn("bumpLiveStateSeq: erro ao incrementar seq:", err);
+  }
 }

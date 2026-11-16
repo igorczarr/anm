@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ExternalLink,
   FileBarChart2,
+  Gift,
   KeyRound,
   LogOut,
   Menu,
@@ -47,11 +48,12 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Ao Vivo",
     href: "/admin/operacao",
     icon: PlayCircle,
-    matchPaths: ["/admin", "/admin/operacao", "/admin/perguntas", "/admin/votacoes"],
+    matchPaths: ["/admin", "/admin/operacao", "/admin/perguntas", "/admin/votacoes", "/admin/sorteios"],
     subItems: [
       { href: "/admin/operacao", label: "Mesa de Palco", icon: Radio },
       { href: "/admin/perguntas", label: "Curadoria", icon: MessageSquareMore },
       { href: "/admin/votacoes", label: "Votações", icon: Vote },
+      { href: "/admin/sorteios", label: "Sorteios", icon: Gift },
     ],
   },
   {
