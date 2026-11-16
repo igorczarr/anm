@@ -6,6 +6,9 @@ import {
 import { Prisma } from "@prisma/client";
 
 export const DEFAULT_EVENT_SLUG = "a-nova-moeda-2026";
+export const FALLBACK_PRIMARY_EVENT_ID = "cmw9umwil000b2orcp07nnui6";
+
+let lastKnownEvent: any = null;
 
 // Cache em memória de dados estáticos do evento (pautas, speakers, etapas) para navegação instantânea no Admin
 let staticEventCache: {
@@ -30,7 +33,10 @@ export async function getPrimaryEvent() {
       },
     });
 
-    if (event) return event;
+    if (event) {
+      lastKnownEvent = event;
+      return event;
+    }
 
     const firstEvent = await prisma.event.findFirst({
       include: {
@@ -39,10 +45,13 @@ export async function getPrimaryEvent() {
       orderBy: { createdAt: "asc" },
     });
 
-    if (firstEvent) return firstEvent;
+    if (firstEvent) {
+      lastKnownEvent = firstEvent;
+      return firstEvent;
+    }
 
     // Auto-provisionamento de segurança caso o banco esteja vazio
-    return await prisma.event.create({
+    const created = await prisma.event.create({
       data: {
         slug: DEFAULT_EVENT_SLUG,
         name: "A Nova Moeda",
@@ -63,9 +72,36 @@ export async function getPrimaryEvent() {
         liveState: true,
       },
     });
+    lastKnownEvent = created;
+    return created;
   } catch (err) {
-    console.warn("getPrimaryEvent: Banco de dados inacessível ou não configurado:", err);
-    return null;
+    console.warn("getPrimaryEvent: Usando fallback de resiliência durante oscilação do banco:", err);
+    if (lastKnownEvent) return lastKnownEvent;
+    const now = new Date();
+    return {
+      id: FALLBACK_PRIMARY_EVENT_ID,
+      slug: DEFAULT_EVENT_SLUG,
+      name: "A Nova Moeda",
+      theme: "Economia da Solidão",
+      institution: "Universidade Estadual de Feira de Santana (UEFS)",
+      formatDescription: "5 Pautas + Mesa-Redonda",
+      estimatedAudience: 250,
+      programmedDurationMin: 145,
+      certifiedHours: 4,
+      scheduleLocked: false,
+      requireCredential: false,
+      requireAccessCode: false,
+      accessCode: null,
+      scheduledStartAt: new Date("2026-11-17T21:30:00.000Z"),
+      actualStartAt: null,
+      actualEndAt: null,
+      questionCharLimit: 400,
+      maxQuestionsPerTopic: 1,
+      peakConnections: 150,
+      createdAt: now,
+      updatedAt: now,
+      liveState: null,
+    } as any;
   }
 }
 

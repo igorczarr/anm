@@ -331,117 +331,159 @@ export async function generateInstagramStoryBlob({
 function EditorialPassArtwork({
   displayName,
   compact = false,
+  inlineCompact = false,
 }: {
   displayName: string;
   displayCredential?: string;
   compact?: boolean;
+  inlineCompact?: boolean;
 }) {
   return (
     <div
-      style={{ borderRadius: "28px" }}
-      className="anm-editorial-pass relative overflow-hidden bg-gradient-to-b from-[#0C1D13] via-[#07120C] to-[#040A06] border border-[#D5C5AA]/30 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)] text-center"
+      style={{ borderRadius: inlineCompact ? "22px" : "28px" }}
+      className="anm-editorial-pass relative overflow-hidden bg-gradient-to-b from-[#0C1D13] via-[#07120C] to-[#040A06] border border-[#D5C5AA]/30 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] text-center"
     >
       {/* Luzes atmosféricas de fundo (Esmeralda + Champagne) */}
       <div
         style={{ borderRadius: "9999px" }}
-        className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-56 bg-emerald-500/20 blur-3xl"
+        className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-48 bg-emerald-500/20 blur-3xl"
       />
       <div
         style={{ borderRadius: "9999px" }}
-        className="pointer-events-none absolute top-1/3 -right-20 w-56 h-56 bg-[#D5C5AA]/10 blur-3xl"
+        className="pointer-events-none absolute top-1/3 -right-20 w-48 h-48 bg-[#D5C5AA]/10 blur-3xl"
       />
 
-      <div className={compact ? "p-5 space-y-4" : "p-6 sm:p-7 space-y-5"}>
+      <div
+        className={
+          inlineCompact
+            ? "p-3 sm:p-3.5 space-y-2"
+            : compact
+              ? "p-5 space-y-4"
+              : "p-6 sm:p-7 space-y-5"
+        }
+      >
         {/* 1. Header Editorial Unificado, Limpo e Centralizado */}
-        <div className="relative z-10 flex flex-col items-center pt-1 space-y-2">
-          {/* Emblema Oficial Flutuante com Halo Suave */}
-          <div className="relative flex items-center justify-center mb-0.5">
+        <div className="relative z-10 flex flex-col items-center space-y-1">
+          <div className="relative flex items-center justify-center">
             <div
               style={{ borderRadius: "9999px" }}
               className="absolute inset-0 bg-emerald-400/20 blur-xl scale-125 pointer-events-none"
             />
-            <BrandLogo className="relative w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-md" />
+            <BrandLogo
+              className={
+                inlineCompact
+                  ? "relative w-9 h-9 object-contain drop-shadow-md"
+                  : "relative w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-md"
+              }
+            />
           </div>
 
-          {/* Lockup "Eu faço parte da A Nova Moeda" */}
           <div className="space-y-0.5">
-            <div className="flex items-center justify-center gap-2.5">
-              <span className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[#D5C5AA]/60" />
-              <span className="font-editorial italic text-base sm:text-lg text-[#D5C5AA] tracking-wide">
+            <div className="flex items-center justify-center gap-2">
+              <span className="h-[1px] w-7 bg-gradient-to-r from-transparent to-[#D5C5AA]/60" />
+              <span
+                className={
+                  inlineCompact
+                    ? "font-editorial italic text-xs sm:text-sm text-[#D5C5AA] tracking-wide"
+                    : "font-editorial italic text-base sm:text-lg text-[#D5C5AA] tracking-wide"
+                }
+              >
                 Eu faço parte da
               </span>
-              <span className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[#D5C5AA]/60" />
+              <span className="h-[1px] w-7 bg-gradient-to-l from-transparent to-[#D5C5AA]/60" />
             </div>
 
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F7DECA] leading-none pt-0.5">
+            <h2
+              className={
+                inlineCompact
+                  ? "font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F7DECA] leading-none"
+                  : "font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F7DECA] leading-none pt-0.5"
+              }
+            >
               A Nova Moeda
             </h2>
 
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-400 pt-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-400">
               Economia da Solidão
             </p>
 
-            <p className="text-[10px] font-medium text-[#D5C5AA]/65 tracking-wider pt-0.5">
-              17 de Novembro · 18h30 · UEFS
-            </p>
+            {!inlineCompact && (
+              <p className="text-[10px] font-medium text-[#D5C5AA]/65 tracking-wider">
+                17 de Novembro · 18h30 · UEFS
+              </p>
+            )}
           </div>
         </div>
 
         {/* 2. Card de Protagonismo: Participante + Confirmação de Voto e Escolha do Tema */}
         <div
-          style={{ borderRadius: "22px" }}
-          className="anm-editorial-spotlight relative z-10 bg-gradient-to-b from-emerald-950/55 via-[#06130C] to-[#030A06] border border-emerald-400/40 p-4 sm:p-5 shadow-inner space-y-2"
+          style={{ borderRadius: inlineCompact ? "16px" : "22px" }}
+          className={`anm-editorial-spotlight relative z-10 bg-gradient-to-b from-emerald-950/55 via-[#06130C] to-[#030A06] border border-emerald-400/40 shadow-inner ${
+            inlineCompact ? "p-3 space-y-1" : "p-4 sm:p-5 space-y-2"
+          }`}
         >
           <div className="flex justify-center">
             <span
               style={{ borderRadius: "9999px" }}
-              className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-emerald-500 text-[#030A06] text-[10px] font-extrabold uppercase tracking-wider shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-500 text-[#030A06] text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider shadow-sm"
             >
-              <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
+              <CheckCircle2 className="w-3 h-3 stroke-[2.5] shrink-0" />
               <span>Voto Confirmado na Pauta</span>
             </span>
           </div>
 
-          <div className="pt-0.5">
-            <strong className="font-display text-xl sm:text-2xl font-extrabold text-[#F7DECA] tracking-tight block truncate">
+          <div>
+            <strong
+              className={
+                inlineCompact
+                  ? "font-display text-lg sm:text-xl font-extrabold text-[#F7DECA] tracking-tight block truncate"
+                  : "font-display text-xl sm:text-2xl font-extrabold text-[#F7DECA] tracking-tight block truncate"
+              }
+            >
               {displayName}
             </strong>
           </div>
 
-          <p className="text-xs sm:text-sm font-bold text-emerald-300 leading-snug">
+          <p className="text-xs font-bold text-emerald-300 leading-snug">
             Já votou e escolheu o tema da Mesa-Redonda
           </p>
 
-          <p className="text-[10px] text-[#D5C5AA]/70 leading-tight">
-            Participação registrada na escolha da questão central do debate
-          </p>
+          {!inlineCompact && (
+            <p className="text-[10px] text-[#D5C5AA]/70 leading-tight">
+              Participação registrada na escolha da questão central do debate
+            </p>
+          )}
         </div>
 
         {/* 3. Galeria dos 6 Especialistas da Mesa-Redonda */}
-        <div className="relative z-10 space-y-2.5 pt-0.5">
+        <div className="relative z-10 space-y-1.5">
           <div className="flex items-center justify-center gap-2">
             <span className="h-[1px] flex-1 bg-[#D5C5AA]/15" />
-            <span className="text-[9px] font-bold uppercase tracking-wider text-[#D5C5AA]/85">
+            <span className="text-[8.5px] font-bold uppercase tracking-wider text-[#D5C5AA]/85">
               Especialistas da Mesa-Redonda
             </span>
             <span className="h-[1px] flex-1 bg-[#D5C5AA]/15" />
           </div>
 
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className="grid grid-cols-6 gap-1">
             {SIX_SPECIALISTS.map((sp) => (
-              <div key={sp.id} className="flex flex-col items-center gap-1">
+              <div key={sp.id} className="flex flex-col items-center gap-0.5">
                 <div
                   style={{ borderRadius: "9999px" }}
-                  className="p-[1.5px] bg-gradient-to-b from-[#D5C5AA] to-emerald-500 shadow-md"
+                  className="p-[1.5px] bg-gradient-to-b from-[#D5C5AA] to-emerald-500 shadow-sm"
                 >
                   <img
                     src={sp.photoUrl}
                     alt={sp.name}
                     style={{ borderRadius: "9999px" }}
-                    className="w-10 h-10 sm:w-11 sm:h-11 object-cover object-top bg-[#030A06]"
+                    className={
+                      inlineCompact
+                        ? "w-8 h-8 sm:w-9 sm:h-9 object-cover object-top bg-[#030A06]"
+                        : "w-10 h-10 sm:w-11 sm:h-11 object-cover object-top bg-[#030A06]"
+                    }
                   />
                 </div>
-                <span className="text-[9px] text-[#F7DECA] font-bold truncate w-full leading-tight">
+                <span className="text-[8.5px] text-[#F7DECA] font-bold truncate w-full leading-tight">
                   {sp.name}
                 </span>
               </div>
@@ -451,12 +493,16 @@ function EditorialPassArtwork({
 
         {/* 4. Rodapé de Convite Social com QR Code */}
         <div
-          style={{ borderRadius: "20px" }}
-          className="relative z-10 bg-[#030A06]/90 border border-[#D5C5AA]/20 p-3.5 flex items-center gap-3.5 text-left"
+          style={{ borderRadius: inlineCompact ? "16px" : "20px" }}
+          className={`relative z-10 bg-[#030A06]/90 border border-[#D5C5AA]/20 flex items-center text-left ${
+            inlineCompact ? "p-2.5 gap-2.5" : "p-3.5 gap-3.5"
+          }`}
         >
           <div
-            style={{ borderRadius: "14px" }}
-            className="w-16 h-16 bg-white p-1.5 shrink-0 shadow-md flex items-center justify-center"
+            style={{ borderRadius: "12px" }}
+            className={`${
+              inlineCompact ? "w-12 h-12 p-1" : "w-16 h-16 p-1.5"
+            } bg-white shrink-0 shadow-md flex items-center justify-center`}
           >
             <img
               src="/api/qr"
@@ -465,14 +511,14 @@ function EditorialPassArtwork({
             />
           </div>
           <div className="space-y-0.5 min-w-0">
-            <div className="text-xs sm:text-sm font-extrabold text-[#F7DECA] leading-tight">
+            <div className="text-[11px] sm:text-xs font-extrabold text-[#F7DECA] leading-tight">
               E você, já votou e escolheu o tema?
             </div>
-            <p className="text-[10px] sm:text-[11px] text-[#D5C5AA]/85 leading-snug">
+            <p className="text-[9.5px] sm:text-[10.5px] text-[#D5C5AA]/85 leading-tight">
               Aponte a câmera para o QR Code, vote na pauta da Mesa-Redonda e
               poste nos seus Stories!
             </p>
-            <span className="text-[10px] font-bold text-emerald-400 block pt-0.5">
+            <span className="text-[9px] font-bold text-emerald-400 block">
               #ANovaMoeda · UEFS
             </span>
           </div>
@@ -552,30 +598,31 @@ export function InstagramVoteReceiptCard({
   }, [displayName, displayCredential]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <EditorialPassArtwork
         displayName={displayName}
         displayCredential={displayCredential}
+        inlineCompact
       />
 
       {shareFeedback && (
-        <div className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 text-xs text-emerald-200 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{shareFeedback}</span>
+        <div className="p-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 text-[11px] text-emerald-200 flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="truncate">{shareFeedback}</span>
         </div>
       )}
 
-      {/* Botões de Compartilhamento */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      {/* Botões de Compartilhamento Lado a Lado (Compactos para No-Scroll) */}
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={handleShareOrDownloadStory}
           disabled={sharing}
-          className="w-full py-3.5 px-4 rounded-xl bg-[#14532D] hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer transition"
+          className="w-full py-2.5 px-3 rounded-xl bg-[#14532D] hover:bg-emerald-800 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition"
         >
-          <Share2 className="w-4 h-4 shrink-0" />
-          <span>
-            {sharing ? "Gerando Story..." : "Compartilhar nos Stories"}
+          <Share2 className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">
+            {sharing ? "Gerando..." : "Compartilhar Stories"}
           </span>
         </button>
 
@@ -583,22 +630,22 @@ export function InstagramVoteReceiptCard({
           <button
             type="button"
             onClick={onOpenStoryModal}
-            className="w-full py-3.5 px-4 rounded-xl border border-[#D5C5AA]/35 bg-[#030A06] text-[#F7DECA] font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:border-emerald-400 transition"
+            className="w-full py-2.5 px-3 rounded-xl border border-[#D5C5AA]/35 bg-[#030A06] text-[#F7DECA] font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer hover:border-emerald-400 transition"
           >
-            <Eye className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Modo Stories (Tela Cheia p/ Print)</span>
+            <Eye className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">Tela Cheia (Print)</span>
           </button>
         )}
       </div>
 
       {isPollOpen && onChangeVoteRequest && (
-        <div className="text-center pt-1">
+        <div className="text-center">
           <button
             type="button"
             onClick={onChangeVoteRequest}
-            className="inline-flex items-center gap-1.5 text-[11px] text-[#D5C5AA]/70 hover:text-emerald-400 underline underline-offset-4 cursor-pointer transition"
+            className="inline-flex items-center gap-1 text-[10px] text-[#D5C5AA]/70 hover:text-emerald-400 underline underline-offset-4 cursor-pointer transition"
           >
-            <RefreshCw className="w-3 h-3" />
+            <RefreshCw className="w-2.5 h-2.5" />
             <span>Alterar minha escolha na votação</span>
           </button>
         </div>

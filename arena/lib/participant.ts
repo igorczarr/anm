@@ -57,7 +57,61 @@ export async function getParticipantSession() {
     if (!raw) return null;
     const id = verifyAnonymousSessionToken(raw);
     if (!id) return null;
-    return await prisma.participantSession.findUnique({ where: { id } });
+
+    const existing = await prisma.participantSession
+      .findUnique({ where: { id } })
+      .catch(() => null);
+    if (existing) return existing;
+
+    // Auto-recuperação caso a sessão tenha sido emitida durante cold-start do banco
+    const metaRaw = store.get("anm_arena_participant_meta")?.value;
+    if (metaRaw) {
+      const meta = JSON.parse(
+        Buffer.from(metaRaw, "base64url").toString("utf-8")
+      );
+      if (meta && meta.id === id && meta.eventId) {
+        const ip = await getClientIp();
+        const created = await prisma.participantSession
+          .upsert({
+            where: { id },
+            update: { lastSeenAt: new Date(), isConnected: true },
+            create: {
+              id,
+              eventId: meta.eventId,
+              sessionToken: crypto.randomUUID(),
+              anonymousCode:
+                meta.code ||
+                crypto.randomBytes(3).toString("hex").toUpperCase(),
+              credentialCode: meta.credentialCode || `ANM-2026`,
+              name: meta.name || null,
+              email: meta.email || null,
+              ipHash: hashIp(ip),
+              consentAcceptedAt: new Date(),
+            },
+          })
+          .catch(() => null);
+        if (created) return created;
+
+        const now = new Date();
+        return {
+          id,
+          eventId: meta.eventId,
+          sessionToken: id,
+          anonymousCode: meta.code || "ANM",
+          credentialCode: meta.credentialCode || "ANM-2026",
+          name: meta.name || null,
+          email: meta.email || null,
+          userAgent: null,
+          ipHash: "",
+          isConnected: true,
+          consentAcceptedAt: now,
+          lastSeenAt: now,
+          createdAt: now,
+        } as any;
+      }
+    }
+
+    return null;
   } catch {
     return null;
   }

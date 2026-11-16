@@ -1,13 +1,19 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getPrimaryEvent } from "@/lib/live-state";
+import { getPrimaryEvent, FALLBACK_PRIMARY_EVENT_ID } from "@/lib/live-state";
 import {
   createParticipantSession,
   getClientIp,
   getParticipantSession,
+  hashIp,
   rateLimit,
 } from "@/lib/participant";
+import {
+  PARTICIPANT_SESSION_COOKIE,
+  signAnonymousSessionToken,
+} from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +24,9 @@ const BodySchema = z.object({
 });
 
 /**
- * Cria ou atualiza a sessão do participante, validando nome e e-mail
- * para vincular e rastrear cada interação, atribuindo credencial automaticamente.
+ * Cria ou atualiza a sessão do participante com resiliência total a cold-start (scale-to-zero).
+ * Nunca retorna 503: caso o banco esteja acordando no exato milissegundo da chamada,
+ * emite o cookie assinado imediatamente e sincroniza em background.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -36,12 +43,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email } = parsed.data;
+    const normalizedEmail = email.trim().toLowerCase();
     const explicitCredential = parsed.data.credentialCode
       ?.trim()
       .toUpperCase();
 
     const ip = await getClientIp();
-    if (!rateLimit(`session:${ip}`, 50, 10 * 60 * 1000)) {
+    if (!rateLimit(`session:${ip}`, 80, 10 * 60 * 1000)) {
       return NextResponse.json(
         { ok: false, error: "Muitas tentativas. Aguarde alguns instantes." },
         { status: 429 }
@@ -49,76 +57,140 @@ export async function POST(req: NextRequest) {
     }
 
     const event = await getPrimaryEvent();
-    if (!event) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            "Conexão com o banco de dados em inicialização. Tente novamente em alguns segundos.",
-        },
-        { status: 503 }
-      );
-    }
+    const eventId = event?.id || FALLBACK_PRIMARY_EVENT_ID;
 
-    let session = await getParticipantSession();
     const generatedCredential =
-      explicitCredential ||
-      session?.credentialCode ||
-      `ANM-${Math.floor(100 + Math.random() * 900)}`;
+      explicitCredential || `ANM-${Math.floor(100 + Math.random() * 900)}`;
 
-    if (!session || session.eventId !== event.id) {
-      session = await createParticipantSession(event.id, {
-        name,
-        email,
-        credentialCode: generatedCredential,
-      });
-    } else {
-      session = await prisma.participantSession.update({
-        where: { id: session.id },
-        data: {
+    let sessionId: string;
+    let anonymousCode: string;
+    let finalCredential: string;
+
+    try {
+      let session = await getParticipantSession();
+
+      if (!session || session.eventId !== eventId) {
+        session = await createParticipantSession(eventId, {
           name,
-          email: email.toLowerCase(),
-          credentialCode: session.credentialCode || generatedCredential,
-          lastSeenAt: new Date(),
-          isConnected: true,
-        },
-      });
+          email: normalizedEmail,
+          credentialCode: generatedCredential,
+        });
+      } else {
+        session = await prisma.participantSession.update({
+          where: { id: session.id },
+          data: {
+            name,
+            email: normalizedEmail,
+            credentialCode: session.credentialCode || generatedCredential,
+            lastSeenAt: new Date(),
+            isConnected: true,
+          },
+        });
+      }
+
+      sessionId = session.id;
+      anonymousCode = session.anonymousCode;
+      finalCredential = session.credentialCode || generatedCredential;
+
+      // Sincroniza tabela de credenciais em background
+      prisma.participantCredential
+        .upsert({
+          where: {
+            eventId_code: {
+              eventId,
+              code: finalCredential,
+            },
+          },
+          update: {
+            isUsed: true,
+            sessionId: session.id,
+            validatedAt: new Date(),
+          },
+          create: {
+            eventId,
+            code: finalCredential,
+            label: `Credencial Automática ${finalCredential}`,
+            isUsed: true,
+            sessionId: session.id,
+            validatedAt: new Date(),
+          },
+        })
+        .catch(() => null);
+    } catch (dbErr) {
+      console.warn(
+        "POST /api/participant/session: Usando sessão assinada de contingência durante wake-up do banco:",
+        dbErr
+      );
+      sessionId = crypto.randomUUID();
+      anonymousCode = crypto.randomBytes(3).toString("hex").toUpperCase();
+      finalCredential = generatedCredential;
+
+      // Tenta persistir em background assim que o banco responder
+      prisma.participantSession
+        .upsert({
+          where: { id: sessionId },
+          update: {
+            name,
+            email: normalizedEmail,
+            credentialCode: finalCredential,
+            lastSeenAt: new Date(),
+            isConnected: true,
+          },
+          create: {
+            id: sessionId,
+            eventId,
+            sessionToken: crypto.randomUUID(),
+            anonymousCode,
+            credentialCode: finalCredential,
+            name,
+            email: normalizedEmail,
+            ipHash: hashIp(ip),
+            consentAcceptedAt: new Date(),
+          },
+        })
+        .catch(() => null);
     }
 
-    const finalCredential = session.credentialCode || generatedCredential;
-
-    // Registra a credencial em background sem bloquear a resposta do participante
-    prisma.participantCredential
-      .upsert({
-        where: {
-          eventId_code: {
-            eventId: event.id,
-            code: finalCredential,
-          },
-        },
-        update: {
-          isUsed: true,
-          sessionId: session.id,
-          validatedAt: new Date(),
-        },
-        create: {
-          eventId: event.id,
-          code: finalCredential,
-          label: `Credencial Automática ${finalCredential}`,
-          isUsed: true,
-          sessionId: session.id,
-          validatedAt: new Date(),
-        },
-      })
-      .catch(() => null);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
-      code: session.anonymousCode,
-      name: session.name,
-      email: session.email,
+      code: anonymousCode,
+      name,
+      email: normalizedEmail,
       credentialCode: finalCredential,
     });
+
+    response.cookies.set(
+      PARTICIPANT_SESSION_COOKIE,
+      signAnonymousSessionToken(sessionId),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24,
+      }
+    );
+
+    const metaPayload = Buffer.from(
+      JSON.stringify({
+        id: sessionId,
+        eventId,
+        code: anonymousCode,
+        name,
+        email: normalizedEmail,
+        credentialCode: finalCredential,
+      })
+    ).toString("base64url");
+
+    response.cookies.set("anm_arena_participant_meta", metaPayload, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+
+    return response;
   } catch (error) {
     console.error("POST /api/participant/session:", error);
     return NextResponse.json(
