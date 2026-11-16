@@ -113,10 +113,10 @@ function CompactWaitingStrip({
       <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 dark:bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-700 dark:bg-emerald-500" />
           </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 truncate">
+          <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-400 truncate">
             Inicio do ANM em:
           </span>
         </div>
@@ -130,7 +130,7 @@ function CompactWaitingStrip({
               alt={sp.fullName}
               title={`${sp.name} · ${sp.fullName}`}
               style={{ borderRadius: "9999px" }}
-              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover object-top border-2 border-[#0A150D] ring-1 ring-emerald-400/40 shadow-xs transition-transform hover:scale-110 hover:z-20"
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover object-top border-2 border-white dark:border-[#0A150D] ring-1 ring-emerald-600/40 dark:ring-emerald-400/40 shadow-xs transition-transform hover:scale-110 hover:z-20"
             />
           ))}
         </div>
@@ -140,42 +140,42 @@ function CompactWaitingStrip({
       <div className="relative z-10 flex items-center justify-center gap-4 sm:gap-6 py-0.5">
         {/* Horas */}
         <div className="flex flex-col items-center">
-          <span className="font-mono font-black text-3xl sm:text-4xl text-[#F7DECA] tracking-tighter leading-none drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-slate-900 dark:text-[#F7DECA] tracking-tighter leading-none drop-shadow-none dark:drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
             {hours}
           </span>
-          <span className="text-[8px] font-black tracking-[0.25em] text-[#D5C5AA]/60 uppercase mt-0.5">
+          <span className="text-[8px] font-black tracking-[0.25em] text-slate-500 dark:text-[#D5C5AA]/60 uppercase mt-0.5">
             HORAS
           </span>
         </div>
 
         {/* Separador com pontos de pulso luminoso */}
         <div className="flex flex-col items-center justify-center gap-1.5 pb-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 dark:bg-emerald-400 shadow-sm dark:shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 dark:bg-emerald-400 shadow-sm dark:shadow-[0_0_8px_#10B981]" />
         </div>
 
         {/* Minutos */}
         <div className="flex flex-col items-center">
-          <span className="font-mono font-black text-3xl sm:text-4xl text-[#F7DECA] tracking-tighter leading-none drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-slate-900 dark:text-[#F7DECA] tracking-tighter leading-none drop-shadow-none dark:drop-shadow-[0_2px_14px_rgba(247,222,202,0.22)]">
             {minutes}
           </span>
-          <span className="text-[8px] font-black tracking-[0.25em] text-[#D5C5AA]/60 uppercase mt-0.5">
+          <span className="text-[8px] font-black tracking-[0.25em] text-slate-500 dark:text-[#D5C5AA]/60 uppercase mt-0.5">
             MINUTOS
           </span>
         </div>
 
         {/* Separador com pontos de pulso luminoso */}
         <div className="flex flex-col items-center justify-center gap-1.5 pb-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_#10B981]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-700/80 dark:bg-emerald-400/80 shadow-sm dark:shadow-[0_0_8px_#10B981]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-700/80 dark:bg-emerald-400/80 shadow-sm dark:shadow-[0_0_8px_#10B981]" />
         </div>
 
         {/* Segundos em Destaque Vivo */}
         <div className="flex flex-col items-center">
-          <span className="font-mono font-black text-3xl sm:text-4xl text-emerald-400 tracking-tighter leading-none drop-shadow-[0_0_16px_rgba(16,185,129,0.5)]">
+          <span className="font-mono font-black text-3xl sm:text-4xl text-emerald-700 dark:text-emerald-400 tracking-tighter leading-none drop-shadow-none dark:drop-shadow-[0_0_16px_rgba(16,185,129,0.5)]">
             {seconds}
           </span>
-          <span className="text-[8px] font-black tracking-[0.25em] text-emerald-400/80 uppercase mt-0.5">
+          <span className="text-[8px] font-black tracking-[0.25em] text-emerald-800 dark:text-emerald-400/80 uppercase mt-0.5">
             SEGUNDOS
           </span>
         </div>
@@ -528,10 +528,10 @@ export default function ParticiparPage() {
     return (
       <div
         style={{ borderRadius: "20px" }}
-        className={`border bg-[#0A150D] p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden transition-colors ${
+        className={`border bg-white dark:bg-[#0A150D] p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-md overflow-hidden transition-colors ${
           selectedPollOption
-            ? "border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
-            : "border-[#D5C5AA]/25"
+            ? "border-emerald-500/60 shadow-md dark:shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+            : "border-slate-200 dark:border-[#D5C5AA]/25"
         }`}
       >
         <div className="flex items-center justify-between gap-2 text-[10px] shrink-0">
@@ -539,10 +539,10 @@ export default function ParticiparPage() {
             className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${
               selectedPollOption
                 ? "bg-[#14532D] text-white shadow-xs"
-                : "bg-[#030A06] border border-white/10 text-[#D5C5AA]"
+                : "bg-slate-100 dark:bg-[#030A06] border border-slate-300 dark:border-white/10 text-slate-700 dark:text-[#D5C5AA]"
             }`}
           >
-            <Vote className="w-3 h-3 text-emerald-400" />
+            <Vote className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
             <span>
               {activePoll.status === "TIE_BREAK"
                 ? "Desempate · Mesa-Redonda"
@@ -556,7 +556,7 @@ export default function ParticiparPage() {
                 setChangingSecretVote(false);
                 setSelectedPollOptionId(null);
               }}
-              className="text-[10px] font-semibold text-emerald-300 underline cursor-pointer"
+              className="text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 underline cursor-pointer"
             >
               Voltar ao Comprovante
             </button>
@@ -564,10 +564,10 @@ export default function ParticiparPage() {
         </div>
 
         <div className="space-y-0.5 shrink-0">
-          <h2 className="font-display text-sm sm:text-base font-extrabold text-[#F7DECA] leading-snug">
+          <h2 className="font-display text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#F7DECA] leading-snug">
             {activePoll.question}
           </h2>
-          <p className="text-[11px] text-[#D5C5AA]/75 leading-tight">
+          <p className="text-[11px] text-slate-600 dark:text-[#D5C5AA]/75 leading-tight">
             {selectedPollOption
               ? "Opção selecionada! Confirme sua escolha abaixo:"
               : "Toque em uma das questões para selecionar o tema da Mesa-Redonda:"}
@@ -575,7 +575,7 @@ export default function ParticiparPage() {
         </div>
 
         {voteFeedback && (
-          <div className="p-2 rounded-xl text-[11px] flex items-center gap-1.5 border bg-red-950/40 text-red-200 border-red-500/40 shrink-0">
+          <div className="p-2 rounded-xl text-[11px] flex items-center gap-1.5 border bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-200 border-red-300 dark:border-red-500/40 shrink-0">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{voteFeedback.message}</span>
           </div>
@@ -607,14 +607,14 @@ export default function ParticiparPage() {
                   }}
                   className={`w-full p-2.5 sm:p-3 rounded-xl text-left transition flex flex-col gap-1 cursor-pointer ${
                     isSelected
-                      ? "border-2 border-emerald-400 bg-emerald-950/60 ring-1 ring-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.22)]"
-                      : "border border-white/10 bg-[#030A06] hover:border-white/25 hover:bg-white/[0.02]"
+                      ? "border-2 border-emerald-600 dark:border-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 ring-1 ring-emerald-500/40 dark:ring-emerald-400/50 shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.22)]"
+                      : "border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#030A06] hover:border-slate-300 dark:hover:border-white/25 hover:bg-slate-100 dark:hover:bg-white/[0.02]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider truncate ${
-                        isSelected ? "text-emerald-400 font-extrabold" : "text-[#D5C5AA]/65"
+                        isSelected ? "text-emerald-800 dark:text-emerald-400 font-extrabold" : "text-emerald-900/80 dark:text-[#D5C5AA]/65"
                       }`}
                     >
                       {opt.themeLabel || `Questão ${opt.optionOrder}`}
@@ -622,8 +622,8 @@ export default function ParticiparPage() {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 transition ${
                         isSelected
-                          ? "bg-emerald-400 text-[#030A06] flex items-center gap-1 shadow-xs"
-                          : "border border-white/10 bg-white/5 text-[#D5C5AA]/60 font-medium"
+                          ? "bg-emerald-600 dark:bg-emerald-400 text-white dark:text-[#030A06] flex items-center gap-1 shadow-xs"
+                          : "border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-slate-600 dark:text-[#D5C5AA]/60 font-medium"
                       }`}
                     >
                       {isSelected ? (
@@ -638,7 +638,7 @@ export default function ParticiparPage() {
                   </div>
                   <p
                     className={`text-[11px] sm:text-xs leading-snug ${
-                      isSelected ? "font-semibold text-[#F7DECA]" : "font-normal text-[#D5C5AA]/85"
+                      isSelected ? "font-semibold text-slate-900 dark:text-white" : "font-normal text-slate-800 dark:text-[#D5C5AA]/85"
                     }`}
                   >
                     {opt.label}
@@ -650,23 +650,23 @@ export default function ParticiparPage() {
 
         {/* Mensagem e Confirmação de Voto */}
         {selectedPollOption ? (
-          <div className="p-2.5 rounded-xl border-2 border-emerald-400 bg-emerald-950/90 space-y-2 shadow-lg shrink-0 animate-in fade-in duration-150">
+          <div className="p-2.5 rounded-xl border-2 border-emerald-500 dark:border-emerald-400 bg-emerald-50 dark:bg-emerald-950/90 space-y-2 shadow-lg shrink-0 animate-in fade-in duration-150">
             <div className="flex items-center justify-between gap-2">
               <div className="space-y-0.5 min-w-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1 truncate">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 flex items-center gap-1 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
                   <span className="truncate">
                     {selectedPollOption.themeLabel || `Questão ${selectedPollOption.optionOrder}`}
                   </span>
                 </span>
-                <p className="text-xs font-bold text-[#F7DECA] leading-snug">
+                <p className="text-xs font-bold text-slate-900 dark:text-[#F7DECA] leading-snug">
                   Você realmente quer essa opção para a Mesa-Redonda?
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedPollOptionId(null)}
-                className="text-[10px] text-[#D5C5AA]/70 hover:text-white underline cursor-pointer shrink-0"
+                className="text-[10px] text-slate-600 dark:text-[#D5C5AA]/70 hover:text-slate-900 dark:hover:text-white underline cursor-pointer shrink-0"
               >
                 Trocar
               </button>
@@ -676,7 +676,7 @@ export default function ParticiparPage() {
               type="button"
               disabled={submittingVote || !isPollOpen}
               onClick={() => handleCastVote(selectedPollOption.id)}
-              className="w-full py-2.5 px-4 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#030A06] font-extrabold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition active:scale-[0.99] disabled:opacity-60"
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300 text-white dark:text-[#030A06] font-extrabold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition active:scale-[0.99] disabled:opacity-60"
             >
               <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
               <span>
@@ -687,8 +687,8 @@ export default function ParticiparPage() {
             </button>
           </div>
         ) : (
-          <div className="py-2 px-3 rounded-xl border border-white/5 bg-[#030A06]/60 text-center shrink-0">
-            <p className="text-[10.5px] text-[#D5C5AA]/60">
+          <div className="py-2 px-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100/70 dark:bg-[#030A06]/60 text-center shrink-0">
+            <p className="text-[10.5px] text-slate-600 dark:text-[#D5C5AA]/60">
               Toque em uma das questões acima para selecionar.
             </p>
           </div>
@@ -707,17 +707,17 @@ export default function ParticiparPage() {
         {/* Topo Editorial Compacto */}
         <header
           style={{ borderRadius: "18px" }}
-          className="border border-[#D5C5AA]/25 bg-[#0A150D]/95 px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-md shrink-0"
+          className="border border-slate-200 dark:border-[#D5C5AA]/25 bg-white/95 dark:bg-[#0A150D]/95 px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-md shrink-0"
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
               <BrandLogo className="w-full h-full object-contain drop-shadow-xs" />
             </div>
             <div className="min-w-0">
-              <div className="font-display font-extrabold text-sm sm:text-base text-[#F7DECA] leading-tight truncate">
+              <div className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-[#F7DECA] leading-tight truncate">
                 A Nova Moeda
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 truncate">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 truncate">
                 Economia da Solidão · UEFS
               </div>
             </div>
@@ -737,24 +737,24 @@ export default function ParticiparPage() {
           {/* Card Exclusivo de Login (Passo 1) */}
           <div
             style={{ borderRadius: "22px" }}
-            className="border border-[#D5C5AA]/30 bg-[#0A150D]/95 p-4 sm:p-5 space-y-3.5 shadow-xl backdrop-blur-md"
+            className="border border-slate-200 dark:border-[#D5C5AA]/30 bg-white/95 dark:bg-[#0A150D]/95 p-4 sm:p-5 space-y-3.5 shadow-xl backdrop-blur-md"
           >
             <div className="space-y-1 text-center">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-[9.5px] font-bold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-[9.5px] font-bold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
                 <span>Passo 1 de 2 · Identificação do Participante</span>
               </span>
-              <h1 className="font-display text-lg sm:text-xl text-[#F7DECA] font-extrabold leading-snug pt-0.5">
+              <h1 className="font-display text-lg sm:text-xl text-slate-900 dark:text-[#F7DECA] font-extrabold leading-snug pt-0.5">
                 Identifique-se para Votar na Pauta
               </h1>
-              <p className="text-[11px] sm:text-xs text-[#D5C5AA]/80 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-[#D5C5AA]/80 leading-relaxed">
                 Faça seu login rápido para liberar a votação da Mesa-Redonda e gerar seu comprovante para os Stories.
               </p>
             </div>
 
             <form onSubmit={handleEnterArena} className="space-y-3 text-left">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#D5C5AA]">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-[#D5C5AA]">
                   Seu Nome Completo *
                 </label>
                 <input
@@ -763,12 +763,12 @@ export default function ParticiparPage() {
                   onChange={(e) => setNameInput(e.target.value)}
                   placeholder="Ex.: Maria Souza"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] text-xs sm:text-sm outline-none focus:border-emerald-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] text-xs sm:text-sm outline-none focus:border-emerald-500 dark:focus:border-emerald-400 placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#D5C5AA]">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-[#D5C5AA]">
                   Seu E-mail *
                 </label>
                 <input
@@ -777,12 +777,12 @@ export default function ParticiparPage() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   placeholder="Ex.: maria@exemplo.com"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] text-xs sm:text-sm outline-none focus:border-emerald-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] text-xs sm:text-sm outline-none focus:border-emerald-500 dark:focus:border-emerald-400 placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40"
                 />
               </div>
 
               {enterError && (
-                <div className="p-2.5 rounded-xl border border-red-500/40 bg-red-950/30 text-[11px] text-red-200 flex items-center gap-2">
+                <div className="p-2.5 rounded-xl border border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-950/30 text-[11px] text-red-700 dark:text-red-200 flex items-center gap-2">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{enterError}</span>
                 </div>
@@ -791,7 +791,7 @@ export default function ParticiparPage() {
               <button
                 type="submit"
                 disabled={entering || loadingSession}
-                className="w-full py-3.5 px-5 bg-[#D5C5AA] text-[#030A06] font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-md cursor-pointer hover:opacity-95 transition disabled:opacity-60"
+                className="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-500 dark:bg-[#D5C5AA] text-white dark:text-[#030A06] font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-md cursor-pointer transition disabled:opacity-60"
               >
                 <span>
                   {loadingSession
@@ -807,7 +807,7 @@ export default function ParticiparPage() {
         </div>
 
         {/* Rodapé Discreto */}
-        <footer className="text-center text-[10px] text-[#D5C5AA]/60 shrink-0 pb-0.5">
+        <footer className="text-center text-[10px] text-slate-500 dark:text-[#D5C5AA]/60 shrink-0 pb-0.5">
           Credencial digital gerada automaticamente · Voto 100% sigiloso
         </footer>
       </div>
@@ -826,11 +826,11 @@ export default function ParticiparPage() {
             <BrandLogo className="w-full h-full object-contain drop-shadow-xs" />
           </div>
           <div className="min-w-0">
-            <div className="font-display font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-tight truncate">
+            <div className="font-display font-extrabold text-xs sm:text-sm text-slate-900 dark:text-[#F7DECA] leading-tight truncate">
               A Nova Moeda
             </div>
-            <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <div className="text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold flex items-center gap-1 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
               <span className="truncate">
                 {snapshot?.activeTopic
                   ? `Pauta ${snapshot.activeTopic.number} · ${snapshot.activeTopic.mainSpeaker?.name || ""}`
@@ -844,7 +844,7 @@ export default function ParticiparPage() {
           {!connected && (
             <span
               title="Reconectando..."
-              className="p-1.5 rounded-lg bg-red-950/50 border border-red-500/40 text-red-300"
+              className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/50 border border-red-300 dark:border-red-500/40 text-red-700 dark:text-red-300"
             >
               <WifiOff className="w-3.5 h-3.5" />
             </span>
@@ -853,7 +853,7 @@ export default function ParticiparPage() {
             type="button"
             onClick={handleLogout}
             title="Sair / Trocar participante"
-            className="px-2 py-1 rounded-lg border border-white/10 bg-[#030A06] text-[10px] font-semibold text-[#D5C5AA]/80 hover:text-[#F7DECA] hover:border-emerald-400/40 flex items-center gap-1 cursor-pointer transition"
+            className="px-2 py-1 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#030A06] text-[10px] font-semibold text-slate-700 dark:text-[#D5C5AA]/80 hover:text-slate-900 dark:hover:text-[#F7DECA] hover:border-emerald-500/40 dark:hover:border-emerald-400/40 flex items-center gap-1 cursor-pointer transition shadow-xs"
           >
             <LogOut className="w-3 h-3" />
             <span>Sair</span>
@@ -902,17 +902,17 @@ export default function ParticiparPage() {
             {/* QUANDO UMA PAUTA ESTIVER AO VIVO */}
             {snapshot?.activeTopic && (
               <div className="flex-1 min-h-0 flex flex-col justify-center gap-2.5 overflow-hidden">
-                <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-4 rounded-2xl space-y-3">
+                <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 p-4 rounded-2xl space-y-3 shadow-md">
                   <div className="flex items-center justify-between text-xs gap-2">
-                    <span className="font-bold text-[#F7DECA] flex items-center gap-2 truncate">
-                      <MessageSquarePlus className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="font-bold text-slate-900 dark:text-[#F7DECA] flex items-center gap-2 truncate">
+                      <MessageSquarePlus className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                       <span className="truncate">
                         {activeTopicQuestion
                           ? `Sua pergunta na Pauta ${activeTopicQuestion.topicNumber}`
                           : `Pergunta · Pauta ${snapshot.activeTopic.number}`}
                       </span>
                     </span>
-                    <span className="font-mono text-[10px] text-[#D5C5AA]/75 shrink-0">
+                    <span className="font-mono text-[10px] text-slate-600 dark:text-[#D5C5AA]/75 shrink-0">
                       {questionsOpen ? "Captação aberta" : "Captação fechada"}
                     </span>
                   </div>
@@ -921,8 +921,8 @@ export default function ParticiparPage() {
                     <div
                       className={`p-2.5 rounded-xl text-[11px] flex items-center gap-2 border ${
                         questionFeedback.type === "success"
-                          ? "bg-emerald-950/30 text-emerald-200 border-emerald-500/30"
-                          : "bg-red-950/30 text-red-200 border-red-500/30"
+                          ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-500/30"
+                          : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-200 border-red-300 dark:border-red-500/30"
                       }`}
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
@@ -931,17 +931,17 @@ export default function ParticiparPage() {
                   )}
 
                   {activeTopicQuestion && !activeTopicQuestion.canEdit ? (
-                    <div className="border border-[#D5C5AA]/20 bg-[#030A06] p-3.5 rounded-xl space-y-1.5 text-xs">
+                    <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#030A06] p-3.5 rounded-xl space-y-1.5 text-xs">
                       <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-[#D5C5AA]/75 flex items-center gap-1">
+                        <span className="text-slate-600 dark:text-[#D5C5AA]/75 flex items-center gap-1">
                           <Lock className="w-3 h-3" />
                           Edição encerrada
                         </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 font-semibold">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-semibold">
                           {PUBLIC_STATUS_LABELS[activeTopicQuestion.status] || "Recebida"}
                         </span>
                       </div>
-                      <p className="text-[#F7DECA] leading-relaxed line-clamp-4">
+                      <p className="text-slate-900 dark:text-[#F7DECA] leading-relaxed line-clamp-4">
                         {activeTopicQuestion.text}
                       </p>
                     </div>
@@ -961,10 +961,10 @@ export default function ParticiparPage() {
                             ? "O envio de perguntas abre durante a exposição de cada pauta."
                             : "Escreva aqui sua pergunta para o especialista..."
                         }
-                        className="w-full p-3 text-xs border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] rounded-xl outline-none"
+                        className="w-full p-3 text-xs border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] rounded-xl outline-none placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40 focus:border-emerald-500"
                       />
                       <div className="flex items-center justify-between text-xs gap-2">
-                        <span className="font-mono text-[10px] text-[#D5C5AA]/70">
+                        <span className="font-mono text-[10px] text-slate-600 dark:text-[#D5C5AA]/70">
                           {questionText.length}/{charLimit}
                         </span>
                         <button
@@ -974,7 +974,7 @@ export default function ParticiparPage() {
                             !canSendOrEditQuestion ||
                             !questionText.trim()
                           }
-                          className="px-4 py-2 bg-[#D5C5AA] text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-[#D5C5AA] text-white dark:text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition"
                         >
                           <Send className="w-3.5 h-3.5" />
                           <span>
@@ -991,14 +991,14 @@ export default function ParticiparPage() {
                 </div>
 
                 {!isAfterTopic5 && isPollOpen && activePoll && (
-                  <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/60 p-3 rounded-xl flex items-center justify-between gap-2 text-xs shrink-0">
-                    <span className="text-[#D5C5AA]/85 truncate">
+                  <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-slate-50 dark:bg-[#0A150D]/60 p-3 rounded-xl flex items-center justify-between gap-2 text-xs shrink-0 shadow-sm">
+                    <span className="text-slate-800 dark:text-[#D5C5AA]/85 truncate">
                       Votação da Mesa-Redonda aberta
                     </span>
                     <button
                       type="button"
                       onClick={() => setActiveTab("votacao")}
-                      className="px-3 py-1.5 rounded-lg bg-[#14532D] text-white text-[11px] font-semibold shrink-0 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-[#14532D] text-white text-[11px] font-semibold shrink-0 cursor-pointer shadow-xs"
                     >
                       Votar Agora
                     </button>
@@ -1012,19 +1012,19 @@ export default function ParticiparPage() {
         {/* ABA 2: ENVIAR / EDITAR PERGUNTA */}
         {activeTab === "pergunta" && (
           <div className="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
-            <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-4 rounded-2xl space-y-3">
+            <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 p-4 rounded-2xl space-y-3 shadow-md">
               <div className="space-y-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
                   1 Pergunta Ativa por Pauta · Editável na Exposição (15 min)
                 </span>
-                <h2 className="font-display text-base sm:text-lg text-[#F7DECA] font-bold">
+                <h2 className="font-display text-base sm:text-lg text-slate-900 dark:text-[#F7DECA] font-bold">
                   {activeTopicQuestion
                     ? `Editar Pergunta da Pauta ${activeTopicQuestion.topicNumber}`
                     : snapshot?.activeTopic
                       ? `Enviar Pergunta · Pauta ${snapshot.activeTopic.number}`
                       : "Pergunta aos Palestrantes"}
                 </h2>
-                <p className="text-[11px] text-[#D5C5AA]/80 leading-relaxed">
+                <p className="text-[11px] text-slate-700 dark:text-[#D5C5AA]/80 leading-relaxed">
                   {snapshot?.activeTopic
                     ? `Envie até 1 pergunta (${charLimit} caracteres) durante os 15 min de exposição.`
                     : "A captação de perguntas individuais abre automaticamente assim que a Pauta 1 iniciar no palco."}
@@ -1035,8 +1035,8 @@ export default function ParticiparPage() {
                 <div
                   className={`p-2.5 rounded-xl text-[11px] flex items-center gap-2 border ${
                     questionFeedback.type === "success"
-                      ? "bg-emerald-950/30 text-emerald-200 border-emerald-500/30"
-                      : "bg-red-950/30 text-red-200 border-red-500/30"
+                      ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-500/30"
+                      : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-200 border-red-300 dark:border-red-500/30"
                   }`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
@@ -1059,11 +1059,11 @@ export default function ParticiparPage() {
                       ? "Formule sua pergunta com clareza..."
                       : "Aguardando abertura da captação de perguntas no palco..."
                   }
-                  className="w-full p-3 text-xs sm:text-sm border border-[#D5C5AA]/30 bg-[#030A06] text-[#F7DECA] rounded-xl outline-none"
+                  className="w-full p-3 text-xs sm:text-sm border border-slate-300 dark:border-[#D5C5AA]/30 bg-slate-50 dark:bg-[#030A06] text-slate-900 dark:text-[#F7DECA] rounded-xl outline-none placeholder:text-slate-400 dark:placeholder:text-[#D5C5AA]/40 focus:border-emerald-500"
                 />
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-[11px] text-[#D5C5AA]/75">
+                  <span className="font-mono text-[11px] text-slate-600 dark:text-[#D5C5AA]/75">
                     {questionText.length} / {charLimit} caracteres
                   </span>
                   <button
@@ -1073,7 +1073,7 @@ export default function ParticiparPage() {
                       !canSendOrEditQuestion ||
                       !questionText.trim()
                     }
-                    className="px-4 py-2.5 bg-[#D5C5AA] text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 dark:bg-[#D5C5AA] text-white dark:text-[#030A06] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition shadow-xs"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>
@@ -1101,12 +1101,12 @@ export default function ParticiparPage() {
 
             <div className="flex-1 min-h-0 flex flex-col justify-start overflow-hidden">
               {!activePoll || activePoll.status === "DRAFT" ? (
-                <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl text-center space-y-2">
-                  <Vote className="w-7 h-7 text-emerald-400 mx-auto" />
-                  <h2 className="font-display text-base text-[#F7DECA] font-bold">
+                <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 p-5 rounded-2xl text-center space-y-2 shadow-md">
+                  <Vote className="w-7 h-7 text-emerald-700 dark:text-emerald-400 mx-auto" />
+                  <h2 className="font-display text-base text-slate-900 dark:text-[#F7DECA] font-bold">
                     Votação da Mesa-Redonda
                   </h2>
-                  <p className="text-xs text-[#D5C5AA]/75">
+                  <p className="text-xs text-slate-600 dark:text-[#D5C5AA]/75">
                     Escolha a questão central que será debatida pelos 6 especialistas na Mesa-Redonda.
                   </p>
                 </div>
@@ -1139,14 +1139,14 @@ export default function ParticiparPage() {
               Boolean(me?.votes && me.votes.length > 0) ? (
                 <div
                   style={{ borderRadius: "22px" }}
-                  className="flex-1 flex flex-col items-center justify-center text-center p-6 sm:p-7 border border-emerald-500/40 bg-gradient-to-b from-emerald-950/60 via-[#0A160F] to-[#040A06] shadow-xl space-y-4 relative overflow-hidden"
+                  className="flex-1 flex flex-col items-center justify-center text-center p-6 sm:p-7 border border-emerald-500/40 bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 dark:from-emerald-950/60 dark:via-[#0A160F] dark:to-[#040A06] shadow-xl space-y-4 relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.12)_0%,transparent_75%)] pointer-events-none" />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08)_0%,transparent_75%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.12)_0%,transparent_75%)] pointer-events-none" />
 
                   <div className="relative z-10 flex justify-center">
                     <span
                       style={{ borderRadius: "9999px" }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-500 text-[#030A06] text-xs font-black uppercase tracking-wider shadow-md"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-[#030A06] text-xs font-black uppercase tracking-wider shadow-md"
                     >
                       <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                       <span>Habilitado(a) para o Sorteio</span>
@@ -1154,28 +1154,28 @@ export default function ParticiparPage() {
                   </div>
 
                   <div className="relative z-10 space-y-2 max-w-sm">
-                    <h2 className="font-display font-extrabold text-lg sm:text-xl text-[#F7DECA] leading-snug">
+                    <h2 className="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-[#F7DECA] leading-snug">
                       Parabéns! Você está concorrendo ao sorteio oficial
                     </h2>
-                    <p className="text-xs sm:text-[13px] text-[#D5C5AA]/85 leading-relaxed">
-                      Seu voto na Mesa-Redonda foi validado com sucesso. Sua credencial <strong className="text-emerald-300 font-mono font-bold">#{me?.credentialCode || me?.code}</strong> está confirmada e elegível para todos os sorteios do evento.
+                    <p className="text-xs sm:text-[13px] text-slate-700 dark:text-[#D5C5AA]/85 leading-relaxed">
+                      Seu voto na Mesa-Redonda foi validado com sucesso. Sua credencial <strong className="text-emerald-800 dark:text-emerald-300 font-mono font-bold bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-500/30">#{me?.credentialCode || me?.code}</strong> está confirmada e elegível para todos os sorteios do evento.
                     </p>
                   </div>
 
-                  <div className="relative z-10 pt-3 border-t border-white/10 w-full max-w-xs flex items-center justify-center gap-2 text-[11px] text-[#D5C5AA]/70">
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="relative z-10 pt-3 border-t border-slate-200 dark:border-white/10 w-full max-w-xs flex items-center justify-center gap-2 text-[11px] text-slate-600 dark:text-[#D5C5AA]/70">
+                    <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Acompanhe ao vivo pelo auditório!</span>
                   </div>
                 </div>
               ) : (
                 <div
                   style={{ borderRadius: "22px" }}
-                  className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-amber-500/35 bg-gradient-to-b from-amber-950/30 via-[#0E150F] to-[#050B07] shadow-xl space-y-4"
+                  className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-amber-400/50 bg-gradient-to-b from-amber-50/80 via-white to-amber-50/40 dark:from-amber-950/30 dark:via-[#0E150F] dark:to-[#050B07] shadow-xl space-y-4"
                 >
                   <div className="flex justify-center">
                     <span
                       style={{ borderRadius: "9999px" }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-[#030A06] text-xs font-black uppercase tracking-wider shadow-md"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-md"
                     >
                       <AlertCircle className="w-4 h-4 stroke-[2.5]" />
                       <span>Habilitação Pendente</span>
@@ -1183,10 +1183,10 @@ export default function ParticiparPage() {
                   </div>
 
                   <div className="space-y-1.5 max-w-sm">
-                    <h2 className="font-display font-extrabold text-base sm:text-lg text-[#F7DECA] leading-snug">
+                    <h2 className="font-display font-extrabold text-base sm:text-lg text-slate-900 dark:text-[#F7DECA] leading-snug">
                       Vote para se Habilitar ao Sorteio
                     </h2>
-                    <p className="text-xs sm:text-[13px] text-[#D5C5AA]/85 leading-relaxed">
+                    <p className="text-xs sm:text-[13px] text-slate-700 dark:text-[#D5C5AA]/85 leading-relaxed">
                       Para validar sua credencial (#{me?.credentialCode || me?.code}) e concorrer aos brindes oficiais, registre seu voto na Mesa-Redonda.
                     </p>
                   </div>
@@ -1195,7 +1195,7 @@ export default function ParticiparPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab("votacao")}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-xs font-extrabold shadow-lg flex items-center gap-2 cursor-pointer transition active:scale-95"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-[#030A06] text-xs font-extrabold shadow-lg flex items-center gap-2 cursor-pointer transition active:scale-95"
                     >
                       <span>Votar Agora</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1211,16 +1211,16 @@ export default function ParticiparPage() {
                   style={{ borderRadius: "18px" }}
                   className={`border p-3 space-y-1.5 shadow-md shrink-0 transition ${
                     Boolean(me?.votes && me.votes.length > 0)
-                      ? "border-emerald-500/50 bg-emerald-950/50"
-                      : "border-amber-500/40 bg-amber-950/25"
+                      ? "border-emerald-500/50 bg-emerald-50/70 dark:bg-emerald-950/50"
+                      : "border-amber-500/40 bg-amber-50/70 dark:bg-amber-950/25"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1 ${
                         Boolean(me?.votes && me.votes.length > 0)
-                          ? "bg-emerald-500 text-[#030A06]"
-                          : "bg-amber-400 text-[#030A06]"
+                          ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-[#030A06]"
+                          : "bg-amber-400 text-slate-950"
                       }`}
                     >
                       {Boolean(me?.votes && me.votes.length > 0) ? (
@@ -1235,13 +1235,13 @@ export default function ParticiparPage() {
                         </>
                       )}
                     </span>
-                    <span className="font-mono text-[9.5px] text-[#D5C5AA]/70">
+                    <span className="font-mono text-[9.5px] text-slate-600 dark:text-[#D5C5AA]/70">
                       Credencial #{me?.credentialCode || me?.code}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] text-[#F7DECA] leading-snug">
+                    <p className="text-[11px] text-slate-800 dark:text-[#F7DECA] leading-snug">
                       {Boolean(me?.votes && me.votes.length > 0) ? (
                         <>
                           Seu voto na Mesa-Redonda foi validado! Você está concorrendo automaticamente a todos os brindes oficiais.
@@ -1257,7 +1257,7 @@ export default function ParticiparPage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("votacao")}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-[10px] font-extrabold shrink-0 shadow-sm flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-[#030A06] text-[10px] font-extrabold shrink-0 shadow-sm flex items-center gap-1 cursor-pointer"
                       >
                         <span>Votar Agora</span>
                         <ArrowRight className="w-3 h-3" />
@@ -1269,11 +1269,11 @@ export default function ParticiparPage() {
                 {/* Lista dos Brindes Disponíveis para Sorteio */}
                 <div className="flex-1 min-h-0 flex flex-col justify-start gap-1.5 overflow-hidden">
                   <div className="flex items-center justify-between px-1 shrink-0">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+                      <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       <span>Brindes Oficiais do Evento</span>
                     </span>
-                    <span className="text-[10px] text-[#D5C5AA]/70">
+                    <span className="text-[10px] text-slate-600 dark:text-[#D5C5AA]/70">
                       {snapshot.giveaways.prizes.filter((p) => p.status === "DRAWN").length} de {snapshot.giveaways.prizes.length} sorteados
                     </span>
                   </div>
@@ -1295,29 +1295,29 @@ export default function ParticiparPage() {
                           style={{ borderRadius: "16px" }}
                           className={`border p-3 space-y-1.5 transition ${
                             isWinnerThisUser
-                              ? "border-2 border-amber-400 bg-gradient-to-b from-amber-950/70 via-emerald-950/50 to-[#0A150D] shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/50"
+                              ? "border-2 border-amber-500 dark:border-amber-400 bg-amber-50/90 dark:bg-gradient-to-b dark:from-amber-950/70 dark:via-emerald-950/50 dark:to-[#0A150D] shadow-lg dark:shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/50"
                               : prize.status === "DRAWN"
-                                ? "border-emerald-500/40 bg-emerald-950/30"
-                                : "border-white/10 bg-[#0A150D]/90"
+                                ? "border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/30"
+                                : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#0A150D]/90"
                           }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-0.5 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-400">
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
                                   Brinde #{idx + 1}
                                 </span>
                                 {prize.sponsor && (
-                                  <span className="text-[9px] text-[#D5C5AA]/60 truncate">
+                                  <span className="text-[9px] text-slate-500 dark:text-[#D5C5AA]/60 truncate">
                                     · {prize.sponsor}
                                   </span>
                                 )}
                               </div>
-                              <h3 className="font-display font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-snug">
+                              <h3 className="font-display font-extrabold text-xs sm:text-sm text-slate-900 dark:text-[#F7DECA] leading-snug">
                                 {prize.title}
                               </h3>
                               {prize.description && (
-                                <p className="text-[10.5px] text-[#D5C5AA]/75 leading-tight">
+                                <p className="text-[10.5px] text-slate-700 dark:text-[#D5C5AA]/75 leading-tight">
                                   {prize.description}
                                 </p>
                               )}
@@ -1326,8 +1326,8 @@ export default function ParticiparPage() {
                             <span
                               className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
                                 prize.status === "DRAWN"
-                                  ? "bg-emerald-500 text-[#030A06]"
-                                  : "border border-white/10 bg-white/5 text-[#D5C5AA]/70"
+                                  ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-[#030A06]"
+                                  : "border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-[#D5C5AA]/70"
                               }`}
                             >
                               {prize.status === "DRAWN" ? "Sorteado ✓" : "Ao vivo no palco"}
@@ -1336,13 +1336,13 @@ export default function ParticiparPage() {
 
                           {/* Notificação Festiva caso este usuário tenha vencido */}
                           {isWinnerThisUser && (
-                            <div className="p-2.5 rounded-xl border border-amber-400/80 bg-amber-950/80 text-center space-y-1 animate-pulse">
-                              <div className="text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
-                                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                            <div className="p-2.5 rounded-xl border border-amber-500/80 bg-amber-50 dark:bg-amber-950/80 text-center space-y-1 animate-pulse">
+                              <div className="text-[11px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                                <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                                 <span>PARABÉNS! VOCÊ É O(A) GANHADOR(A)!</span>
-                                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                                <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                               </div>
-                              <p className="text-[10px] text-[#F7DECA] leading-tight">
+                              <p className="text-[10px] text-slate-900 dark:text-[#F7DECA] leading-tight">
                                 Apresente sua credencial (#{me?.credentialCode || me?.code}) à organização no final do evento para retirar seu brinde!
                               </p>
                             </div>
@@ -1350,15 +1350,15 @@ export default function ParticiparPage() {
 
                           {/* Se foi sorteado para outro participante */}
                           {prize.status === "DRAWN" && prize.winner && !isWinnerThisUser && (
-                            <div className="p-2 rounded-xl border border-emerald-500/30 bg-[#030A06] flex items-center justify-between gap-2 text-[10px]">
+                            <div className="p-2 rounded-xl border border-emerald-500/30 bg-emerald-50/70 dark:bg-[#030A06] flex items-center justify-between gap-2 text-[10px]">
                               <div className="flex items-center gap-1.5 min-w-0">
-                                <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
-                                <span className="text-[#D5C5AA]/75 truncate">Ganhador(a):</span>
-                                <strong className="text-emerald-300 font-bold truncate">
+                                <Trophy className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                                <span className="text-slate-600 dark:text-[#D5C5AA]/75 truncate">Ganhador(a):</span>
+                                <strong className="text-emerald-800 dark:text-emerald-300 font-bold truncate">
                                   {prize.winner.name}
                                 </strong>
                               </div>
-                              <span className="font-mono text-[9.5px] text-[#D5C5AA]/70 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                              <span className="font-mono text-[9.5px] text-slate-700 dark:text-[#D5C5AA]/70 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-500/20 shrink-0">
                                 #{prize.winner.credentialCode}
                               </span>
                             </div>
@@ -1376,23 +1376,23 @@ export default function ParticiparPage() {
         {/* ABA 5: MINHAS PARTICIPAÇÕES & COMPROVANTE */}
         {activeTab === "minhas" && (
           <div className="flex-1 min-h-0 flex flex-col justify-start gap-2.5 overflow-hidden">
-            <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs shrink-0">
-              <span className="font-bold text-[#F7DECA] flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs shrink-0 shadow-sm">
+              <span className="font-bold text-slate-900 dark:text-[#F7DECA] flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                 <span>Credencial de Acesso</span>
               </span>
-              <span className="font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-lg border border-emerald-500/30 text-[11px]">
+              <span className="font-mono font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-500/30 text-[11px]">
                 #{me?.credentialCode || me?.code}
               </span>
             </div>
 
             <div className="flex-1 min-h-0 flex flex-col justify-start overflow-hidden">
               {!me?.votes.length ? (
-                <div className="border border-[#D5C5AA]/20 bg-[#0A150D]/90 p-5 rounded-2xl text-center space-y-2">
-                  <h2 className="font-display text-base text-[#F7DECA] font-bold">
+                <div className="border border-slate-200 dark:border-[#D5C5AA]/20 bg-white dark:bg-[#0A150D]/90 p-5 rounded-2xl text-center space-y-2 shadow-sm">
+                  <h2 className="font-display text-base text-slate-900 dark:text-[#F7DECA] font-bold">
                     Comprovante da Mesa-Redonda
                   </h2>
-                  <p className="text-xs text-[#D5C5AA]/75">
+                  <p className="text-xs text-slate-600 dark:text-[#D5C5AA]/75">
                     Você ainda não registrou seu voto. Acesse a aba Início ou Votação para escolher o tema e gerar seu comprovante para os Stories.
                   </p>
                 </div>
@@ -1421,7 +1421,7 @@ export default function ParticiparPage() {
       <div className="shrink-0 pt-0.5 pb-0.5">
         <nav
           style={{ borderRadius: "9999px" }}
-          className="grid grid-cols-5 gap-1 bg-[#0A150D]/95 backdrop-blur-xl border border-emerald-500/35 p-1 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.6)] ring-1 ring-white/10 text-[9px] sm:text-[10px]"
+          className="grid grid-cols-5 gap-1 bg-white/95 dark:bg-[#0A150D]/95 backdrop-blur-xl border border-slate-300 dark:border-emerald-500/35 p-1 rounded-full shadow-lg dark:shadow-[0_10px_25px_rgba(0,0,0,0.6)] ring-1 ring-slate-200 dark:ring-white/10 text-[9px] sm:text-[10px]"
         >
           {[
             { key: "inicio", label: "Início", icon: Home },
@@ -1453,7 +1453,7 @@ export default function ParticiparPage() {
                 className={`py-1.5 px-1 rounded-full flex items-center justify-center gap-1 font-bold cursor-pointer transition ${
                   active
                     ? "bg-[#14532D] text-white shadow-xs"
-                    : "text-[#D5C5AA] hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#D5C5AA] dark:hover:bg-white/5"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />

@@ -209,11 +209,6 @@ html.light [class*="bg-emerald-950"] {
   color: #065F46 !important;
 }
 
-html[data-theme="light"] [class*="bg-emerald-950"] *,
-html.light [class*="bg-emerald-950"] * {
-  color: #065F46 !important;
-}
-
 html[data-theme="light"] [class*="border-emerald-500"],
 html.light [class*="border-emerald-500"],
 html[data-theme="light"] [class*="border-emerald-400"],
@@ -238,11 +233,6 @@ html.light [class*="bg-amber-950"] {
   color: #92400E !important;
 }
 
-html[data-theme="light"] [class*="bg-amber-950"] *,
-html.light [class*="bg-amber-950"] * {
-  color: #92400E !important;
-}
-
 html[data-theme="light"] [class*="border-amber-500"],
 html.light [class*="border-amber-500"],
 html[data-theme="light"] [class*="border-amber-400"],
@@ -264,11 +254,6 @@ html[data-theme="light"] [class*="bg-red-950"],
 html.light [class*="bg-red-950"] {
   background-color: #FEF2F2 !important;
   border-color: #FECACA !important;
-  color: #991B1B !important;
-}
-
-html[data-theme="light"] [class*="bg-red-950"] *,
-html.light [class*="bg-red-950"] * {
   color: #991B1B !important;
 }
 
@@ -1040,13 +1025,82 @@ html.light .anm-editorial-pass {
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 55%, #ECFDF5 100%) !important;
   border-color: #CBD5E1 !important;
   box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.14) !important;
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass h2,
+html.light .anm-editorial-pass h2 {
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .font-editorial,
+html.light .anm-editorial-pass .font-editorial {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .text-emerald-400,
+html.light .anm-editorial-pass .text-emerald-400 {
+  color: #047857 !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .text-\[\#F7DECA\],
+html.light .anm-editorial-pass .text-\[\#F7DECA\] {
+  color: #0F172A !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .text-\[\#D5C5AA\],
+html.light .anm-editorial-pass .text-\[\#D5C5AA\],
+html[data-theme="light"] .anm-editorial-pass .text-\[\#D5C5AA\]\/85,
+html.light .anm-editorial-pass .text-\[\#D5C5AA\]\/85,
+html[data-theme="light"] .anm-editorial-pass .text-\[\#D5C5AA\]\/75,
+html.light .anm-editorial-pass .text-\[\#D5C5AA\]\/75,
+html[data-theme="light"] .anm-editorial-pass .text-\[\#D5C5AA\]\/65,
+html.light .anm-editorial-pass .text-\[\#D5C5AA\]\/65 {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .border-\[\#D5C5AA\]\/30,
+html.light .anm-editorial-pass .border-\[\#D5C5AA\]\/30,
+html[data-theme="light"] .anm-editorial-pass .border-\[\#D5C5AA\]\/20,
+html.light .anm-editorial-pass .border-\[\#D5C5AA\]\/20,
+html[data-theme="light"] .anm-editorial-pass .border-\[\#D5C5AA\]\/15,
+html.light .anm-editorial-pass .border-\[\#D5C5AA\]\/15 {
+  border-color: #CBD5E1 !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .bg-\[\#D5C5AA\]\/60,
+html.light .anm-editorial-pass .bg-\[\#D5C5AA\]\/60,
+html[data-theme="light"] .anm-editorial-pass .bg-\[\#D5C5AA\]\/15,
+html.light .anm-editorial-pass .bg-\[\#D5C5AA\]\/15 {
+  background-color: #94A3B8 !important;
 }
 
 html[data-theme="light"] .anm-editorial-spotlight,
 html.light .anm-editorial-spotlight {
   background: linear-gradient(180deg, #ECFDF5 0%, #FFFFFF 100%) !important;
-  border-color: #10B981 !important;
-  box-shadow: 0 4px 16px -4px rgba(16, 185, 129, 0.12) !important;
+  border-color: #059669 !important;
+  box-shadow: 0 4px 16px -4px rgba(5, 150, 105, 0.15) !important;
+}
+
+html[data-theme="light"] .anm-editorial-spotlight .text-\[\#F7DECA\],
+html.light .anm-editorial-spotlight .text-\[\#F7DECA\] {
+  color: #064E3B !important;
+}
+
+html[data-theme="light"] .anm-editorial-spotlight .text-emerald-300,
+html.light .anm-editorial-spotlight .text-emerald-300 {
+  color: #047857 !important;
+}
+
+html[data-theme="light"] .anm-editorial-pass .bg-\[\#030A06\]\/90,
+html.light .anm-editorial-pass .bg-\[\#030A06\]\/90,
+html[data-theme="light"] .anm-editorial-pass .bg-\[\#030A06\],
+html.light .anm-editorial-pass .bg-\[\#030A06\] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
 }
 
 
