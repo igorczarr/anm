@@ -1134,196 +1134,242 @@ export default function ParticiparPage() {
         {/* ABA 4: SORTEIOS DO EVENTO (HABILITAÇÃO AUTOMÁTICA POR VOTO) */}
         {activeTab === "sorteio" && (
           <div className="flex-1 min-h-0 flex flex-col justify-start gap-2 overflow-hidden">
-            {/* Card de Status de Elegibilidade do Participante */}
-            <div
-              style={{ borderRadius: "18px" }}
-              className={`border p-3 space-y-1.5 shadow-md shrink-0 transition ${
-                Boolean(me?.votes && me.votes.length > 0)
-                  ? "border-emerald-500/50 bg-emerald-950/50"
-                  : "border-amber-500/40 bg-amber-950/25"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1 ${
+            {(!snapshot?.giveaways?.prizes || snapshot.giveaways.prizes.length === 0) ? (
+              /* QUANDO NÃO HÁ BRINDES CADASTRADOS: MANTÉM APENAS A INFORMAÇÃO PARABENIZANDO PELA ELEGIBILIDADE */
+              Boolean(me?.votes && me.votes.length > 0) ? (
+                <div
+                  style={{ borderRadius: "22px" }}
+                  className="flex-1 flex flex-col items-center justify-center text-center p-6 sm:p-7 border border-emerald-500/40 bg-gradient-to-b from-emerald-950/60 via-[#0A160F] to-[#040A06] shadow-xl space-y-4 relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.12)_0%,transparent_75%)] pointer-events-none" />
+
+                  <div className="relative z-10 flex justify-center">
+                    <span
+                      style={{ borderRadius: "9999px" }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-500 text-[#030A06] text-xs font-black uppercase tracking-wider shadow-md"
+                    >
+                      <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                      <span>Habilitado(a) para o Sorteio</span>
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 space-y-2 max-w-sm">
+                    <h2 className="font-display font-extrabold text-lg sm:text-xl text-[#F7DECA] leading-snug">
+                      Parabéns! Você está concorrendo ao sorteio oficial
+                    </h2>
+                    <p className="text-xs sm:text-[13px] text-[#D5C5AA]/85 leading-relaxed">
+                      Seu voto na Mesa-Redonda foi validado com sucesso. Sua credencial <strong className="text-emerald-300 font-mono font-bold">#{me?.credentialCode || me?.code}</strong> está confirmada e elegível para todos os sorteios do evento.
+                    </p>
+                  </div>
+
+                  <div className="relative z-10 pt-3 border-t border-white/10 w-full max-w-xs flex items-center justify-center gap-2 text-[11px] text-[#D5C5AA]/70">
+                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Acompanhe ao vivo pelo auditório!</span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{ borderRadius: "22px" }}
+                  className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-amber-500/35 bg-gradient-to-b from-amber-950/30 via-[#0E150F] to-[#050B07] shadow-xl space-y-4"
+                >
+                  <div className="flex justify-center">
+                    <span
+                      style={{ borderRadius: "9999px" }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-[#030A06] text-xs font-black uppercase tracking-wider shadow-md"
+                    >
+                      <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+                      <span>Habilitação Pendente</span>
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 max-w-sm">
+                    <h2 className="font-display font-extrabold text-base sm:text-lg text-[#F7DECA] leading-snug">
+                      Vote para se Habilitar ao Sorteio
+                    </h2>
+                    <p className="text-xs sm:text-[13px] text-[#D5C5AA]/85 leading-relaxed">
+                      Para validar sua credencial (#{me?.credentialCode || me?.code}) e concorrer aos brindes oficiais, registre seu voto na Mesa-Redonda.
+                    </p>
+                  </div>
+
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("votacao")}
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-xs font-extrabold shadow-lg flex items-center gap-2 cursor-pointer transition active:scale-95"
+                    >
+                      <span>Votar Agora</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )
+            ) : (
+              /* QUANDO HÁ BRINDES CADASTRADOS: EXIBE O STATUS E A LISTA DOS BRINDES CADASTRADOS */
+              <>
+                {/* Card de Status de Elegibilidade do Participante */}
+                <div
+                  style={{ borderRadius: "18px" }}
+                  className={`border p-3 space-y-1.5 shadow-md shrink-0 transition ${
                     Boolean(me?.votes && me.votes.length > 0)
-                      ? "bg-emerald-500 text-[#030A06]"
-                      : "bg-amber-400 text-[#030A06]"
+                      ? "border-emerald-500/50 bg-emerald-950/50"
+                      : "border-amber-500/40 bg-amber-950/25"
                   }`}
                 >
-                  {Boolean(me?.votes && me.votes.length > 0) ? (
-                    <>
-                      <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
-                      <span>Habilitado(a) para o Sorteio</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-3 h-3 stroke-[2.5]" />
-                      <span>Habilitação Pendente</span>
-                    </>
-                  )}
-                </span>
-                <span className="font-mono text-[9.5px] text-[#D5C5AA]/70">
-                  Credencial #{me?.credentialCode || me?.code}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[11px] text-[#F7DECA] leading-snug">
-                  {Boolean(me?.votes && me.votes.length > 0) ? (
-                    <>
-                      Seu voto na Mesa-Redonda foi validado! Você está concorrendo automaticamente a todos os brindes oficiais.
-                    </>
-                  ) : (
-                    <>
-                      Para se habilitar e concorrer aos brindes, registre seu voto na Mesa-Redonda.
-                    </>
-                  )}
-                </p>
-
-                {!Boolean(me?.votes && me.votes.length > 0) && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("votacao")}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-[10px] font-extrabold shrink-0 shadow-sm flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Votar Agora</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Lista dos Brindes Disponíveis para Sorteio */}
-            <div className="flex-1 min-h-0 flex flex-col justify-start gap-1.5 overflow-hidden">
-              <div className="flex items-center justify-between px-1 shrink-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Brindes Oficiais do Evento</span>
-                </span>
-                <span className="text-[10px] text-[#D5C5AA]/70">
-                  {snapshot?.giveaways?.prizes?.filter((p) => p.status === "DRAWN").length ?? 0} de {snapshot?.giveaways?.prizes?.length ?? 3} sorteados
-                </span>
-              </div>
-
-              <div className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-0.5">
-                {(snapshot?.giveaways?.prizes && snapshot.giveaways.prizes.length > 0
-                  ? snapshot.giveaways.prizes
-                  : [
-                      {
-                        id: "p1",
-                        title: 'Livro "A Nova Moeda: Economia da Solidão"',
-                        description: "Exemplar impresso oficial autografado pelos autores e especialistas.",
-                        sponsor: "Coordenação Geral ANM",
-                        status: "PENDING",
-                        winner: null,
-                      },
-                      {
-                        id: "p2",
-                        title: "Kit Oficial Exclusivo A Nova Moeda",
-                        description: "Ecobag institucional, caderno comemorativo de anotações e credencial de honra.",
-                        sponsor: "UEFS & Vértice",
-                        status: "PENDING",
-                        winner: null,
-                      },
-                      {
-                        id: "p3",
-                        title: "Acesso VIP à Mentoria com Especialistas",
-                        description: "Sessão online exclusiva pós-evento com a mesa de especialistas.",
-                        sponsor: "Mesa de Especialistas",
-                        status: "PENDING",
-                        winner: null,
-                      },
-                    ]
-                ).map((prize, idx) => {
-                  const isWinnerThisUser = Boolean(
-                    prize.winner &&
-                      ((prize.winner.participantId && prize.winner.participantId === me?.id) ||
-                        (prize.winner.credentialCode &&
-                          (prize.winner.credentialCode === me?.credentialCode ||
-                            prize.winner.credentialCode === me?.code)) ||
-                        (me?.name && prize.winner.name && prize.winner.name.trim().toLowerCase() === me.name.trim().toLowerCase()))
-                  );
-
-                  return (
-                    <div
-                      key={prize.id}
-                      style={{ borderRadius: "16px" }}
-                      className={`border p-3 space-y-1.5 transition ${
-                        isWinnerThisUser
-                          ? "border-2 border-amber-400 bg-gradient-to-b from-amber-950/70 via-emerald-950/50 to-[#0A150D] shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/50"
-                          : prize.status === "DRAWN"
-                            ? "border-emerald-500/40 bg-emerald-950/30"
-                            : "border-white/10 bg-[#0A150D]/90"
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1 ${
+                        Boolean(me?.votes && me.votes.length > 0)
+                          ? "bg-emerald-500 text-[#030A06]"
+                          : "bg-amber-400 text-[#030A06]"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="space-y-0.5 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-400">
-                              Brinde #{idx + 1}
-                            </span>
-                            {prize.sponsor && (
-                              <span className="text-[9px] text-[#D5C5AA]/60 truncate">
-                                · {prize.sponsor}
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="font-display font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-snug">
-                            {prize.title}
-                          </h3>
-                          {prize.description && (
-                            <p className="text-[10.5px] text-[#D5C5AA]/75 leading-tight">
-                              {prize.description}
-                            </p>
-                          )}
-                        </div>
+                      {Boolean(me?.votes && me.votes.length > 0) ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
+                          <span>Habilitado(a) para o Sorteio</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="w-3 h-3 stroke-[2.5]" />
+                          <span>Habilitação Pendente</span>
+                        </>
+                      )}
+                    </span>
+                    <span className="font-mono text-[9.5px] text-[#D5C5AA]/70">
+                      Credencial #{me?.credentialCode || me?.code}
+                    </span>
+                  </div>
 
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
-                            prize.status === "DRAWN"
-                              ? "bg-emerald-500 text-[#030A06]"
-                              : "border border-white/10 bg-white/5 text-[#D5C5AA]/70"
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] text-[#F7DECA] leading-snug">
+                      {Boolean(me?.votes && me.votes.length > 0) ? (
+                        <>
+                          Seu voto na Mesa-Redonda foi validado! Você está concorrendo automaticamente a todos os brindes oficiais.
+                        </>
+                      ) : (
+                        <>
+                          Para se habilitar e concorrer aos brindes, registre seu voto na Mesa-Redonda.
+                        </>
+                      )}
+                    </p>
+
+                    {!Boolean(me?.votes && me.votes.length > 0) && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("votacao")}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-[#030A06] text-[10px] font-extrabold shrink-0 shadow-sm flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Votar Agora</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lista dos Brindes Disponíveis para Sorteio */}
+                <div className="flex-1 min-h-0 flex flex-col justify-start gap-1.5 overflow-hidden">
+                  <div className="flex items-center justify-between px-1 shrink-0">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Brindes Oficiais do Evento</span>
+                    </span>
+                    <span className="text-[10px] text-[#D5C5AA]/70">
+                      {snapshot.giveaways.prizes.filter((p) => p.status === "DRAWN").length} de {snapshot.giveaways.prizes.length} sorteados
+                    </span>
+                  </div>
+
+                  <div className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-0.5">
+                    {snapshot.giveaways.prizes.map((prize, idx) => {
+                      const isWinnerThisUser = Boolean(
+                        prize.winner &&
+                          ((prize.winner.participantId && prize.winner.participantId === me?.id) ||
+                            (prize.winner.credentialCode &&
+                              (prize.winner.credentialCode === me?.credentialCode ||
+                                prize.winner.credentialCode === me?.code)) ||
+                            (me?.name && prize.winner.name && prize.winner.name.trim().toLowerCase() === me.name.trim().toLowerCase()))
+                      );
+
+                      return (
+                        <div
+                          key={prize.id}
+                          style={{ borderRadius: "16px" }}
+                          className={`border p-3 space-y-1.5 transition ${
+                            isWinnerThisUser
+                              ? "border-2 border-amber-400 bg-gradient-to-b from-amber-950/70 via-emerald-950/50 to-[#0A150D] shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/50"
+                              : prize.status === "DRAWN"
+                                ? "border-emerald-500/40 bg-emerald-950/30"
+                                : "border-white/10 bg-[#0A150D]/90"
                           }`}
                         >
-                          {prize.status === "DRAWN" ? "Sorteado ✓" : "Ao vivo no palco"}
-                        </span>
-                      </div>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-0.5 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-400">
+                                  Brinde #{idx + 1}
+                                </span>
+                                {prize.sponsor && (
+                                  <span className="text-[9px] text-[#D5C5AA]/60 truncate">
+                                    · {prize.sponsor}
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="font-display font-extrabold text-xs sm:text-sm text-[#F7DECA] leading-snug">
+                                {prize.title}
+                              </h3>
+                              {prize.description && (
+                                <p className="text-[10.5px] text-[#D5C5AA]/75 leading-tight">
+                                  {prize.description}
+                                </p>
+                              )}
+                            </div>
 
-                      {/* Notificação Festiva caso este usuário tenha vencido */}
-                      {isWinnerThisUser && (
-                        <div className="p-2.5 rounded-xl border border-amber-400/80 bg-amber-950/80 text-center space-y-1 animate-pulse">
-                          <div className="text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
-                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                            <span>PARABÉNS! VOCÊ É O(A) GANHADOR(A)!</span>
-                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                                prize.status === "DRAWN"
+                                  ? "bg-emerald-500 text-[#030A06]"
+                                  : "border border-white/10 bg-white/5 text-[#D5C5AA]/70"
+                              }`}
+                            >
+                              {prize.status === "DRAWN" ? "Sorteado ✓" : "Ao vivo no palco"}
+                            </span>
                           </div>
-                          <p className="text-[10px] text-[#F7DECA] leading-tight">
-                            Apresente sua credencial (#{me?.credentialCode || me?.code}) à organização no final do evento para retirar seu brinde!
-                          </p>
-                        </div>
-                      )}
 
-                      {/* Se foi sorteado para outro participante */}
-                      {prize.status === "DRAWN" && prize.winner && !isWinnerThisUser && (
-                        <div className="p-2 rounded-xl border border-emerald-500/30 bg-[#030A06] flex items-center justify-between gap-2 text-[10px]">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[#D5C5AA]/75 truncate">Ganhador(a):</span>
-                            <strong className="text-emerald-300 font-bold truncate">
-                              {prize.winner.name}
-                            </strong>
-                          </div>
-                          <span className="font-mono text-[9.5px] text-[#D5C5AA]/70 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
-                            #{prize.winner.credentialCode}
-                          </span>
+                          {/* Notificação Festiva caso este usuário tenha vencido */}
+                          {isWinnerThisUser && (
+                            <div className="p-2.5 rounded-xl border border-amber-400/80 bg-amber-950/80 text-center space-y-1 animate-pulse">
+                              <div className="text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                                <span>PARABÉNS! VOCÊ É O(A) GANHADOR(A)!</span>
+                                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                              </div>
+                              <p className="text-[10px] text-[#F7DECA] leading-tight">
+                                Apresente sua credencial (#{me?.credentialCode || me?.code}) à organização no final do evento para retirar seu brinde!
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Se foi sorteado para outro participante */}
+                          {prize.status === "DRAWN" && prize.winner && !isWinnerThisUser && (
+                            <div className="p-2 rounded-xl border border-emerald-500/30 bg-[#030A06] flex items-center justify-between gap-2 text-[10px]">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
+                                <span className="text-[#D5C5AA]/75 truncate">Ganhador(a):</span>
+                                <strong className="text-emerald-300 font-bold truncate">
+                                  {prize.winner.name}
+                                </strong>
+                              </div>
+                              <span className="font-mono text-[9.5px] text-[#D5C5AA]/70 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                                #{prize.winner.credentialCode}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 

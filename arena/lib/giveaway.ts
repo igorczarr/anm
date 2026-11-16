@@ -33,49 +33,9 @@ export interface GiveawaySnapshot {
   updatedAt: string;
 }
 
-const DEFAULT_PRIZES: GiveawayPrize[] = [
-  {
-    id: "prize_livro_anm_autografado",
-    title: 'Livro "A Nova Moeda: Economia da Solidão"',
-    description: "Exemplar impresso oficial autografado pelos autores e especialistas da Mesa-Redonda.",
-    sponsor: "Coordenação Geral A Nova Moeda",
-    quantity: 1,
-    order: 1,
-    status: "PENDING",
-    drawnAt: null,
-    winner: null,
-    createdAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-    updatedAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-  },
-  {
-    id: "prize_kit_oficial_uefs_anm",
-    title: "Kit Oficial Exclusivo A Nova Moeda",
-    description: "Ecobag institucional em algodão cru, caderno comemorativo de anotações e credencial de honra.",
-    sponsor: "UEFS & Vértice",
-    quantity: 1,
-    order: 2,
-    status: "PENDING",
-    drawnAt: null,
-    winner: null,
-    createdAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-    updatedAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-  },
-  {
-    id: "prize_mentoria_pos_evento",
-    title: "Acesso VIP à Mentoria com Especialistas",
-    description: "Sessão online exclusiva pós-evento para aprofundamento das temáticas de Economia da Solidão.",
-    sponsor: "Mesa de Especialistas",
-    quantity: 1,
-    order: 3,
-    status: "PENDING",
-    drawnAt: null,
-    winner: null,
-    createdAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-    updatedAt: new Date("2026-11-15T18:00:00Z").toISOString(),
-  },
-];
+const DEFAULT_PRIZES: GiveawayPrize[] = [];
 
-let inMemoryPrizes: GiveawayPrize[] = [...DEFAULT_PRIZES];
+let inMemoryPrizes: GiveawayPrize[] = [];
 let lastDrawnId: string | null = null;
 
 function getDataFilePath(): string {
@@ -88,7 +48,7 @@ function ensureDataLoaded() {
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, "utf-8");
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         inMemoryPrizes = parsed;
       }
     } else {
