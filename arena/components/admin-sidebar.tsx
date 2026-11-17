@@ -270,7 +270,7 @@ export function AdminSidebar() {
         </div>
       )}
 
-      <div className="hidden md:block shrink-0 min-h-screen">
+      <div className="hidden md:block shrink-0 h-full">
         {navContent}
       </div>
     </>

@@ -818,6 +818,40 @@ export async function toggleQuestionsOpenAction(open: boolean) {
   revalidatePath("/admin/operacao");
 }
 
+const SLIDE_DECK_SIZES: Record<string, number> = { intro: 15, closing: 14 };
+
+/**
+ * Controla o miniscreen de slides da Paula no telão.
+ * deck = null encerra a projeção; index é limitado ao tamanho do deck.
+ */
+export async function setSlidesAction(deck: "intro" | "closing" | null, index = 0) {
+  const admin = await requireAdminPermission("canOperateTimer");
+  const event = await getPrimaryEvent();
+  if (!event) throw new Error("Evento não encontrado");
+
+  let safeIndex = 0;
+  if (deck) {
+    const size = SLIDE_DECK_SIZES[deck];
+    if (!size) throw new Error("Deck de slides inválido");
+    safeIndex = Math.max(0, Math.min(size - 1, Math.floor(index)));
+  }
+
+  await updateLiveStateAtomic(event.id, "config.updated", {
+    slideDeck: deck,
+    slideIndex: safeIndex,
+  });
+
+  await logAdminAction({
+    eventId: event.id,
+    userId: admin.id,
+    action: deck ? "SLIDES_SHOWN" : "SLIDES_HIDDEN",
+    entityType: "LiveState",
+    metadata: deck ? { deck, index: safeIndex } : undefined,
+  });
+
+  revalidatePath("/admin/operacao");
+}
+
 export async function openCurrentTopicPollAction() {
   const admin = await requireAdminPermission("canManagePolls");
   const event = await getPrimaryEvent();

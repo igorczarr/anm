@@ -7,6 +7,7 @@ import { ARENA_MODE_LABELS } from "@/lib/events";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandLogo } from "@/components/brand-logo";
 import { ArenaParticleField } from "@/components/arena-particle-field";
+import { SlideMiniScreen } from "@/components/slide-mini-screen";
 import {
   AlertTriangle,
   Maximize2,
@@ -541,6 +542,10 @@ export function ArenaScreen() {
 
   const showTimer = isStageMonitor || (ls?.showTimerOnArena ?? true);
 
+  const slideDeck = ls?.slideDeck ?? null;
+  const slideIndex = ls?.slideIndex ?? 0;
+  const slidesActive = Boolean(slideDeck);
+
   const activeSpeakerName =
     activeTopic?.mainSpeaker?.name || activeStep?.speaker?.name || activeStep?.responsibleName;
   const activeSpeakerPhoto = resolveSpeakerPhoto(
@@ -1002,7 +1007,11 @@ export function ArenaScreen() {
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "INTRODUCTION" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <div
+              className={`${
+                slidesActive && slideDeck === "intro" ? "lg:col-span-5" : "lg:col-span-7"
+              } space-y-6 text-left`}
+            >
               <div className="space-y-2">
                 <div className="flex items-center gap-4">
                   <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
@@ -1038,21 +1047,31 @@ export function ArenaScreen() {
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-6">
-              {showTimer && (
-                <CircularTimer
-                  formatted={timer.formatted}
-                  alertLevel={timer.alertLevel}
-                  elapsedMs={timer.elapsedMs}
-                  totalDurationMs={timer.totalDurationMs}
-                  size={168}
-                />
+            <div
+              className={`${
+                slidesActive && slideDeck === "intro" ? "lg:col-span-7" : "lg:col-span-5"
+              } flex flex-col items-center gap-6`}
+            >
+              {slidesActive && slideDeck === "intro" ? (
+                <SlideMiniScreen deck="intro" index={slideIndex} />
+              ) : (
+                <>
+                  {showTimer && (
+                    <CircularTimer
+                      formatted={timer.formatted}
+                      alertLevel={timer.alertLevel}
+                      elapsedMs={timer.elapsedMs}
+                      totalDurationMs={timer.totalDurationMs}
+                      size={168}
+                    />
+                  )}
+                  <ParticipateNowCard
+                    title="Participe pelo Celular"
+                    subtitle="Vote na questão da Mesa-Redonda enquanto acompanha a introdução."
+                    size="default"
+                  />
+                </>
               )}
-              <ParticipateNowCard
-                title="Participe pelo Celular"
-                subtitle="Vote na questão da Mesa-Redonda enquanto acompanha a introdução."
-                size="default"
-              />
             </div>
           </div>
         )}
@@ -1361,6 +1380,34 @@ export function ArenaScreen() {
         {/* 8. TELA DE ENCERRAMENTO (CLOSING)                                       */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "CLOSING" && (
+          slidesActive && slideDeck === "closing" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto animate-stage-enter">
+              <div className="lg:col-span-5 space-y-5 text-left">
+                <span className="text-[11px] uppercase font-bold tracking-[0.28em] text-emerald-400 block">
+                  Encerramento · Síntese Final
+                </span>
+                <h1 className="font-display text-4xl sm:text-5xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
+                  O Trabalho Hoje
+                </h1>
+                <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
+                  <img
+                    src="/img/Paula.jpeg"
+                    alt="Paula Melo"
+                    className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
+                      Apresentadora &amp; Mediadora
+                    </span>
+                    <div className="font-display font-bold text-xl text-[#F7DECA]">Paula Melo</div>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:col-span-7">
+                <SlideMiniScreen deck="closing" index={slideIndex} />
+              </div>
+            </div>
+          ) : (
           <div className="space-y-5 max-w-3xl mx-auto text-center animate-stage-enter">
             <span className="text-[11px] uppercase font-bold tracking-[0.28em] text-emerald-400 block">
               Sessão Encerrada · A Nova Moeda
@@ -1375,6 +1422,7 @@ export function ArenaScreen() {
               Universidade Estadual de Feira de Santana · UEFS
             </div>
           </div>
+          )
         )}
 
         {/* ----------------------------------------------------------------------- */}

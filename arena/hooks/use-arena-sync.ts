@@ -184,6 +184,8 @@ export interface ArenaFullSnapshot {
     soundAlertsEnabled: boolean;
     emergencyActive: boolean;
     emergencyMessage: string | null;
+    slideDeck?: string | null;
+    slideIndex?: number;
     arenaOnline: boolean;
     arenaLastHeartbeatAt: string | null;
     timerStartedAt: string | null;

@@ -20,6 +20,7 @@ import {
   resetTimerAction,
   resumeTimerAction,
   setArenaModeManualAction,
+  setSlidesAction,
   startEventAction,
   startTopicQAPhaseAction,
   toggleEmergencyModeAction,
@@ -28,6 +29,7 @@ import {
 import type { ArenaMode } from "@prisma/client";
 import { CurationDesk } from "@/components/curation-desk";
 import { PollsDesk } from "@/components/polls-desk";
+import { SlideMiniScreen, useSlideManifest } from "@/components/slide-mini-screen";
 import { getSpeakerPhoto } from "@/lib/speakers";
 import {
   AlertTriangle,
@@ -35,6 +37,8 @@ import {
   Bell,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Clock,
   ExternalLink,
@@ -46,6 +50,7 @@ import {
   Pause,
   Play,
   Plus,
+  Presentation,
   Radio,
   RotateCcw,
   ShieldAlert,
@@ -200,6 +205,40 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
   };
 
   const ls = snapshot?.liveState;
+  const slideManifest = useSlideManifest();
+  const slideDeck = ls?.slideDeck ?? null;
+  const slideIndex = ls?.slideIndex ?? 0;
+  const slideTotal = slideDeck ? slideManifest[slideDeck]?.count ?? 0 : 0;
+
+  const goToSlide = useCallback(
+    (next: number) => {
+      if (!slideDeck || slideTotal === 0) return;
+      const clamped = Math.max(0, Math.min(slideTotal - 1, next));
+      if (clamped === slideIndex) return;
+      runAction(() => setSlidesAction(slideDeck as "intro" | "closing", clamped));
+    },
+    [slideDeck, slideTotal, slideIndex, runAction]
+  );
+
+  // Atalhos de teclado enquanto os slides estão no ar
+  useEffect(() => {
+    if (!slideDeck) return;
+    function onKey(e: KeyboardEvent) {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        goToSlide(slideIndex + 1);
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        goToSlide(slideIndex - 1);
+      } else if (e.key === "Escape") {
+        runAction(() => setSlidesAction(null));
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [slideDeck, slideIndex, goToSlide, runAction]);
   const activeStep = snapshot?.activeStep;
   const nextStep = snapshot?.nextStep;
   const activeTopic = snapshot?.activeTopic;
@@ -913,6 +952,82 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
                     <span>Apurar Votos</span>
                   </button>
                 </div>
+              </div>
+
+              {/* Card de Slides da Paula (Miniscreen no Telão) */}
+              <div className="border border-white/[0.08] bg-[#0A120D]/90 p-5 rounded-2xl space-y-3 backdrop-blur-md">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-[#F7DECA] flex items-center gap-1.5">
+                    <Presentation className="w-4 h-4 text-emerald-400" />
+                    Slides da Paula
+                  </span>
+                  <span
+                    className={`text-[11px] font-semibold ${
+                      slideDeck ? "text-emerald-400" : "text-[#D5C5AA]/50"
+                    }`}
+                  >
+                    {slideDeck
+                      ? `${slideDeck === "intro" ? "Introdução" : "Encerramento"} · ${String(slideIndex + 1).padStart(2, "0")}/${String(slideTotal).padStart(2, "0")}`
+                      : "Fora do ar"}
+                  </span>
+                </div>
+
+                {slideDeck ? (
+                  <>
+                    <SlideMiniScreen deck={slideDeck} index={slideIndex} />
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <button
+                        type="button"
+                        disabled={isPending || slideIndex <= 0}
+                        onClick={() => goToSlide(slideIndex - 1)}
+                        className="py-2 rounded-xl border border-white/[0.12] bg-[#050C07] text-[#F7DECA] text-xs font-medium flex items-center justify-center gap-1 hover:bg-white/[0.05] disabled:opacity-35 cursor-pointer"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" /> Anterior
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => runAction(() => setSlidesAction(null))}
+                        className="py-2 rounded-xl border border-red-500/30 bg-red-950/20 text-red-300 text-xs font-medium hover:bg-red-950/40 cursor-pointer"
+                      >
+                        Ocultar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isPending || slideIndex >= slideTotal - 1}
+                        onClick={() => goToSlide(slideIndex + 1)}
+                        className="py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-35 cursor-pointer"
+                      >
+                        Próximo <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-[#D5C5AA]/50">
+                      Atalhos: setas ← → (ou Espaço) avançam os slides; Esc oculta.
+                    </p>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => runAction(() => setSlidesAction("intro", 0))}
+                      className="py-2.5 px-3 rounded-xl bg-[#D5C5AA] hover:bg-[#E2D4BE] text-[#030A06] text-xs font-semibold cursor-pointer disabled:opacity-40"
+                    >
+                      Projetar Introdução
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => runAction(() => setSlidesAction("closing", 0))}
+                      className="py-2.5 px-3 rounded-xl border border-white/[0.12] bg-[#050C07] text-[#F7DECA] text-xs font-semibold hover:bg-white/[0.05] cursor-pointer disabled:opacity-40"
+                    >
+                      Projetar Encerramento
+                    </button>
+                  </div>
+                )}
+                <p className="text-[10px] text-[#D5C5AA]/45">
+                  Introdução aparece na etapa 02 e o Encerramento na etapa 10 do telão.
+                </p>
               </div>
 
               {/* Card de Projeção no Telão ARENA */}

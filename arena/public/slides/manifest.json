@@ -1,0 +1,161 @@
+{
+  "intro": {
+    "title": "Parte_I_O_que_e_trabalho_(A_Nova_Moeda)",
+    "count": 15,
+    "aspect": 1.7778,
+    "slides": [
+      {
+        "src": "/slides/intro/slide-01.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-02.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-03.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-04.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-05.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-06.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-07.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-08.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-09.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-10.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-11.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-12.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-13.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-14.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/intro/slide-15.png",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  },
+  "closing": {
+    "title": "Parte_II_O_trabalho_hoje_(A_Nova_Moeda)",
+    "count": 14,
+    "aspect": 1.7778,
+    "slides": [
+      {
+        "src": "/slides/closing/slide-01.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-02.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-03.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-04.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-05.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-06.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-07.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-08.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-09.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-10.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-11.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-12.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-13.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/closing/slide-14.png",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  }
+}

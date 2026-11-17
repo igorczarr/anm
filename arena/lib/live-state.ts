@@ -461,6 +461,8 @@ export async function getArenaSyncSnapshot(options?: {
       soundAlertsEnabled: liveState.soundAlertsEnabled,
       emergencyActive: liveState.emergencyActive,
       emergencyMessage: liveState.emergencyMessage,
+      slideDeck: liveState.slideDeck ?? null,
+      slideIndex: liveState.slideIndex ?? 0,
       arenaOnline: Boolean(arenaOnline),
       arenaLastHeartbeatAt: liveState.arenaLastHeartbeatAt,
       timerStartedAt: liveState.timerStartedAt,

@@ -254,6 +254,8 @@ model LiveState {
   soundAlertsEnabled      Boolean     @default(true)
   emergencyActive         Boolean     @default(false)
   emergencyMessage        String?
+  slideDeck               String?
+  slideIndex              Int         @default(0)
   arenaLastHeartbeatAt    DateTime?
   updatedAt               DateTime    @updatedAt
 
