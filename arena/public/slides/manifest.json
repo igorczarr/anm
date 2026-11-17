@@ -157,5 +157,57 @@
         "height": 1080
       }
     ]
+  },
+  "sergio": {
+    "title": "Economia_da_Solidao_UEFS_-_Dr._Sergio_Passos_(Apresentacao)",
+    "count": 9,
+    "aspect": 1.7778,
+    "slides": [
+      {
+        "src": "/slides/sergio/slide-01.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-02.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-03.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-04.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-05.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-06.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-07.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-08.png",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "src": "/slides/sergio/slide-09.png",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
   }
 }

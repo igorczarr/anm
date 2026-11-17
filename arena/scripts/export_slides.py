@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent / "public" / "slides"
 SOURCES = {
     "intro": (UP / "media_1794937143908_4f7e4d06.pdf", "Parte_I_O_que_e_trabalho_(A_Nova_Moeda).pdf"),
     "closing": (UP / "media_1794937144077_f7402b94.pdf", "Parte_II_O_trabalho_hoje_(A_Nova_Moeda).pdf"),
+    "sergio": (UP / "media_1794947809469_78023a06.pdf", "Economia_da_Solidao_UEFS_-_Dr._Sergio_Passos_(Apresentacao).pdf"),
 }
 
 TARGET_WIDTH = 1920

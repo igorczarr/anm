@@ -1,4 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import { neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import ws from "ws";
+
+neonConfig.webSocketConstructor = ws;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -77,10 +82,22 @@ sanitizeDatabaseUrl();
 function createPrismaClient() {
   const dbUrl = sanitizeDatabaseUrl();
 
-  const baseClient = new PrismaClient({
-    datasourceUrl: dbUrl,
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  let baseClient: PrismaClient;
+  try {
+    const adapter = new PrismaNeon(
+      { connectionString: dbUrl },
+      { schema: "arena" }
+    );
+    baseClient = new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  } catch {
+    baseClient = new PrismaClient({
+      datasourceUrl: dbUrl,
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  }
 
   // Auto-retry robusto (até 5 tentativas) para absorver cold-start do Neon/PgBouncer
   return baseClient.$extends({

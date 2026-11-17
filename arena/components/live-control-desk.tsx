@@ -215,7 +215,7 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
       if (!slideDeck || slideTotal === 0) return;
       const clamped = Math.max(0, Math.min(slideTotal - 1, next));
       if (clamped === slideIndex) return;
-      runAction(() => setSlidesAction(slideDeck as "intro" | "closing", clamped));
+      runAction(() => setSlidesAction(slideDeck as "intro" | "closing" | "sergio", clamped));
     },
     [slideDeck, slideTotal, slideIndex, runAction]
   );
@@ -954,12 +954,12 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
                 </div>
               </div>
 
-              {/* Card de Slides da Paula (Miniscreen no Telão) */}
+              {/* Card de Slides da Apresentação (Miniscreen no Telão) */}
               <div className="border border-white/[0.08] bg-[#0A120D]/90 p-5 rounded-2xl space-y-3 backdrop-blur-md">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-[#F7DECA] flex items-center gap-1.5">
                     <Presentation className="w-4 h-4 text-emerald-400" />
-                    Slides da Paula
+                    Slides da Apresentação
                   </span>
                   <span
                     className={`text-[11px] font-semibold ${
@@ -967,7 +967,13 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
                     }`}
                   >
                     {slideDeck
-                      ? `${slideDeck === "intro" ? "Introdução" : "Encerramento"} · ${String(slideIndex + 1).padStart(2, "0")}/${String(slideTotal).padStart(2, "0")}`
+                      ? `${
+                          slideDeck === "sergio"
+                            ? "Dr. Sérgio (Pauta 4)"
+                            : slideDeck === "intro"
+                            ? "Introdução (Paula)"
+                            : "Encerramento (Paula)"
+                        } · ${String(slideIndex + 1).padStart(2, "0")}/${String(slideTotal).padStart(2, "0")}`
                       : "Fora do ar"}
                   </span>
                 </div>
@@ -1001,32 +1007,71 @@ export function LiveControlDesk({ compact = false }: { compact?: boolean }) {
                         Próximo <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
+                    {/* Atalhos rápidos para trocar de deck */}
+                    <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                      <span className="text-[10px] text-[#D5C5AA]/40 uppercase tracking-wider mr-1">Trocar:</span>
+                      <button
+                        type="button"
+                        disabled={isPending || slideDeck === "intro"}
+                        onClick={() => runAction(() => setSlidesAction("intro", 0))}
+                        className="px-2 py-1 text-[11px] rounded-lg border border-white/10 hover:bg-white/5 text-[#D5C5AA] disabled:opacity-40 cursor-pointer"
+                      >
+                        Intro (Paula)
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isPending || slideDeck === "sergio"}
+                        onClick={() => runAction(() => setSlidesAction("sergio", 0))}
+                        className="px-2 py-1 text-[11px] rounded-lg border border-white/10 hover:bg-white/5 text-[#D5C5AA] disabled:opacity-40 cursor-pointer"
+                      >
+                        Dr. Sérgio (Pauta 4)
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isPending || slideDeck === "closing"}
+                        onClick={() => runAction(() => setSlidesAction("closing", 0))}
+                        className="px-2 py-1 text-[11px] rounded-lg border border-white/10 hover:bg-white/5 text-[#D5C5AA] disabled:opacity-40 cursor-pointer"
+                      >
+                        Encerramento
+                      </button>
+                    </div>
                     <p className="text-[10px] text-[#D5C5AA]/50">
                       Atalhos: setas ← → (ou Espaço) avançam os slides; Esc oculta.
                     </p>
                   </>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button
                       type="button"
                       disabled={isPending}
                       onClick={() => runAction(() => setSlidesAction("intro", 0))}
-                      className="py-2.5 px-3 rounded-xl bg-[#D5C5AA] hover:bg-[#E2D4BE] text-[#030A06] text-xs font-semibold cursor-pointer disabled:opacity-40"
+                      className="py-2.5 px-3 rounded-xl bg-[#D5C5AA] hover:bg-[#E2D4BE] text-[#030A06] text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors text-center"
                     >
                       Projetar Introdução
+                      <span className="block text-[10px] opacity-70 font-normal">Paula Melo · 15 slides</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => runAction(() => setSlidesAction("sergio", 0))}
+                      className="py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors text-center shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                    >
+                      Projetar Dr. Sérgio
+                      <span className="block text-[10px] text-emerald-200 font-normal">Pauta 4 · 9 slides</span>
                     </button>
                     <button
                       type="button"
                       disabled={isPending}
                       onClick={() => runAction(() => setSlidesAction("closing", 0))}
-                      className="py-2.5 px-3 rounded-xl border border-white/[0.12] bg-[#050C07] text-[#F7DECA] text-xs font-semibold hover:bg-white/[0.05] cursor-pointer disabled:opacity-40"
+                      className="py-2.5 px-3 rounded-xl border border-white/[0.12] bg-[#050C07] text-[#F7DECA] text-xs font-semibold hover:bg-white/[0.05] cursor-pointer disabled:opacity-40 transition-colors text-center"
                     >
                       Projetar Encerramento
+                      <span className="block text-[10px] text-[#D5C5AA]/60 font-normal">Paula Melo · 14 slides</span>
                     </button>
                   </div>
                 )}
                 <p className="text-[10px] text-[#D5C5AA]/45">
-                  Introdução aparece na etapa 02 e o Encerramento na etapa 10 do telão.
+                  Introdução (Etapa 02), Dr. Sérgio Passos (Pauta 4 / Etapa 06) e Encerramento (Etapa 10) no telão.
                 </p>
               </div>
 

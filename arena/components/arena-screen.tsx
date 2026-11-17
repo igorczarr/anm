@@ -1006,74 +1006,123 @@ export function ArenaScreen() {
         {/* 3. MODO INTRODUÇÃO E CONTEXTO (INTRODUCTION)                            */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "INTRODUCTION" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
-            <div
-              className={`${
-                slidesActive && slideDeck === "intro" ? "lg:col-span-5" : "lg:col-span-7"
-              } space-y-6 text-left`}
-            >
-              <div className="space-y-2">
-                <div className="flex items-center gap-4">
-                  <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
-                    Etapa 02 / 10 · Contexto Estratégico
-                  </span>
-                  <SoundWaveBadge label="Com a Palavra" />
-                </div>
-                <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
-                  A Economia da Solidão
-                </h1>
-                <p className="text-xs sm:text-base text-[#D5C5AA]/85 max-w-2xl leading-relaxed pt-1">
-                  Contextualização conceitual sobre as transformações sociais, o isolamento contemporâneo e os impactos humanos e econômicos debatidos na Arena.
-                </p>
+          slidesActive && slideDeck === "intro" ? (
+            <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center animate-stage-enter">
+              {/* Coluna Dominante: Slide Ampliado e Nítido em Proporção Cinema */}
+              <div className="lg:col-span-8 xl:col-span-9 flex flex-col items-center justify-center">
+                <SlideMiniScreen deck="intro" index={slideIndex} className="w-full" />
               </div>
 
-              <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
-                <img
-                  src="/img/Paula.jpeg"
-                  alt="Paula Melo"
-                  className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
-                />
-                <div className="space-y-0.5">
-                  <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
-                    Apresentadora &amp; Mediadora
-                  </span>
-                  <div className="font-display font-bold text-xl text-[#F7DECA]">
-                    Paula Melo
+              {/* Coluna Lateral Editorial: Apresentadora e Cronômetro */}
+              <div className="lg:col-span-4 xl:col-span-3 space-y-6 text-left">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                      Etapa 02 / 10 · Contexto Estratégico
+                    </span>
+                    <SoundWaveBadge label="Com a Palavra" />
                   </div>
-                  <div className="text-xs text-[#D5C5AA]/65">
-                    Panorama introdutório antes das 5 exposições individuais
+                  <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-[#F7DECA] font-extrabold leading-[1.1] tracking-tight">
+                    A Economia da Solidão
+                  </h1>
+                  <p className="text-xs text-[#D5C5AA]/80 leading-relaxed pt-1">
+                    Panorama conceitual sobre as transformações do trabalho e isolamento contemporâneo.
+                  </p>
+                </div>
+
+                <div className="border-l-2 border-emerald-400/80 pl-4 flex items-center gap-4 py-1">
+                  <img
+                    src="/img/Paula.jpeg"
+                    alt="Paula Melo"
+                    className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-lg shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
+                      Apresentadora &amp; Mediadora
+                    </span>
+                    <div className="font-display font-bold text-lg text-[#F7DECA]">
+                      Paula Melo
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div
-              className={`${
-                slidesActive && slideDeck === "intro" ? "lg:col-span-7" : "lg:col-span-5"
-              } flex flex-col items-center gap-6`}
-            >
-              {slidesActive && slideDeck === "intro" ? (
-                <SlideMiniScreen deck="intro" index={slideIndex} />
-              ) : (
-                <>
-                  {showTimer && (
+                {showTimer && (
+                  <div className="pt-2">
                     <CircularTimer
                       formatted={timer.formatted}
                       alertLevel={timer.alertLevel}
                       elapsedMs={timer.elapsedMs}
                       totalDurationMs={timer.totalDurationMs}
-                      size={168}
+                      size={148}
                     />
-                  )}
+                  </div>
+                )}
+
+                <div className="pt-2">
                   <ParticipateNowCard
                     title="Participe pelo Celular"
-                    subtitle="Vote na questão da Mesa-Redonda enquanto acompanha a introdução."
-                    size="default"
+                    subtitle="Vote na questão da Mesa-Redonda enquanto acompanha."
+                    size="compact"
                   />
-                </>
-              )}
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+              <div className="lg:col-span-7 space-y-6 text-left">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                      Etapa 02 / 10 · Contexto Estratégico
+                    </span>
+                    <SoundWaveBadge label="Com a Palavra" />
+                  </div>
+                  <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
+                    A Economia da Solidão
+                  </h1>
+                  <p className="text-xs sm:text-base text-[#D5C5AA]/85 max-w-2xl leading-relaxed pt-1">
+                    Contextualização conceitual sobre as transformações sociais, o isolamento contemporâneo e os impactos humanos e econômicos debatidos na Arena.
+                  </p>
+                </div>
+
+                <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
+                  <img
+                    src="/img/Paula.jpeg"
+                    alt="Paula Melo"
+                    className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
+                      Apresentadora &amp; Mediadora
+                    </span>
+                    <div className="font-display font-bold text-xl text-[#F7DECA]">
+                      Paula Melo
+                    </div>
+                    <div className="text-xs text-[#D5C5AA]/65">
+                      Panorama introdutório antes das 5 exposições individuais
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 flex flex-col items-center gap-6">
+                {showTimer && (
+                  <CircularTimer
+                    formatted={timer.formatted}
+                    alertLevel={timer.alertLevel}
+                    elapsedMs={timer.elapsedMs}
+                    totalDurationMs={timer.totalDurationMs}
+                    size={168}
+                  />
+                )}
+                <ParticipateNowCard
+                  title="Participe pelo Celular"
+                  subtitle="Vote na questão da Mesa-Redonda enquanto acompanha a introdução."
+                  size="default"
+                />
+              </div>
+            </div>
+          )
         )}
 
         {/* ----------------------------------------------------------------------- */}
@@ -1186,66 +1235,138 @@ export function ArenaScreen() {
         {/* 5. TELA DA EXPOSIÇÃO INDIVIDUAL (15 min) — QUANDO HOUVER PAUTA ATIVA    */}
         {/* ----------------------------------------------------------------------- */}
         {(currentMode === "SPEAKER_EXPOSITION" || currentMode === "TOPIC_OVERVIEW") && activeTopic && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
-                    Pauta 0{activeTopic.number} / 05
-                  </span>
-                  <SoundWaveBadge />
-                </div>
-                <h1 className="font-display text-3xl sm:text-5xl lg:text-[54px] text-[#F7DECA] font-extrabold leading-[1.08] tracking-tight">
-                  {activeTopic.title}
-                </h1>
+          slidesActive && slideDeck ? (
+            <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center animate-stage-enter">
+              {/* Coluna Principal: SLIDE GIGANTE E NÍTIDO (col-span-8 ou 9) */}
+              <div className="lg:col-span-8 xl:col-span-9 flex flex-col items-center justify-center">
+                <SlideMiniScreen deck={slideDeck} index={slideIndex} className="w-full" />
               </div>
 
-              {/* Assinatura Editorial do Palestrante — Sem Caixa */}
-              <div className="border-l-2 border-emerald-400/80 pl-5 sm:pl-6 flex items-center gap-5 pt-1">
-                {activeSpeakerPhoto ? (
-                  <img
-                    src={activeSpeakerPhoto}
-                    alt={activeTopic.mainSpeaker.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] shrink-0"
-                  />
-                ) : (
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#030A06] ring-2 ring-emerald-400/60 flex items-center justify-center font-bold text-2xl text-emerald-400 shrink-0">
-                    {activeTopic.mainSpeaker.name.charAt(0)}
+              {/* Coluna Lateral Editorial: Palestrante, Tópico e Cronômetro */}
+              <div className="lg:col-span-4 xl:col-span-3 space-y-6 text-left">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                      Pauta 0{activeTopic.number} / 05
+                    </span>
+                    <SoundWaveBadge />
+                  </div>
+                  <h2 className="font-display text-xl sm:text-2xl text-[#F7DECA] font-bold leading-snug line-clamp-3">
+                    {activeTopic.title}
+                  </h2>
+                </div>
+
+                {/* Palestrante */}
+                <div className="border-l-2 border-emerald-400/80 pl-4 flex items-center gap-4 py-1">
+                  {activeSpeakerPhoto ? (
+                    <img
+                      src={activeSpeakerPhoto}
+                      alt={activeTopic.mainSpeaker.name}
+                      className="w-16 h-16 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-[0_0_25px_rgba(16,185,129,0.25)] shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-[#030A06] ring-2 ring-emerald-400/60 flex items-center justify-center font-bold text-xl text-emerald-400 shrink-0">
+                      {activeTopic.mainSpeaker.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase tracking-[0.22em] text-emerald-400 font-bold block">
+                      Especialista Convidado
+                    </span>
+                    <div className="font-display text-lg sm:text-xl text-[#F7DECA] font-bold truncate">
+                      {activeTopic.mainSpeaker.name}
+                    </div>
+                    <div className="text-[11px] text-[#D5C5AA]/65 truncate">
+                      Exposição ao vivo
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cronômetro Puro Estilizado */}
+                {showTimer && (
+                  <div className="pt-2 flex flex-col items-center sm:items-start">
+                    <CircularTimer
+                      formatted={timer.formatted}
+                      alertLevel={timer.alertLevel}
+                      elapsedMs={timer.elapsedMs}
+                      totalDurationMs={timer.totalDurationMs}
+                      size={148}
+                    />
                   </div>
                 )}
-                <div className="space-y-1 min-w-0">
-                  <span className="text-[10px] uppercase tracking-[0.24em] text-emerald-400 font-bold block">
-                    Especialista Convidado
-                  </span>
-                  <div className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-bold truncate tracking-tight">
-                    {activeTopic.mainSpeaker.name}
-                  </div>
-                  <div className="text-xs text-[#D5C5AA]/70">
-                    Exposição principal · Perguntas abertas pelo QR Code
-                  </div>
+
+                {/* QR Code Discreto para Envio de Perguntas */}
+                <div className="pt-2">
+                  <ParticipateNowCard
+                    title="Envie sua Pergunta"
+                    subtitle="Escaneie pelo celular para perguntar ao especialista."
+                    size="compact"
+                  />
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+              <div className="lg:col-span-7 space-y-6 text-left">
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                      Pauta 0{activeTopic.number} / 05
+                    </span>
+                    <SoundWaveBadge />
+                  </div>
+                  <h1 className="font-display text-3xl sm:text-5xl lg:text-[54px] text-[#F7DECA] font-extrabold leading-[1.08] tracking-tight">
+                    {activeTopic.title}
+                  </h1>
+                </div>
 
-            {/* Coluna Direita: Cronômetro Puro Estilizado (Sem Caixa, Sem "Tempo de Exposição") */}
-            <div className="lg:col-span-5 flex flex-col items-center gap-6">
-              {showTimer && (
-                <CircularTimer
-                  formatted={timer.formatted}
-                  alertLevel={timer.alertLevel}
-                  elapsedMs={timer.elapsedMs}
-                  totalDurationMs={timer.totalDurationMs}
-                  size={184}
+                {/* Assinatura Editorial do Palestrante — Sem Caixa */}
+                <div className="border-l-2 border-emerald-400/80 pl-5 sm:pl-6 flex items-center gap-5 pt-1">
+                  {activeSpeakerPhoto ? (
+                    <img
+                      src={activeSpeakerPhoto}
+                      alt={activeTopic.mainSpeaker.name}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] shrink-0"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#030A06] ring-2 ring-emerald-400/60 flex items-center justify-center font-bold text-2xl text-emerald-400 shrink-0">
+                      {activeTopic.mainSpeaker.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="space-y-1 min-w-0">
+                    <span className="text-[10px] uppercase tracking-[0.24em] text-emerald-400 font-bold block">
+                      Especialista Convidado
+                    </span>
+                    <div className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-bold truncate tracking-tight">
+                      {activeTopic.mainSpeaker.name}
+                    </div>
+                    <div className="text-xs text-[#D5C5AA]/70">
+                      Exposição principal · Perguntas abertas pelo QR Code
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coluna Direita: Cronômetro Puro Estilizado (Sem Caixa, Sem "Tempo de Exposição") */}
+              <div className="lg:col-span-5 flex flex-col items-center gap-6">
+                {showTimer && (
+                  <CircularTimer
+                    formatted={timer.formatted}
+                    alertLevel={timer.alertLevel}
+                    elapsedMs={timer.elapsedMs}
+                    totalDurationMs={timer.totalDurationMs}
+                    size={184}
+                  />
+                )}
+
+                <ParticipateNowCard
+                  title="Envie sua Pergunta"
+                  subtitle={`Participe ao vivo enviando sua pergunta para ${activeTopic.mainSpeaker.name}.`}
+                  size="default"
                 />
-              )}
-
-              <ParticipateNowCard
-                title="Envie sua Pergunta"
-                subtitle={`Participe ao vivo enviando sua pergunta para ${activeTopic.mainSpeaker.name}.`}
-                size="default"
-              />
+              </div>
             </div>
-          </div>
+          )
         )}
 
         {/* ----------------------------------------------------------------------- */}
@@ -1381,30 +1502,40 @@ export function ArenaScreen() {
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "CLOSING" && (
           slidesActive && slideDeck === "closing" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto animate-stage-enter">
-              <div className="lg:col-span-5 space-y-5 text-left">
-                <span className="text-[11px] uppercase font-bold tracking-[0.28em] text-emerald-400 block">
-                  Encerramento · Síntese Final
-                </span>
-                <h1 className="font-display text-4xl sm:text-5xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
-                  O Trabalho Hoje
-                </h1>
-                <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
+            <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center animate-stage-enter">
+              {/* Coluna Principal: Slide Ampliado e Nítido em Proporção Cinema */}
+              <div className="lg:col-span-8 xl:col-span-9 flex flex-col items-center justify-center">
+                <SlideMiniScreen deck="closing" index={slideIndex} className="w-full" />
+              </div>
+
+              {/* Coluna Lateral Editorial: Apresentadora e Síntese */}
+              <div className="lg:col-span-4 xl:col-span-3 space-y-6 text-left">
+                <div className="space-y-2">
+                  <span className="text-[11px] uppercase font-bold tracking-[0.28em] text-emerald-400 block">
+                    Encerramento · Síntese Final
+                  </span>
+                  <h1 className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-extrabold leading-[1.08] tracking-tight">
+                    O Trabalho Hoje
+                  </h1>
+                </div>
+
+                <div className="border-l-2 border-emerald-400/80 pl-4 flex items-center gap-4 py-1">
                   <img
                     src="/img/Paula.jpeg"
                     alt="Paula Melo"
-                    className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
+                    className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-lg shrink-0"
                   />
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
                       Apresentadora &amp; Mediadora
                     </span>
-                    <div className="font-display font-bold text-xl text-[#F7DECA]">Paula Melo</div>
+                    <div className="font-display font-bold text-lg text-[#F7DECA]">Paula Melo</div>
                   </div>
                 </div>
-              </div>
-              <div className="lg:col-span-7">
-                <SlideMiniScreen deck="closing" index={slideIndex} />
+
+                <div className="pt-2 text-xs text-[#D5C5AA]/70 leading-relaxed">
+                  Síntese e conclusões sobre os impactos humanos e econômicos debatidos durante a Arena.
+                </div>
               </div>
             </div>
           ) : (

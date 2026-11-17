@@ -818,13 +818,13 @@ export async function toggleQuestionsOpenAction(open: boolean) {
   revalidatePath("/admin/operacao");
 }
 
-const SLIDE_DECK_SIZES: Record<string, number> = { intro: 15, closing: 14 };
+const SLIDE_DECK_SIZES: Record<string, number> = { intro: 15, closing: 14, sergio: 9 };
 
 /**
- * Controla o miniscreen de slides da Paula no telão.
+ * Controla o miniscreen de slides da Paula e do Dr. Sérgio no telão.
  * deck = null encerra a projeção; index é limitado ao tamanho do deck.
  */
-export async function setSlidesAction(deck: "intro" | "closing" | null, index = 0) {
+export async function setSlidesAction(deck: "intro" | "closing" | "sergio" | null, index = 0) {
   const admin = await requireAdminPermission("canOperateTimer");
   const event = await getPrimaryEvent();
   if (!event) throw new Error("Evento não encontrado");

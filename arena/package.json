@@ -13,6 +13,8 @@
     "test:sim": "tsx scripts/rehearsal-sim.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.1",
+    "@prisma/adapter-neon": "^7.10.1",
     "@prisma/client": "6.19.3",
     "clsx": "^2.1.1",
     "lucide-react": "^1.70.0",
@@ -23,6 +25,7 @@
     "react-dom": "19.3.0",
     "tailwind-merge": "^3.7.0",
     "tsx": "4.23.15",
+    "ws": "^8.23.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -31,6 +34,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",

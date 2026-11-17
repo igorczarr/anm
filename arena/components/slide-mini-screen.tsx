@@ -81,15 +81,22 @@ export function SlideMiniScreen({
   const aspect = info?.aspect ?? 16 / 9;
   const progress = useMemo(() => (total > 1 ? ((safeIndex + 1) / total) * 100 : 100), [safeIndex, total]);
 
+  const authorLabel = useMemo(() => {
+    if (deck === "sergio") return "Slides · Dr. Sérgio Passos (Pauta 4)";
+    if (deck === "closing") return "Slides · Paula Melo (Encerramento)";
+    if (deck === "intro") return "Slides · Paula Melo (Introdução)";
+    return "Slides da Apresentação";
+  }, [deck]);
+
   if (!info || total === 0) return null;
 
   return (
     <div className={`relative w-full select-none ${className}`}>
       {/* Halo atmosférico atrás da tela */}
-      <div className="absolute -inset-6 rounded-[28px] bg-emerald-400/10 blur-3xl pointer-events-none" />
+      <div className="absolute -inset-8 rounded-[32px] bg-emerald-400/10 blur-3xl pointer-events-none" />
 
       <div
-        className="relative w-full overflow-hidden rounded-xl bg-black ring-1 ring-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]"
+        className="relative w-full overflow-hidden rounded-2xl bg-black ring-1 ring-white/20 shadow-[0_35px_100px_-20px_rgba(0,0,0,0.95)]"
         style={{ aspectRatio: String(aspect) }}
       >
         {prev !== null && (
@@ -110,19 +117,22 @@ export function SlideMiniScreen({
           draggable={false}
         />
 
-        {/* Barra de progresso capilar */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/10">
+        {/* Barra de progresso capilar com brilho */}
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
           <div
-            className="h-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)] transition-all duration-500"
+            className="h-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,1)] transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.24em] text-[#D5C5AA]/60 font-semibold">
-        <span className="text-emerald-400 font-bold">Slides · Paula Melo</span>
-        <span className="font-mono tabular-nums">
-          {String(safeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+      <div className="mt-3 flex items-center justify-between text-xs uppercase tracking-[0.22em] text-[#D5C5AA]/75 font-semibold px-1">
+        <span className="text-emerald-400 font-bold flex items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+          {authorLabel}
+        </span>
+        <span className="font-mono tabular-nums text-sm text-[#F7DECA] font-bold tracking-normal">
+          {String(safeIndex + 1).padStart(2, "0")} <span className="text-white/30 font-normal">/</span> {String(total).padStart(2, "0")}
         </span>
       </div>
 
