@@ -42,45 +42,50 @@ export function AdminStatusStrip() {
 
   return (
     <>
-      <header className="h-11 border-b border-white/[0.06] bg-[#050C07]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between text-xs select-none z-30">
-        {/* Esquerda: Status ao vivo + Etapa Atual */}
-        <div className="flex items-center gap-3 min-w-0">
-          {isLive ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 font-semibold tracking-wider text-[10px] shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              AO VIVO
+      <header className="relative h-12 bg-[#030A06]/80 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between text-xs select-none z-30">
+        {/* Esquerda: Status ao vivo + Etapa Atual — tipografia editorial, sem pílulas */}
+        <div className="flex items-center gap-4 min-w-0">
+          <span className="flex items-center gap-2 shrink-0">
+            <span className="relative flex h-2 w-2">
+              {isLive && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              )}
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${
+                  isLive
+                    ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+                    : isPaused
+                      ? "bg-amber-400"
+                      : "bg-slate-500"
+                }`}
+              />
             </span>
-          ) : isPaused ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-300 font-semibold tracking-wider text-[10px] shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              PAUSADO
+            <span
+              className={`text-[10px] uppercase tracking-[0.26em] font-bold ${
+                isLive ? "text-[#F7DECA]" : isPaused ? "text-amber-300" : "text-[#D5C5AA]/60"
+              }`}
+            >
+              {isLive ? "Ao Vivo" : isPaused ? "Pausado" : "Aguardando"}
             </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#D5C5AA]/70 font-medium tracking-wider text-[10px] shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-              AGUARDANDO
-            </span>
-          )}
+          </span>
+
+          <div className="h-5 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-transparent shrink-0" />
 
           {/* Etapa Ativa */}
           <div className="flex items-center gap-2 truncate text-[11px]">
             {activeTopic ? (
               <span className="text-[#F7DECA] font-medium truncate">
-                Pauta {activeTopic.number}:{" "}
-                <strong className="text-emerald-400 font-semibold">
-                  {activeTopic.mainSpeaker.name}
-                </strong>{" "}
-                <span className="hidden sm:inline text-[#D5C5AA]/60">
-                  — {activeTopic.title}
+                <span className="text-emerald-400 font-mono font-bold tracking-wider mr-2">
+                  P0{activeTopic.number}
                 </span>
+                <strong className="font-semibold">{activeTopic.mainSpeaker.name}</strong>{" "}
+                <span className="hidden sm:inline text-[#D5C5AA]/55">— {activeTopic.title}</span>
               </span>
             ) : activeStep ? (
               <span className="text-[#F7DECA] font-medium truncate">
                 {activeStep.title}{" "}
                 {activeStep.responsibleName && (
-                  <span className="text-[#D5C5AA]/60 font-normal">
-                    ({activeStep.responsibleName})
-                  </span>
+                  <span className="text-[#D5C5AA]/55 font-normal">({activeStep.responsibleName})</span>
                 )}
               </span>
             ) : (
@@ -91,29 +96,36 @@ export function AdminStatusStrip() {
           </div>
         </div>
 
-        {/* Direita: Timer Compacto + Diagnóstico + Links */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div
-            className={`font-mono font-bold text-xs px-2.5 py-0.5 rounded-md border flex items-center gap-1.5 ${timerColor}`}
+        {/* Direita: Cronômetro tabular + Conexão */}
+        <div className="flex items-center gap-5 shrink-0">
+          <span
+            className={`font-mono font-bold tabular-nums text-sm tracking-tight ${
+              timer.alertLevel === "EXPIRED"
+                ? "text-red-400 animate-pulse"
+                : timer.alertLevel === "CRITICAL_30S"
+                  ? "text-amber-400"
+                  : timer.alertLevel === "WARNING_2MIN"
+                    ? "text-amber-300"
+                    : "text-[#F7DECA]"
+            }`}
           >
-            <Clock className="w-3 h-3 text-emerald-400" />
-            <span>{timer.formatted}</span>
-          </div>
+            {timer.formatted}
+          </span>
 
           <button
             type="button"
             onClick={() => setShowDiagnostic(true)}
-            className={`p-1 rounded-md border flex items-center gap-1 text-[10px] transition cursor-pointer ${
+            className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold transition cursor-pointer ${
               connected
-                ? "border-white/[0.06] bg-[#0A120D] text-[#D5C5AA]/70 hover:text-[#F7DECA] hover:border-white/[0.15]"
-                : "border-red-500/50 bg-red-950/40 text-red-300 animate-pulse"
+                ? "text-[#D5C5AA]/60 hover:text-[#F7DECA]"
+                : "text-red-300 animate-pulse"
             }`}
             title="Diagnóstico de Rede do Servidor"
           >
             {connected ? (
               <>
                 <Wifi className="w-3 h-3 text-emerald-400" />
-                <span className="hidden md:inline">Sincronizado</span>
+                <span className="hidden md:inline">Online</span>
               </>
             ) : (
               <>
@@ -123,6 +135,7 @@ export function AdminStatusStrip() {
             )}
           </button>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-400/45 via-white/[0.1] to-emerald-400/20" />
       </header>
 
       {/* Popover / Modal de Diagnóstico Técnico */}

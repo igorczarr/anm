@@ -3,26 +3,18 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useArenaSync } from "@/hooks/use-arena-sync";
-import { ARENA_MODE_LABELS, formatSecondsMMSS } from "@/lib/events";
+import { ARENA_MODE_LABELS } from "@/lib/events";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandLogo } from "@/components/brand-logo";
+import { ArenaParticleField } from "@/components/arena-particle-field";
 import {
   AlertTriangle,
-  ArrowRight,
-  BarChart2,
-  Clock,
   Maximize2,
   Minimize2,
-  MessageSquare,
-  Mic,
-  Radio,
   Smartphone,
-  Sparkles,
   Trophy,
-  Users,
   Volume2,
   VolumeX,
-  Vote,
   WifiOff,
 } from "lucide-react";
 
@@ -79,7 +71,7 @@ function resolveSpeakerPhoto(name?: string | null, photoUrl?: string | null): st
 }
 
 // ---------------------------------------------------------------------------
-// ÁUDIO CINEMATOGRÁFICO DO TELÃO (Chimes e Efeitos Web Audio em 60fps)
+// ÁUDIO CINEMATOGRÁFICO DO TELÃO (Chimes Web Audio)
 // ---------------------------------------------------------------------------
 function playPresentationChime(kind: "STAGE_START" | "POLL_WINNER") {
   try {
@@ -135,15 +127,14 @@ function playPresentationChime(kind: "STAGE_START" | "POLL_WINNER") {
 }
 
 // ---------------------------------------------------------------------------
-// SUB-COMPONENTE: Anel de Progresso Circular que Esvazia Suavemente
+// SUB-COMPONENTE: Cronômetro Horológico de Precisão (Sem caixa, sem rótulo redundante)
 // ---------------------------------------------------------------------------
 function CircularTimer({
   formatted,
   alertLevel,
   elapsedMs,
   totalDurationMs,
-  phaseLabel,
-  size = 140,
+  size = 168,
 }: {
   formatted: string;
   alertLevel: "NORMAL" | "WARNING_2MIN" | "CRITICAL_30S" | "EXPIRED";
@@ -152,8 +143,10 @@ function CircularTimer({
   phaseLabel?: string;
   size?: number;
 }) {
-  const strokeWidth = size > 170 ? 8 : 6;
-  const radius = (size - strokeWidth * 2) / 2;
+  const strokeWidth = size >= 190 ? 4.5 : 3.5;
+  const center = size / 2;
+  const outerTickRadius = center - 2;
+  const radius = center - 14;
   const circumference = 2 * Math.PI * radius;
 
   const remainingFraction =
@@ -167,31 +160,90 @@ function CircularTimer({
         ? "#F59E0B"
         : alertLevel === "WARNING_2MIN"
           ? "#FCD34D"
-          : "#10B981";
+          : "#34D399";
 
   const glowShadow =
     alertLevel === "EXPIRED"
-      ? "drop-shadow(0 0 14px rgba(239, 68, 68, 0.7))"
+      ? "drop-shadow(0 0 18px rgba(239, 68, 68, 0.75))"
       : alertLevel === "CRITICAL_30S"
-        ? "drop-shadow(0 0 12px rgba(245, 158, 11, 0.6))"
+        ? "drop-shadow(0 0 16px rgba(245, 158, 11, 0.65))"
         : alertLevel === "WARNING_2MIN"
-          ? "drop-shadow(0 0 10px rgba(252, 211, 77, 0.45))"
-          : "drop-shadow(0 0 10px rgba(16, 185, 129, 0.4))";
+          ? "drop-shadow(0 0 14px rgba(252, 211, 77, 0.5))"
+          : "drop-shadow(0 0 16px rgba(52, 211, 153, 0.45))";
+
+  const textGlow =
+    alertLevel === "EXPIRED"
+      ? "0 0 32px rgba(239, 68, 68, 0.55)"
+      : alertLevel === "CRITICAL_30S"
+        ? "0 0 28px rgba(245, 158, 11, 0.45)"
+        : "0 0 28px rgba(52, 211, 153, 0.28)";
+
+  // Posição do ponto orbital na ponta do arco
+  const tipAngle = -Math.PI / 2 + 2 * Math.PI * remainingFraction;
+  const tipX = center + radius * Math.cos(tipAngle);
+  const tipY = center + radius * Math.sin(tipAngle);
+
+  const tickCount = 60;
+  const activeTicks = Math.round(remainingFraction * tickCount);
 
   return (
-    <div className="relative flex flex-col items-center justify-center mx-auto select-none" style={{ width: size, height: size }}>
-      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+    <div
+      className="relative flex items-center justify-center mx-auto select-none overflow-visible"
+      style={{ width: size, height: size }}
+    >
+      {/* Halo radial atmosférico livre de caixa */}
+      <div
+        className="absolute -inset-6 rounded-full pointer-events-none opacity-40 blur-2xl"
+        style={{
+          background: `radial-gradient(circle, ${strokeColor}33 0%, transparent 70%)`,
+        }}
+      />
+
+      <svg
+        className="w-full h-full overflow-visible"
+        style={{ overflow: "visible" }}
+        viewBox={`0 0 ${size} ${size}`}
+      >
+        {/* 60 marcações horológicas de alta precisão */}
+        {Array.from({ length: tickCount }).map((_, idx) => {
+          const a = (idx / tickCount) * Math.PI * 2 - Math.PI / 2;
+          const isMajor = idx % 5 === 0;
+          const rOuter = outerTickRadius;
+          const rInner = rOuter - (isMajor ? 6 : 3);
+          const x1 = center + rInner * Math.cos(a);
+          const y1 = center + rInner * Math.sin(a);
+          const x2 = center + rOuter * Math.cos(a);
+          const y2 = center + rOuter * Math.sin(a);
+          const lit = idx <= activeTicks;
+          return (
+            <line
+              key={idx}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={lit ? strokeColor : "rgba(213, 197, 170, 0.14)"}
+              strokeOpacity={lit ? (isMajor ? 0.75 : 0.38) : 0.2}
+              strokeWidth={isMajor ? 1.4 : 0.9}
+              strokeLinecap="round"
+            />
+          );
+        })}
+
+        {/* Trilha fina de base */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={center}
+          cy={center}
           r={radius}
-          stroke="rgba(213, 197, 170, 0.12)"
-          strokeWidth={strokeWidth}
+          stroke="rgba(213, 197, 170, 0.1)"
+          strokeWidth={1.25}
           fill="none"
         />
+
+        {/* Arco principal de precisão */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={center}
+          cy={center}
           r={radius}
           stroke={strokeColor}
           strokeWidth={strokeWidth}
@@ -199,17 +251,38 @@ function CircularTimer({
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           fill="none"
+          transform={`rotate(-90 ${center} ${center})`}
           style={{
             filter: glowShadow,
             transition: "stroke-dashoffset 0.5s linear, stroke 0.3s ease",
           }}
         />
+
+        {/* Ponto luminoso orbital na extremidade ativa */}
+        {remainingFraction > 0.01 && (
+          <circle
+            cx={tipX}
+            cy={tipY}
+            r={strokeWidth * 1.15}
+            fill="#F7DECA"
+            style={{
+              filter: glowShadow,
+              transition: "cx 0.5s linear, cy 0.5s linear",
+            }}
+          />
+        )}
       </svg>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
+      {/* Dígitos tabulares esculpidos sem qualquer texto redundante */}
+      <div className="absolute inset-0 flex items-center justify-center text-center select-none pointer-events-none">
         <span
-          className={`font-mono font-bold tracking-tight leading-none ${
-            size >= 190 ? "text-4xl sm:text-5xl" : size >= 150 ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"
+          style={{ textShadow: textGlow }}
+          className={`font-mono font-bold tabular-nums tracking-tight leading-none ${
+            size >= 190
+              ? "text-5xl sm:text-6xl"
+              : size >= 150
+                ? "text-4xl sm:text-[42px]"
+                : "text-3xl sm:text-4xl"
           } ${
             alertLevel === "EXPIRED"
               ? "text-red-400 animate-pulse"
@@ -222,11 +295,6 @@ function CircularTimer({
         >
           {formatted}
         </span>
-        {phaseLabel && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 mt-1 block">
-            {phaseLabel}
-          </span>
-        )}
       </div>
     </div>
   );
@@ -239,12 +307,12 @@ function SoundWaveBadge({ label = "Com a Palavra" }: { label?: string }) {
   return (
     <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400">
       <span className="flex items-end gap-0.5 h-3" aria-hidden="true">
-        <span className="w-1 bg-emerald-400 rounded-full animate-wave-1" />
-        <span className="w-1 bg-emerald-400 rounded-full animate-wave-2" />
-        <span className="w-1 bg-emerald-400 rounded-full animate-wave-3" />
-        <span className="w-1 bg-emerald-400 rounded-full animate-wave-1" />
+        <span className="w-0.5 bg-emerald-400 rounded-full animate-wave-1" />
+        <span className="w-0.5 bg-emerald-400 rounded-full animate-wave-2" />
+        <span className="w-0.5 bg-emerald-400 rounded-full animate-wave-3" />
+        <span className="w-0.5 bg-emerald-400 rounded-full animate-wave-1" />
       </span>
-      <span className="uppercase tracking-wider text-[11px] font-bold">{label}</span>
+      <span className="uppercase tracking-[0.2em] text-[10px] font-bold">{label}</span>
     </div>
   );
 }
@@ -254,7 +322,7 @@ function SoundWaveBadge({ label = "Com a Palavra" }: { label?: string }) {
 // ---------------------------------------------------------------------------
 function ConfettiSparkles() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-2xl z-0">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {[...Array(14)].map((_, i) => (
         <div
           key={i}
@@ -272,7 +340,7 @@ function ConfettiSparkles() {
 }
 
 // ---------------------------------------------------------------------------
-// SUB-COMPONENTE: Módulo de Participação com QR Code (Autêntico, sem pílulas)
+// SUB-COMPONENTE: QR Code Arquitetônico Flutuante (Zero Caixas Pesadas)
 // ---------------------------------------------------------------------------
 function ParticipateNowCard({
   title = "Participe pelo Celular",
@@ -287,16 +355,15 @@ function ParticipateNowCard({
 }) {
   if (compact || size === "compact") {
     return (
-      <div className="border border-white/10 bg-[#0A150D]/90 p-3 sm:p-3.5 rounded-2xl flex items-center gap-3.5 shadow-xl max-w-sm w-full backdrop-blur-md select-none group hover:border-emerald-400/40 transition">
-        <div className="relative w-14 h-14 bg-white p-1 rounded-xl shrink-0 shadow-md">
+      <div className="flex items-center gap-4 max-w-sm w-full select-none">
+        <div className="relative w-14 h-14 bg-white p-1.5 rounded-xl shrink-0 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
           <img src="/api/qr" alt="QR" className="w-full h-full object-contain" />
         </div>
         <div className="text-xs text-[#D5C5AA]/90 text-left space-y-0.5">
-          <div className="font-bold text-[#F7DECA] text-xs">
+          <div className="font-bold text-[#F7DECA] text-xs tracking-wide uppercase">
             {title}
           </div>
-          <span className="block text-[11px] leading-tight text-[#D5C5AA]/80">{subtitle}</span>
-          <span className="text-[10px] text-emerald-400 font-semibold block">Sem necessidade de instalar app</span>
+          <span className="block text-[11px] leading-tight text-[#D5C5AA]/75">{subtitle}</span>
         </div>
       </div>
     );
@@ -304,46 +371,46 @@ function ParticipateNowCard({
 
   const isHero = size === "hero";
   const qrBoxClass = isHero
-    ? "w-44 h-44 sm:w-48 sm:h-48 p-2.5 sm:p-3"
-    : "w-32 h-32 sm:w-36 sm:h-36 p-2 sm:p-2.5";
-  const cardPadding = isHero ? "p-5 sm:p-6 space-y-3" : "p-3.5 sm:p-4 space-y-2";
+    ? "w-44 h-44 sm:w-52 sm:h-52 p-3"
+    : "w-32 h-32 sm:w-36 sm:h-36 p-2.5";
 
   return (
-    <div className="relative group max-w-sm w-full mx-auto select-none">
-      <div className="absolute -inset-1 rounded-3xl bg-emerald-500/10 blur-xl opacity-60 group-hover:opacity-100 transition duration-700" />
+    <div className="relative flex flex-col items-center text-center max-w-xs w-full mx-auto select-none space-y-3">
+      {/* Rótulo superior de telemetria */}
+      <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-400">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span>{title}</span>
+      </div>
 
-      <div className={`relative rounded-3xl border border-white/10 bg-[#0A140E]/95 backdrop-blur-2xl ${cardPadding} text-center shadow-2xl`}>
-        {/* Título autêntico sem botão de pílula */}
-        <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>{title}</span>
+      {/* Superfície óptica do QR Code flutuando sem moldura de card em volta */}
+      <div className="relative group">
+        <div className="absolute -inset-4 rounded-3xl bg-emerald-500/15 blur-2xl opacity-75 pointer-events-none" />
+        <div
+          className={`relative ${qrBoxClass} mx-auto bg-white rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.55)] flex items-center justify-center`}
+        >
+          <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-emerald-700/80 pointer-events-none" />
+          <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-emerald-700/80 pointer-events-none" />
+          <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-emerald-700/80 pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-emerald-700/80 pointer-events-none" />
+          <img
+            src="/api/qr"
+            alt="QR Code de Participação"
+            className="w-full h-full object-contain"
+          />
         </div>
+      </div>
 
-        <div className={`relative ${qrBoxClass} mx-auto bg-white rounded-2xl shadow-[inset_0_2px_8px_rgba(0,0,0,0.08)] border-2 border-emerald-500/30 flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-300`}>
-          <div className="absolute top-1.5 left-1.5 w-3 h-3 border-t-2 border-l-2 border-emerald-700 rounded-tl pointer-events-none" />
-          <div className="absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-emerald-700 rounded-tr pointer-events-none" />
-          <div className="absolute bottom-1.5 left-1.5 w-3 h-3 border-b-2 border-l-2 border-emerald-700 rounded-bl pointer-events-none" />
-          <div className="absolute bottom-1.5 right-1.5 w-3 h-3 border-b-2 border-r-2 border-emerald-700 rounded-br pointer-events-none" />
-          <img src="/api/qr" alt="QR Code de Participação" className="w-full h-full object-contain" />
+      {/* Tipografia editorial direta, sem caixas */}
+      <div className="space-y-1 pt-0.5">
+        <div className="font-display font-bold text-xs sm:text-sm text-[#F7DECA] tracking-tight">
+          Aponte a Câmera do Celular
         </div>
-
-        <div className="space-y-0.5">
-          <div className="font-display font-bold text-xs sm:text-sm text-[#F7DECA] tracking-tight">
-            Aponte a Câmera do Celular
-          </div>
-          <p className="text-[10px] sm:text-[11px] text-[#D5C5AA]/85 leading-snug font-medium line-clamp-2">
-            {subtitle}
-          </p>
-        </div>
-
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-[#D5C5AA]/70">
-          <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-            <Smartphone className="w-3 h-3" />
-            <span>Interação Instantânea</span>
-          </span>
-          <span className="font-mono text-emerald-300/90 font-medium">
-            Sem baixar app
-          </span>
+        <p className="text-[11px] text-[#D5C5AA]/75 leading-snug max-w-[240px] mx-auto">
+          {subtitle}
+        </p>
+        <div className="pt-1 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.18em] text-emerald-400/90 font-semibold">
+          <Smartphone className="w-3 h-3" />
+          <span>Acesso Instantâneo · Web</span>
         </div>
       </div>
     </div>
@@ -474,19 +541,6 @@ export function ArenaScreen() {
 
   const showTimer = isStageMonitor || (ls?.showTimerOnArena ?? true);
 
-  const timerStyle = useMemo(() => {
-    if (timer.alertLevel === "EXPIRED") {
-      return "text-red-400 border-red-500/60 bg-red-950/40 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.35)]";
-    }
-    if (timer.alertLevel === "CRITICAL_30S") {
-      return "text-amber-400 border-amber-400/60 bg-amber-950/30 shadow-[0_0_18px_rgba(245,158,11,0.25)] animate-pulse";
-    }
-    if (timer.alertLevel === "WARNING_2MIN") {
-      return "text-amber-200 border-amber-300/40 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]";
-    }
-    return "text-[#F7DECA] border-[#D5C5AA]/25 bg-[#0A150D]/80 shadow-[0_0_15px_rgba(20,83,45,0.2)]";
-  }, [timer.alertLevel]);
-
   const activeSpeakerName =
     activeTopic?.mainSpeaker?.name || activeStep?.speaker?.name || activeStep?.responsibleName;
   const activeSpeakerPhoto = resolveSpeakerPhoto(
@@ -494,12 +548,16 @@ export function ArenaScreen() {
     activeTopic?.mainSpeaker?.photoUrl || activeStep?.speaker?.photoUrl
   );
 
-  // Contagem regressiva autêntica e confiável para início
-  const [countdownText, setCountdownText] = useState<string | null>(null);
+  // Contagem regressiva de alta precisão (HH:MM:SS) para abertura
+  const [countdownParts, setCountdownParts] = useState<{
+    hours: string;
+    minutes: string;
+    seconds: string;
+  } | null>(null);
 
   useEffect(() => {
     if (currentMode !== "WAITING") {
-      setCountdownText(null);
+      setCountdownParts(null);
       return;
     }
 
@@ -510,22 +568,22 @@ export function ArenaScreen() {
     const updateTicker = () => {
       const now = Date.now();
       if (target && target > now) {
-        const diff = target - now;
-        const totalSec = Math.floor(diff / 1000);
+        const totalSec = Math.floor((target - now) / 1000);
         const hours = Math.floor(totalSec / 3600);
         const mins = Math.floor((totalSec % 3600) / 60);
         const secs = totalSec % 60;
-        if (hours > 0) {
-          setCountdownText(
-            `${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`
-          );
-        } else {
-          setCountdownText(
-            `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
-          );
-        }
+        setCountdownParts({
+          hours: String(hours).padStart(2, "0"),
+          minutes: String(mins).padStart(2, "0"),
+          seconds: String(secs).padStart(2, "0"),
+        });
       } else {
-        setCountdownText(timer.formatted || "05:00");
+        const parts = (timer.formatted || "05:00").split(":");
+        setCountdownParts({
+          hours: "00",
+          minutes: parts[0] || "05",
+          seconds: parts[1] || "00",
+        });
       }
     };
 
@@ -533,8 +591,6 @@ export function ArenaScreen() {
     const ticker = setInterval(updateTicker, 1000);
     return () => clearInterval(ticker);
   }, [snapshot?.event?.scheduledStartAt, currentMode, timer.formatted]);
-
-  const countdownDisplay = countdownText || timer.formatted || "05:00";
 
   // =========================================================================
   // MODO MONITOR DE APOIO DE PALCO (ALTO CONTRASTE PARA O PALESTRANTE)
@@ -549,9 +605,9 @@ export function ArenaScreen() {
           </div>
         )}
 
-        <header className="shrink-0 flex items-center justify-between border-b border-white/10 pb-4">
+        <header className="shrink-0 flex items-center justify-between border-b border-white/[0.08] pb-4">
           <div className="space-y-0.5">
-            <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold">
+            <span className="text-[11px] uppercase tracking-[0.22em] text-emerald-400 font-bold">
               Monitor de Apoio de Palco · Arena UEFS
             </span>
             <h1 className="font-display text-xl sm:text-2xl text-[#F7DECA]">
@@ -562,7 +618,7 @@ export function ArenaScreen() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <span className="text-[11px] text-[#D5C5AA]/70 block uppercase tracking-wider">
+              <span className="text-[10px] text-[#D5C5AA]/60 block uppercase tracking-[0.2em]">
                 Com a Palavra
               </span>
               <strong className="text-base text-[#F7DECA]">
@@ -571,7 +627,7 @@ export function ArenaScreen() {
             </div>
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-xl border border-white/10 bg-[#0A150D] text-[#D5C5AA] hover:text-[#F7DECA]"
+              className="p-2 text-[#D5C5AA] hover:text-[#F7DECA] cursor-pointer"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
@@ -584,17 +640,16 @@ export function ArenaScreen() {
             alertLevel={timer.alertLevel}
             elapsedMs={timer.elapsedMs}
             totalDurationMs={timer.totalDurationMs}
-            phaseLabel={activeStep?.phaseLabel || "Tempo da Fase"}
-            size={220}
+            size={240}
           />
           {timer.alertLevel === "EXPIRED" && (
-            <div className="text-lg sm:text-xl font-bold text-red-400 uppercase tracking-wider animate-pulse">
+            <div className="text-lg sm:text-xl font-bold text-red-400 uppercase tracking-[0.2em] animate-pulse">
               TEMPO DA FASE ENCERRADO (00:00)
             </div>
           )}
         </div>
 
-        <footer className="shrink-0 border-t border-white/10 pt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#D5C5AA]/80">
+        <footer className="shrink-0 border-t border-white/[0.08] pt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#D5C5AA]/80">
           <div>
             PRÓXIMA ETAPA:{" "}
             <strong className="text-[#F7DECA]">
@@ -623,35 +678,37 @@ export function ArenaScreen() {
   }
 
   // =========================================================================
-  // TELÃO PÚBLICO DA ARENA (PROJEÇÃO PRINCIPAL IMERSIVA v2.5 — STRICT NO-SCROLL)
+  // TELÃO PÚBLICO DA ARENA — ARQUITETURA EDITORIAL INTERNACIONAL (SEM CAIXAS)
   // =========================================================================
   return (
     <main
-      className={`arena-stage h-screen max-h-screen w-screen max-w-screen overflow-hidden flex flex-col justify-between p-4 sm:p-6 lg:p-7 select-none box-border ${
+      className={`arena-stage h-screen max-h-screen w-screen max-w-screen overflow-hidden flex flex-col justify-between px-6 sm:px-10 lg:px-14 py-5 sm:py-6 select-none box-border ${
         isIdle ? "cursor-none" : "cursor-default"
       }`}
       data-mode={currentMode}
     >
-      {/* 1. Camadas de Fundo Vivo e Dinâmico */}
+      {/* 1. Camadas Atmosféricas + Motor Generativo de Partículas 3D */}
       <div className="arena-orb-1" />
       <div className="arena-orb-2" />
       <div className="arena-orb-accent" />
-      <div className="arena-grid-mesh" />
+      <ArenaParticleField
+        accent={currentMode === "POLL_OPEN" || currentMode === "POLL_RESULTS" ? "amber" : "emerald"}
+      />
       <div className="arena-vignette" />
 
       {/* Controles Flutuantes Discretos */}
       <div
-        className={`fixed bottom-3 right-3 z-50 flex items-center gap-1.5 transition-opacity duration-300 ${
-          isIdle ? "opacity-0 pointer-events-none" : "opacity-90 hover:opacity-100"
+        className={`fixed bottom-4 right-5 z-50 flex items-center gap-2 transition-opacity duration-300 ${
+          isIdle ? "opacity-0 pointer-events-none" : "opacity-85 hover:opacity-100"
         }`}
       >
         <ThemeToggle compact />
         <button
           onClick={toggleSound}
-          className={`p-2 rounded-xl border backdrop-blur-md cursor-pointer transition ${
+          className={`p-2 rounded-full backdrop-blur-md cursor-pointer transition ${
             soundEnabled
-              ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-300 shadow-md"
-              : "bg-[#030A06]/80 border-[#D5C5AA]/20 text-[#D5C5AA]/60 hover:text-white"
+              ? "bg-emerald-500/20 text-emerald-300"
+              : "bg-black/40 text-[#D5C5AA]/60 hover:text-white"
           }`}
           title={soundEnabled ? "Desativar Áudio do Telão (M)" : "Ativar Áudio do Telão (M)"}
         >
@@ -660,145 +717,209 @@ export function ArenaScreen() {
 
         <button
           onClick={toggleFullscreen}
-          className="p-2 rounded-xl border border-[#D5C5AA]/20 bg-[#030A06]/80 text-[#D5C5AA]/60 hover:text-white hover:border-[#D5C5AA]/60 transition backdrop-blur-md cursor-pointer"
+          className="p-2 rounded-full bg-black/40 text-[#D5C5AA]/60 hover:text-white transition backdrop-blur-md cursor-pointer"
           title={isFullscreen ? "Sair de Tela Cheia (F)" : "Alternar Tela Cheia (F)"}
         >
           {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
         </button>
       </div>
 
-      {/* Indicador de Conexão */}
+      {/* Indicador de Sincronização */}
       {!connected && (
-        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 rounded-full bg-red-950/95 border border-red-500/60 text-red-200 text-xs font-semibold flex items-center gap-2 shadow-2xl backdrop-blur-md animate-pulse">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 rounded-full bg-red-950/90 text-red-200 text-xs font-semibold flex items-center gap-2 backdrop-blur-md animate-pulse">
           <WifiOff className="w-3.5 h-3.5 text-red-400" />
-          <span>Sincronizando com o servidor... (horário preservado)</span>
+          <span>Sincronizando com o servidor...</span>
         </div>
       )}
 
-      {/* 2. Cabeçalho Nobre e Translúcido com LOGO CLARO e SEM PÍLULAS */}
-      <header className="relative z-20 shrink-0 flex items-center justify-between border-b border-white/10 pb-3">
-        <div className="flex items-center gap-3 sm:gap-3.5">
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#0A150D] border border-white/10 p-1.5 flex items-center justify-center shadow-md shrink-0">
-            <BrandLogo className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <div className="font-display font-bold text-lg sm:text-xl text-[#F7DECA] tracking-tight leading-tight">
-              A Nova Moeda
+      {/* 2. Masthead Arquitetônico de 3 Zonas — Padrão Fórum Internacional */}
+      <header className="relative z-20 shrink-0 pb-4">
+        <div className="grid grid-cols-12 items-center gap-4">
+          {/* ZONA ESQUERDA (4 col): Assinatura Institucional & Marca */}
+          <div className="col-span-6 lg:col-span-4 flex items-center gap-3.5 min-w-0">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
+              <div className="absolute inset-0 rounded-full bg-emerald-400/15 blur-md pointer-events-none" />
+              <BrandLogo className="relative w-full h-full object-contain drop-shadow-[0_0_14px_rgba(52,211,153,0.35)]" />
             </div>
-            <div className="text-[11px] sm:text-xs text-[#D5C5AA]/70 flex items-center gap-1.5">
-              <span className="font-semibold text-emerald-400">UEFS</span>
-              <span>·</span>
-              <span>
+
+            <div className="h-7 w-[1px] bg-gradient-to-b from-transparent via-[#D5C5AA]/35 to-transparent shrink-0" />
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-emerald-400 font-bold truncate">
+                <span>UEFS</span>
+                <span className="text-[#D5C5AA]/30">/</span>
+                <span className="text-[#D5C5AA]/70">Auditório 02</span>
+              </div>
+              <div className="truncate">
+                <span className="font-display font-extrabold text-base sm:text-lg text-[#F7DECA] tracking-tight">
+                  A Nova Moeda
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ZONA CENTRAL (4 col): Eixo de Progressão das 10 Etapas & Fase Ativa */}
+          <div className="hidden lg:flex lg:col-span-4 flex-col items-center justify-center space-y-1.5">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] font-semibold">
+              <span className="text-emerald-400 font-mono font-bold">
                 {currentMode === "WAITING"
-                  ? "Auditório 2"
+                  ? "PRÉ-ABERTURA"
+                  : activeStep?.macroOrder
+                    ? `ETAPA ${String(activeStep.macroOrder).padStart(2, "0")}/10`
+                    : "EM SESSÃO"}
+              </span>
+              <span className="text-[#D5C5AA]/30">—</span>
+              <span className="text-[#F7DECA]/90 truncate max-w-[220px]">
+                {currentMode === "WAITING"
+                  ? "Recepção & Votação Antecipada"
                   : activeStep?.phaseLabel || ARENA_MODE_LABELS[currentMode]}
+              </span>
+            </div>
+
+            {/* Trilha Óptica de 10 Segmentos Macro */}
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: 10 }).map((_, idx) => {
+                const stepNum = idx + 1;
+                const activeMacro =
+                  currentMode === "WAITING" ? 0 : activeStep?.macroOrder || 1;
+                const isCompleted = stepNum < activeMacro;
+                const isCurrent = stepNum === activeMacro;
+                return (
+                  <span
+                    key={stepNum}
+                    className={`h-[2px] rounded-full transition-all duration-500 ${
+                      isCurrent
+                        ? "w-6 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+                        : isCompleted
+                          ? "w-3 bg-emerald-500/55"
+                          : "w-3 bg-white/[0.12]"
+                    }`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ZONA DIREITA (4 col): Status de Transmissão Limpo */}
+          <div className="col-span-6 lg:col-span-4 flex items-center justify-end">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.26em] text-[#F7DECA] font-bold">
+                Ao Vivo
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          {showTimer &&
-            currentMode !== "WAITING" &&
-            ![
-              "INTRODUCTION",
-              "SPEAKER_EXPOSITION",
-              "SELECTED_QUESTION",
-              "ROUNDTABLE",
-              "POLL_OPEN",
-            ].includes(currentMode) && (
-              <div
-                className={`px-3 py-1 rounded-xl border font-mono font-bold text-base sm:text-lg flex items-center gap-1.5 backdrop-blur-md ${timerStyle}`}
-              >
-                <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{timer.formatted}</span>
-              </div>
-            )}
-
-          {/* Marcador autêntico de transmissão (Sem pílula) */}
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-emerald-400">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-[11px] uppercase tracking-widest text-[#D5C5AA]">AO VIVO</span>
-          </div>
-        </div>
+        {/* Linha Capilar Óptica com Foco Luminoso */}
+        <div className="mt-3.5 h-[1px] w-full bg-gradient-to-r from-emerald-400/50 via-white/[0.12] to-emerald-400/30" />
       </header>
 
       {/* ========================================================================= */}
-      {/* 3. CONTEÚDO PRINCIPAL (100% NO-SCROLL · FITTED VIEWPORT)                  */}
+      {/* 3. PALCO CENTRAL (100% NO-SCROLL · COMPOSIÇÃO EDITORIAL ABERTA)           */}
       {/* ========================================================================= */}
-      <div key={currentMode} className="flex-1 min-h-0 flex items-center justify-center py-2 sm:py-3 relative z-10 overflow-hidden animate-stage-enter">
+      <div
+        key={currentMode}
+        className="flex-1 min-h-0 flex items-center justify-center py-3 relative z-10 overflow-visible animate-stage-enter"
+      >
         {/* ----------------------------------------------------------------------- */}
         {/* 1. MODO DE ESPERA / BOAS-VINDAS (WAITING)                               */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "WAITING" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            {/* Coluna Esquerda: Apresentação Nobre e Convidativa do Evento */}
-            <div className="lg:col-span-7 space-y-3.5 text-left">
-              {/* Identidade Institucional Autêntica (Sem pílulas de IA) */}
-              <div className="space-y-1">
-                <div className="text-[11px] sm:text-xs font-semibold tracking-widest uppercase text-emerald-400">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            {/* Coluna Esquerda: Tipografia Editorial + Contador Escultural + Especialistas */}
+            <div className="lg:col-span-8 space-y-6 text-left">
+              <div className="space-y-2">
+                <div className="text-[11px] font-bold tracking-[0.26em] uppercase text-emerald-400">
                   Universidade Estadual de Feira de Santana · Auditório 2
                 </div>
-                <h1 className="font-display text-3xl sm:text-5xl lg:text-5xl text-[#F7DECA] font-extrabold leading-[1.1] tracking-tight">
-                  A Nova Moeda: <br className="hidden sm:inline" />
-                  <span className="text-emerald-400">Economia da Solidão</span>
+                <h1 className="font-display text-4xl sm:text-6xl lg:text-[64px] text-[#F7DECA] font-extrabold leading-[1.04] tracking-tight">
+                  A Nova Moeda:{" "}
+                  <span className="text-emerald-400 font-light italic">Economia da Solidão</span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-[#D5C5AA]/90 max-w-2xl leading-relaxed pt-0.5">
-                  Sejam bem-vindos à Arena de debates. Uma reflexão coletiva sobre conexões humanas, capital social e o mercado da solidão. A votação da Mesa-Redonda já está aberta no celular: aponte a câmera para votar antes do início oficial!
+                <p className="text-xs sm:text-sm lg:text-base text-[#D5C5AA]/80 max-w-2xl leading-relaxed pt-1">
+                  Reflexão estratégica sobre conexões humanas, capital social e o mercado contemporâneo do isolamento. Aponte a câmera do celular para registrar seu voto na pauta da Mesa-Redonda.
                 </p>
               </div>
 
-              {/* Bloco Autêntico de Contagem Regressiva para Abertura */}
-              <div className="border border-white/10 bg-[#0A150D]/85 p-3 sm:p-3.5 rounded-2xl flex items-center justify-between gap-4 max-w-xl shadow-lg">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] sm:text-[11px] uppercase font-bold tracking-wider text-emerald-400 block">
-                    Abertura da Sessão
-                  </span>
-                  <span className="text-xs sm:text-sm text-[#F7DECA] font-medium block">
-                    Conecte seu dispositivo para acompanhar a programação
-                  </span>
+              {/* Contador Escultural de Alta Precisão — Sem Caixa Envolvente */}
+              <div className="border-l-2 border-emerald-400/70 pl-5 sm:pl-6 py-1 space-y-1.5 overflow-visible">
+                <div className="text-[10px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                  Início do ANM em
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F7DECA] tracking-wider leading-none">
-                    {countdownDisplay}
+                {countdownParts ? (
+                  <div
+                    className="flex items-baseline gap-3 sm:gap-4 font-mono tabular-nums text-[#F7DECA] overflow-visible"
+                    style={{
+                      textShadow:
+                        "0 0 36px rgba(52, 211, 153, 0.35), 0 0 70px rgba(16, 185, 129, 0.18)",
+                    }}
+                  >
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl sm:text-6xl font-bold tracking-tight leading-none">
+                        {countdownParts.hours}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400/80 font-sans font-bold">
+                        h
+                      </span>
+                    </div>
+                    <span className="text-2xl sm:text-4xl text-emerald-400/50 font-light">:</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl sm:text-6xl font-bold tracking-tight leading-none">
+                        {countdownParts.minutes}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400/80 font-sans font-bold">
+                        m
+                      </span>
+                    </div>
+                    <span className="text-2xl sm:text-4xl text-emerald-400/50 font-light">:</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl sm:text-6xl font-bold tracking-tight leading-none text-emerald-300">
+                        {countdownParts.seconds}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400/80 font-sans font-bold">
+                        s
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[9px] uppercase tracking-widest text-[#D5C5AA]/60 block mt-1">
-                    Contagem Regressiva
-                  </span>
-                </div>
+                ) : (
+                  <div
+                    className="font-mono text-4xl sm:text-6xl font-bold tabular-nums text-[#F7DECA] tracking-tight leading-none"
+                    style={{
+                      textShadow:
+                        "0 0 36px rgba(52, 211, 153, 0.35), 0 0 70px rgba(16, 185, 129, 0.18)",
+                    }}
+                  >
+                    {timer.formatted || "05:00"}
+                  </div>
+                )}
               </div>
 
-              {/* Os Seis Especialistas com Fotos Reais */}
-              <div className="space-y-1.5 pt-0.5">
-                <div className="flex items-center justify-between text-xs text-[#D5C5AA]/80">
-                  <span className="text-[11px] uppercase font-bold tracking-wider text-[#F7DECA]">
-                    Seis Especialistas da Mesa:
-                  </span>
-                  <span className="text-[11px] text-[#D5C5AA]/60 hidden sm:inline">
-                    Exposições individuais e Mesa-Redonda
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {/* Lineup Editorial dos 6 Especialistas — Sem Caixas Retangulares */}
+              <div className="pt-2 border-t border-white/[0.08]">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 pt-3">
                   {SIX_SPECIALISTS.map((sp) => (
                     <div
                       key={sp.name}
-                      className="border border-white/10 bg-[#0A150D]/90 p-2 rounded-xl flex flex-col items-center text-center space-y-1.5 shadow-sm group hover:border-emerald-500/40 transition"
+                      className="flex items-center gap-2.5 min-w-0 group"
                     >
                       <img
                         src={sp.photoUrl}
                         alt={sp.name}
-                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg object-cover border border-emerald-500/30 group-hover:scale-105 transition-transform"
+                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover object-top ring-1 ring-emerald-400/40 shrink-0 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
                       />
-                      <div className="min-w-0 w-full">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 block truncate">
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400 block truncate">
                           {sp.role}
                         </span>
-                        <span className="font-semibold text-[11px] text-[#F7DECA] block truncate leading-tight">
-                          {sp.name}
+                        <span className="font-semibold text-xs text-[#F7DECA] block truncate leading-tight">
+                          {sp.name.split(" ")[0]}
+                        </span>
+                        <span className="text-[10px] text-[#D5C5AA]/55 block truncate">
+                          {sp.sub}
                         </span>
                       </div>
                     </div>
@@ -807,11 +928,11 @@ export function ArenaScreen() {
               </div>
             </div>
 
-            {/* Coluna Direita: QR Code Nobre de Acesso Imediato */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center">
+            {/* Coluna Direita: QR Code Flutuante */}
+            <div className="lg:col-span-4 flex flex-col items-center justify-center">
               <ParticipateNowCard
                 title="Votação Aberta no Celular"
-                subtitle="Aponte a câmera para votar na questão da Mesa-Redonda agora mesmo."
+                subtitle="Aponte a câmera para votar na questão da Mesa-Redonda e habilitar sua credencial ao sorteio."
                 size="hero"
               />
             </div>
@@ -822,50 +943,50 @@ export function ArenaScreen() {
         {/* 2. MODO ABERTURA OFICIAL (OPENING)                                      */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "OPENING" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-7 space-y-3.5 sm:space-y-4 text-left">
-              <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                  Etapa 1 de 10 · Mesa Diretora
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="space-y-2">
+                <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold block">
+                  Etapa 01 / 10 · Sessão de Abertura
                 </span>
-                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-extrabold leading-[1.1] tracking-tight">
+                <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
                   Abertura e Boas-Vindas à Arena
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-[#D5C5AA]/90 max-w-2xl leading-relaxed font-medium pt-1">
+                <p className="text-xs sm:text-base text-[#D5C5AA]/85 max-w-2xl leading-relaxed pt-1">
                   Apresentação oficial da Arena A Nova Moeda, diretrizes do debate e acolhimento à plateia pela equipe organizadora e mediação.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl border border-white/10 bg-[#0A150D]/85 backdrop-blur-md flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-[#030A06] border border-emerald-500/40 flex items-center justify-center shrink-0 overflow-hidden">
-                  <img src="/img/Paula.jpeg" alt="Paula Melo" className="w-full h-full object-cover" />
-                </div>
+              {/* Assinatura Editorial da Mediação — Sem Caixa */}
+              <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
+                <img
+                  src="/img/Paula.jpeg"
+                  alt="Paula Melo"
+                  className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
+                />
                 <div className="space-y-0.5">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block">
+                  <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
                     Coordenação &amp; Mediação
                   </span>
-                  <div className="font-display font-bold text-base text-[#F7DECA]">
+                  <div className="font-display font-bold text-xl text-[#F7DECA]">
                     Paula Melo &amp; Equipe Organizadora
                   </div>
-                  <div className="text-xs text-[#D5C5AA]/70">
+                  <div className="text-xs text-[#D5C5AA]/65">
                     Apresentação do formato interativo e orientações ao público
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-3">
+            <div className="lg:col-span-5 flex flex-col items-center gap-6">
               {showTimer && (
-                <div className="border border-white/10 bg-[#0A150D]/90 p-3 sm:p-4 rounded-3xl text-center shadow-2xl backdrop-blur-xl w-full max-w-sm">
-                  <CircularTimer
-                    formatted={timer.formatted}
-                    alertLevel={timer.alertLevel}
-                    elapsedMs={timer.elapsedMs}
-                    totalDurationMs={timer.totalDurationMs}
-                    phaseLabel="Tempo de Abertura"
-                    size={130}
-                  />
-                </div>
+                <CircularTimer
+                  formatted={timer.formatted}
+                  alertLevel={timer.alertLevel}
+                  elapsedMs={timer.elapsedMs}
+                  totalDurationMs={timer.totalDurationMs}
+                  size={168}
+                />
               )}
               <ParticipateNowCard
                 title="Participe pelo Celular"
@@ -880,53 +1001,52 @@ export function ArenaScreen() {
         {/* 3. MODO INTRODUÇÃO E CONTEXTO (INTRODUCTION)                            */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "INTRODUCTION" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-7 space-y-3.5 sm:space-y-4 text-left">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                    Etapa 2 de 10 · Contexto Geral
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="space-y-2">
+                <div className="flex items-center gap-4">
+                  <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                    Etapa 02 / 10 · Contexto Estratégico
                   </span>
                   <SoundWaveBadge label="Com a Palavra" />
                 </div>
-                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-extrabold leading-[1.1] tracking-tight">
+                <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-[1.06] tracking-tight">
                   A Economia da Solidão
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-[#D5C5AA]/90 max-w-2xl leading-relaxed font-medium pt-1">
-                  Contextualização conceitual sobre as transformações sociais, o isolamento contemporâneo e os desafios humanos abordados na Arena.
+                <p className="text-xs sm:text-base text-[#D5C5AA]/85 max-w-2xl leading-relaxed pt-1">
+                  Contextualização conceitual sobre as transformações sociais, o isolamento contemporâneo e os impactos humanos e econômicos debatidos na Arena.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl border border-white/10 bg-[#0A150D]/85 backdrop-blur-md flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-[#030A06] border-2 border-emerald-500/40 overflow-hidden shrink-0 shadow-lg">
-                  <img src="/img/Paula.jpeg" alt="Paula Melo" className="w-full h-full object-cover" />
-                </div>
+              <div className="border-l-2 border-emerald-400/70 pl-5 flex items-center gap-4">
+                <img
+                  src="/img/Paula.jpeg"
+                  alt="Paula Melo"
+                  className="w-14 h-14 rounded-full object-cover object-top ring-2 ring-emerald-400/50 shrink-0 shadow-lg"
+                />
                 <div className="space-y-0.5">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block">
+                  <span className="text-[10px] uppercase font-bold tracking-[0.22em] text-emerald-400 block">
                     Apresentadora &amp; Mediadora
                   </span>
-                  <div className="font-display font-bold text-base text-[#F7DECA]">
+                  <div className="font-display font-bold text-xl text-[#F7DECA]">
                     Paula Melo
                   </div>
-                  <div className="text-xs text-[#D5C5AA]/70">
-                    10 minutos de introdução antes do início das 5 pautas individuais
+                  <div className="text-xs text-[#D5C5AA]/65">
+                    Panorama introdutório antes das 5 exposições individuais
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-3">
+            <div className="lg:col-span-5 flex flex-col items-center gap-6">
               {showTimer && (
-                <div className="border border-white/10 bg-[#0A150D]/90 p-3 sm:p-4 rounded-3xl text-center shadow-2xl backdrop-blur-xl w-full max-w-sm">
-                  <CircularTimer
-                    formatted={timer.formatted}
-                    alertLevel={timer.alertLevel}
-                    elapsedMs={timer.elapsedMs}
-                    totalDurationMs={timer.totalDurationMs}
-                    phaseLabel="Tempo de Introdução"
-                    size={130}
-                  />
-                </div>
+                <CircularTimer
+                  formatted={timer.formatted}
+                  alertLevel={timer.alertLevel}
+                  elapsedMs={timer.elapsedMs}
+                  totalDurationMs={timer.totalDurationMs}
+                  size={168}
+                />
               )}
               <ParticipateNowCard
                 title="Participe pelo Celular"
@@ -941,26 +1061,24 @@ export function ArenaScreen() {
         {/* 4. MODO VOTAÇÃO DA MESA-REDONDA (POLL_OPEN / POLL_RESULTS)              */}
         {/* ----------------------------------------------------------------------- */}
         {(currentMode === "POLL_OPEN" || currentMode === "POLL_RESULTS") && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-7 space-y-3 text-left">
-              <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                  {currentMode === "POLL_RESULTS" || activePoll?.status === "CLOSED" || activePoll?.status === "RESULTS_PUBLISHED"
-                    ? "Resultado Oficial · Questão Eleita"
-                    : "Decisão da Plateia · Votação Aberta"}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-7 space-y-5 text-left">
+              <div className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.26em] text-amber-400 font-bold block">
+                  {currentMode === "POLL_RESULTS" ||
+                  activePoll?.status === "CLOSED" ||
+                  activePoll?.status === "RESULTS_PUBLISHED"
+                    ? "Resultado Oficial · Questão Eleita pelo Auditório"
+                    : "Decisão Coletiva · Votação em Tempo Real"}
                 </span>
-                <h1 className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-extrabold leading-tight tracking-tight drop-shadow-sm">
-                  {activePoll?.question || "Qual questão crucial deve ser debatida pelos especialistas na Mesa-Redonda?"}
+                <h1 className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-extrabold leading-tight tracking-tight">
+                  {activePoll?.question ||
+                    "Qual questão deve orientar a mesa-redonda?"}
                 </h1>
-                <p className="text-xs sm:text-sm text-[#D5C5AA]/85 max-w-2xl leading-relaxed pt-0.5">
-                  {currentMode === "POLL_RESULTS" || activePoll?.status === "CLOSED" || activePoll?.status === "RESULTS_PUBLISHED"
-                    ? "Apuração concluída. Esta é a questão eleita pela plateia para guiar a Mesa-Redonda."
-                    : "A escolha do tema é feita pela plateia em tempo real. Aponte a câmera do celular para votar."}
-                </p>
               </div>
 
-              {/* Lista das Opções com Padding Calibrado */}
-              <div className="space-y-2">
+              {/* Linhas Arquitetônicas de Apuração — Sem Caixas Fechadas */}
+              <div className="divide-y divide-white/[0.08] border-t border-b border-white/[0.08]">
                 {activePoll?.options.map((opt) => {
                   const pct = opt.percentage ?? 0;
                   const isWinner = opt.isWinner;
@@ -974,43 +1092,47 @@ export function ArenaScreen() {
                   return (
                     <div
                       key={opt.id}
-                      className={`relative border p-2.5 sm:p-3 rounded-2xl transition-all duration-300 backdrop-blur-xl ${
+                      className={`relative py-3.5 pl-4 sm:pl-5 transition-all duration-500 border-l-2 ${
                         isWinner
-                          ? "border-2 border-amber-400 bg-amber-950/40 shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                          : "border-white/10 bg-[#0A150D]/85 hover:border-emerald-500/40"
+                          ? "border-amber-400 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent"
+                          : "border-emerald-500/40"
                       }`}
                     >
                       {isWinner && <ConfettiSparkles />}
-                      <div className="relative z-10 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                            {opt.themeLabel || `Questão ${opt.optionOrder}`}
+                      <div className="relative z-10 flex items-baseline justify-between gap-4">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-[0.22em] ${
+                              isWinner ? "text-amber-300" : "text-emerald-400"
+                            }`}
+                          >
+                            {opt.themeLabel || `Questão 0${opt.optionOrder}`}
                           </span>
                           {isWinner && (
-                            <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-extrabold text-[9px] flex items-center gap-1 shadow-sm">
-                              <Trophy className="w-2.5 h-2.5 fill-current" />
-                              ELEITA PELO PÚBLICO
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-400">
+                              <Trophy className="w-3 h-3" />
+                              <span>Eleita</span>
                             </span>
                           )}
                         </div>
                         {showPct && (
-                          <span className="font-mono font-bold text-base text-[#F7DECA] shrink-0">
+                          <span className="font-mono font-bold tabular-nums text-xl sm:text-2xl text-[#F7DECA] shrink-0">
                             {pct}%
                           </span>
                         )}
                       </div>
 
-                      <p className="relative z-10 text-xs sm:text-sm font-medium text-[#F7DECA] mt-0.5 leading-snug">
-                        &ldquo;{opt.label}&rdquo;
+                      <p className="relative z-10 text-xs sm:text-sm font-medium text-[#F7DECA]/95 mt-1 leading-snug max-w-2xl">
+                        {opt.label}
                       </p>
 
                       {showPct && (
-                        <div className="relative z-10 w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/10 mt-1.5">
+                        <div className="relative z-10 w-full h-[3px] bg-white/[0.07] overflow-hidden mt-2.5">
                           <div
                             className={`h-full transition-all duration-1000 ease-out ${
                               isWinner
-                                ? "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]"
-                                : "bg-gradient-to-r from-[#14532D] to-emerald-500"
+                                ? "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+                                : "bg-emerald-400/80"
                             }`}
                             style={{ width: `${pct}%` }}
                           />
@@ -1022,22 +1144,19 @@ export function ArenaScreen() {
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-3">
+            <div className="lg:col-span-5 flex flex-col items-center gap-6">
               {showTimer && (
-                <div className="border border-white/10 bg-[#0A150D]/90 p-3 sm:p-4 rounded-3xl text-center shadow-2xl backdrop-blur-xl w-full max-w-sm">
-                  <CircularTimer
-                    formatted={timer.formatted}
-                    alertLevel={timer.alertLevel}
-                    elapsedMs={timer.elapsedMs}
-                    totalDurationMs={timer.totalDurationMs}
-                    phaseLabel="Tempo de Votação"
-                    size={130}
-                  />
-                </div>
+                <CircularTimer
+                  formatted={timer.formatted}
+                  alertLevel={timer.alertLevel}
+                  elapsedMs={timer.elapsedMs}
+                  totalDurationMs={timer.totalDurationMs}
+                  size={168}
+                />
               )}
               <ParticipateNowCard
                 title="Vote pelo Celular"
-                subtitle="Vote na questão da Mesa-Redonda diretamente pelo navegador."
+                subtitle="Escolha o tema da Mesa-Redonda diretamente pelo navegador."
                 size="default"
               />
             </div>
@@ -1048,67 +1167,62 @@ export function ArenaScreen() {
         {/* 5. TELA DA EXPOSIÇÃO INDIVIDUAL (15 min) — QUANDO HOUVER PAUTA ATIVA    */}
         {/* ----------------------------------------------------------------------- */}
         {(currentMode === "SPEAKER_EXPOSITION" || currentMode === "TOPIC_OVERVIEW") && activeTopic && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-7 space-y-4 text-left">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                    Pauta {activeTopic.number} de 5 · Exposição (15 min)
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                    Pauta 0{activeTopic.number} / 05
                   </span>
                   <SoundWaveBadge />
-                  {activePoll?.status === "OPEN" && (
-                    <span className="text-amber-400 text-xs font-semibold">
-                      · Votação Aberta no Celular
-                    </span>
-                  )}
                 </div>
-                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-bold leading-snug drop-shadow-md">
+                <h1 className="font-display text-3xl sm:text-5xl lg:text-[54px] text-[#F7DECA] font-extrabold leading-[1.08] tracking-tight">
                   {activeTopic.title}
                 </h1>
               </div>
 
-              {/* Card do Palestrante */}
-              <div className="flex items-center gap-4 sm:gap-5 border border-white/10 bg-[#0A150D]/90 p-4 sm:p-5 rounded-3xl backdrop-blur-xl shadow-2xl">
+              {/* Assinatura Editorial do Palestrante — Sem Caixa */}
+              <div className="border-l-2 border-emerald-400/80 pl-5 sm:pl-6 flex items-center gap-5 pt-1">
                 {activeSpeakerPhoto ? (
                   <img
                     src={activeSpeakerPhoto}
                     alt={activeTopic.mainSpeaker.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover object-top border-2 shadow-xl shrink-0 animate-speaker-aura"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover object-top ring-2 ring-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] shrink-0"
                   />
                 ) : (
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#030A06] border-2 border-emerald-500 flex items-center justify-center font-bold text-2xl text-emerald-400 shrink-0 shadow-lg animate-speaker-aura">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#030A06] ring-2 ring-emerald-400/60 flex items-center justify-center font-bold text-2xl text-emerald-400 shrink-0">
                     {activeTopic.mainSpeaker.name.charAt(0)}
                   </div>
                 )}
                 <div className="space-y-1 min-w-0">
-                  <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block">
+                  <span className="text-[10px] uppercase tracking-[0.24em] text-emerald-400 font-bold block">
                     Especialista Convidado
                   </span>
-                  <div className="font-display text-2xl sm:text-3xl text-[#F7DECA] font-bold truncate">
+                  <div className="font-display text-2xl sm:text-4xl text-[#F7DECA] font-bold truncate tracking-tight">
                     {activeTopic.mainSpeaker.name}
                   </div>
-                  <div className="text-xs text-[#D5C5AA]/85">
-                    15 min de exposição individual · Seguido por 5 min de Pergunta &amp; Resposta
+                  <div className="text-xs text-[#D5C5AA]/70">
+                    Exposição principal · Perguntas abertas pelo QR Code
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-3">
-              <div className="border border-white/10 bg-[#0A150D]/90 p-4 sm:p-5 rounded-3xl text-center shadow-2xl backdrop-blur-xl w-full max-w-sm">
+            {/* Coluna Direita: Cronômetro Puro Estilizado (Sem Caixa, Sem "Tempo de Exposição") */}
+            <div className="lg:col-span-5 flex flex-col items-center gap-6">
+              {showTimer && (
                 <CircularTimer
                   formatted={timer.formatted}
                   alertLevel={timer.alertLevel}
                   elapsedMs={timer.elapsedMs}
                   totalDurationMs={timer.totalDurationMs}
-                  phaseLabel="Tempo de Exposição"
-                  size={150}
+                  size={184}
                 />
-              </div>
+              )}
 
               <ParticipateNowCard
-                title="Participe pelo Celular"
-                subtitle={`Envie sua pergunta ao vivo para ${activeTopic.mainSpeaker.name} pelo celular.`}
+                title="Envie sua Pergunta"
+                subtitle={`Participe ao vivo enviando sua pergunta para ${activeTopic.mainSpeaker.name}.`}
                 size="default"
               />
             </div>
@@ -1119,56 +1233,54 @@ export function ArenaScreen() {
         {/* 6. TELA DE PERGUNTA E RESPOSTA (5 min · SELECTED_QUESTION)              */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "SELECTED_QUESTION" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-7 space-y-4 text-left">
-              <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                  Pergunta Selecionada · Pauta {selectedQuestion?.topicNumber || activeTopic?.number}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="flex items-center gap-4">
+                <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                  Voz do Auditório · Pauta 0{selectedQuestion?.topicNumber || activeTopic?.number}
                 </span>
-                <span className="text-xs sm:text-sm text-[#D5C5AA]/80 block">
-                  Respondente: <strong className="text-[#F7DECA]">{activeSpeakerName}</strong>
-                </span>
+                <SoundWaveBadge label="Respondendo" />
               </div>
 
-              <div className="border-2 border-emerald-500/60 bg-[#0A150D]/95 p-6 sm:p-8 rounded-3xl shadow-2xl relative backdrop-blur-xl">
-                <span className="text-6xl text-emerald-500/25 font-serif absolute top-1 left-4 pointer-events-none select-none">
-                  “
-                </span>
-                <p className="font-display text-xl sm:text-3xl text-[#F7DECA] font-semibold leading-relaxed relative z-10 pl-2">
+              {/* Citação Editorial — Barra Vertical Luminosa, Sem Caixa Fechada */}
+              <div className="border-l-2 border-emerald-400 pl-6 sm:pl-8 py-2 relative">
+                <p className="font-display text-2xl sm:text-4xl lg:text-[42px] text-[#F7DECA] font-bold leading-[1.2] tracking-tight">
+                  &ldquo;
                   {selectedQuestion?.text ||
                     "Pergunta da plateia em resposta pelo especialista com mediação de Paula."}
+                  &rdquo;
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[#D5C5AA]/80">
-                <span className="text-[#F7DECA] font-semibold">
-                  Origem: {selectedQuestion?.isMediationReserve ? "Pergunta da Mediação" : "Pergunta da Plateia"}
-                </span>
-                <span className="flex items-center gap-2">
-                  <SoundWaveBadge label="Respondendo" />
-                  {activeSpeakerPhoto && (
-                    <img
-                      src={activeSpeakerPhoto}
-                      alt={activeSpeakerName || ""}
-                      className="w-7 h-7 rounded-full object-cover object-top border border-emerald-400 shadow-md shrink-0"
-                    />
-                  )}
-                  <strong className="text-[#F7DECA] text-xs sm:text-sm">{activeSpeakerName}</strong>
-                </span>
+              <div className="flex items-center gap-4 pt-1">
+                {activeSpeakerPhoto && (
+                  <img
+                    src={activeSpeakerPhoto}
+                    alt={activeSpeakerName || ""}
+                    className="w-11 h-11 rounded-full object-cover object-top ring-1 ring-emerald-400/60 shrink-0"
+                  />
+                )}
+                <div>
+                  <span className="text-[10px] uppercase tracking-[0.22em] text-emerald-400 font-bold block">
+                    {selectedQuestion?.isMediationReserve ? "Questão da Mediação" : "Pergunta da Plateia"}
+                  </span>
+                  <strong className="text-[#F7DECA] text-base font-display">
+                    Com a palavra: {activeSpeakerName}
+                  </strong>
+                </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 flex flex-col items-center gap-3">
-              <div className="border border-white/10 bg-[#0A150D]/90 p-4 sm:p-5 rounded-3xl text-center shadow-2xl backdrop-blur-xl w-full max-w-sm">
+            <div className="lg:col-span-5 flex flex-col items-center gap-6">
+              {showTimer && (
                 <CircularTimer
                   formatted={timer.formatted}
                   alertLevel={timer.alertLevel}
                   elapsedMs={timer.elapsedMs}
                   totalDurationMs={timer.totalDurationMs}
-                  phaseLabel="Tempo de P&amp;R"
-                  size={150}
+                  size={184}
                 />
-              </div>
+              )}
 
               <ParticipateNowCard
                 title="Participe pelo Celular"
@@ -1180,28 +1292,24 @@ export function ArenaScreen() {
         )}
 
         {/* ----------------------------------------------------------------------- */}
-        {/* 7. TELA DE MESA-REDONDA (ROUNDTABLE · 6 DEBATEDORES EM ARCO)            */}
+        {/* 7. TELA DE MESA-REDONDA (ROUNDTABLE · 6 DEBATEDORES)                    */}
         {/* ----------------------------------------------------------------------- */}
         {(currentMode === "ROUNDTABLE" || currentMode === "COLLECTIVE_BUILDING") && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full max-w-7xl mx-auto h-full max-h-full">
-            <div className="lg:col-span-8 space-y-4 text-left">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] uppercase tracking-widest text-emerald-400 font-bold block">
-                    Mesa-Redonda Oficial (20 Minutos)
-                  </span>
-                  <span className="text-amber-400 text-xs font-semibold">
-                    · Questão Eleita pelo Público
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-7xl mx-auto">
+            <div className="lg:col-span-8 space-y-6 text-left">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] uppercase tracking-[0.26em] text-emerald-400 font-bold">
+                  Mesa-Redonda Oficial
+                </span>
+                <span className="text-[#D5C5AA]/30">·</span>
+                <span className="text-[11px] uppercase tracking-[0.22em] text-amber-400 font-bold">
+                  Questão Eleita pelo Público
+                </span>
               </div>
 
-              {/* Questão Vencedora */}
-              <div className="border-2 border-emerald-500/60 bg-[#0A150D]/95 p-5 sm:p-7 rounded-3xl shadow-2xl space-y-1.5 backdrop-blur-xl">
-                <div className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">
-                  Questão Central em Debate
-                </div>
-                <h1 className="font-display text-xl sm:text-3xl text-[#F7DECA] font-bold leading-relaxed">
+              {/* Questão Central em Tipografia Monumental — Sem Caixa */}
+              <div className="border-l-2 border-amber-400 pl-6 sm:pl-8 py-1">
+                <h1 className="font-display text-2xl sm:text-4xl lg:text-[42px] text-[#F7DECA] font-bold leading-[1.18] tracking-tight">
                   &ldquo;
                   {activePoll?.winningQuestionText ||
                     activePoll?.options?.find((o) => o.isWinner)?.label ||
@@ -1211,33 +1319,22 @@ export function ArenaScreen() {
                 </h1>
               </div>
 
-              {/* Os Seis Especialistas da Mesa-Redonda */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-[#D5C5AA]/75">
-                  <span className="uppercase tracking-wider font-semibold text-[11px]">
-                    Seis Debatedores da Mesa:
-                  </span>
-                  <span className="text-emerald-400 font-medium text-xs">
-                    Mediação: Paula Melo
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {/* Os Seis Debatedores em Linha Editorial Limpa */}
+              <div className="pt-3 border-t border-white/[0.08]">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 pt-3">
                   {SIX_SPECIALISTS.map((sp) => (
-                    <div
-                      key={sp.name}
-                      className="border border-white/10 bg-[#0A150D]/90 p-2 rounded-xl flex flex-col items-center text-center space-y-1 shadow-md group hover:border-emerald-500/40 transition"
-                    >
+                    <div key={sp.name} className="flex items-center gap-2.5 min-w-0">
                       <img
                         src={sp.photoUrl}
                         alt={sp.name}
-                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg object-cover border border-emerald-500/30 group-hover:scale-105 transition-transform"
+                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover object-top ring-1 ring-emerald-400/40 shrink-0"
                       />
-                      <div className="min-w-0 w-full">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 block truncate">
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400 block truncate">
                           {sp.role}
                         </span>
-                        <span className="font-bold text-[11px] text-[#F7DECA] leading-tight block truncate">
-                          {sp.name}
+                        <span className="font-bold text-xs text-[#F7DECA] leading-tight block truncate">
+                          {sp.name.split(" ")[0]}
                         </span>
                       </div>
                     </div>
@@ -1246,20 +1343,16 @@ export function ArenaScreen() {
               </div>
             </div>
 
-            <div className="lg:col-span-4 flex flex-col items-center gap-4">
-              <div className="border border-white/10 bg-[#0A150D]/90 p-5 rounded-3xl text-center space-y-3 shadow-2xl backdrop-blur-xl w-full max-w-sm">
+            <div className="lg:col-span-4 flex flex-col items-center justify-center gap-4">
+              {showTimer && (
                 <CircularTimer
                   formatted={timer.formatted}
                   alertLevel={timer.alertLevel}
                   elapsedMs={timer.elapsedMs}
                   totalDurationMs={timer.totalDurationMs}
-                  phaseLabel="Tempo da Mesa"
-                  size={150}
+                  size={200}
                 />
-              </div>
-              <p className="text-xs text-[#D5C5AA]/70 text-center max-w-sm">
-                Debate conjunto entre os 6 especialistas sobre a questão eleita pela plateia.
-              </p>
+              )}
             </div>
           </div>
         )}
@@ -1268,18 +1361,18 @@ export function ArenaScreen() {
         {/* 8. TELA DE ENCERRAMENTO (CLOSING)                                       */}
         {/* ----------------------------------------------------------------------- */}
         {currentMode === "CLOSING" && (
-          <div className="space-y-4 max-w-3xl mx-auto text-center animate-stage-enter">
-            <span className="text-xs uppercase font-bold tracking-widest text-emerald-400 block">
-              Etapa 10 · Encerramento Oficial
+          <div className="space-y-5 max-w-3xl mx-auto text-center animate-stage-enter">
+            <span className="text-[11px] uppercase font-bold tracking-[0.28em] text-emerald-400 block">
+              Sessão Encerrada · A Nova Moeda
             </span>
-            <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-tight">
-              Agradecemos a Sua Participação!
+            <h1 className="font-display text-4xl sm:text-6xl text-[#F7DECA] font-extrabold leading-tight tracking-tight">
+              Agradecemos a Sua Participação
             </h1>
-            <p className="text-sm sm:text-lg text-[#D5C5AA]/90 max-w-xl mx-auto leading-relaxed font-medium">
-              O encontro <strong>A Nova Moeda</strong> foi construído coletivamente com o envolvimento e as perguntas de todos os participantes.
+            <p className="text-sm sm:text-lg text-[#D5C5AA]/85 max-w-xl mx-auto leading-relaxed">
+              O encontro <strong>A Nova Moeda</strong> foi construído coletivamente com a presença, os votos e as perguntas de todos os participantes.
             </p>
-            <div className="pt-3 border-t border-white/10 text-xs text-[#D5C5AA]/70">
-              Universidade Estadual de Feira de Santana (UEFS) · A Nova Moeda
+            <div className="pt-4 border-t border-white/[0.08] text-[11px] uppercase tracking-[0.24em] text-[#D5C5AA]/60">
+              Universidade Estadual de Feira de Santana · UEFS
             </div>
           </div>
         )}
@@ -1290,27 +1383,27 @@ export function ArenaScreen() {
         {(currentMode === "CONTINGENCY" || currentMode === "OPERATIONAL_NOTICE") && (
           <div className="space-y-6 max-w-3xl mx-auto text-center animate-stage-enter">
             {ls?.emergencyActive || currentMode === "CONTINGENCY" ? (
-              <div className="border-2 border-red-500/60 bg-[#0A150D]/95 p-8 sm:p-10 rounded-3xl space-y-4 shadow-2xl backdrop-blur-xl">
-                <div className="w-12 h-12 mx-auto rounded-full bg-red-950/60 border border-red-500/60 text-red-300 flex items-center justify-center animate-pulse">
+              <div className="space-y-4">
+                <div className="w-12 h-12 mx-auto rounded-full bg-red-500/15 text-red-400 flex items-center justify-center animate-pulse">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
-                <h1 className="font-display text-3xl sm:text-4xl text-[#F7DECA] font-bold">
+                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-bold tracking-tight">
                   A Nova Moeda
                 </h1>
-                <p className="text-lg sm:text-xl text-[#D5C5AA] leading-relaxed font-medium">
+                <p className="text-lg sm:text-xl text-[#D5C5AA]/90 leading-relaxed">
                   {ls?.emergencyMessage ||
-                    "Estamos realizando um breve ajuste técnico. A programação continuará em instantes."}
+                    "Breve ajuste técnico em andamento. A programação retornará em instantes."}
                 </p>
               </div>
             ) : screenMessage ? (
-              <div className="border-2 border-amber-500 bg-[#0A150D]/95 p-6 sm:p-10 rounded-3xl space-y-4 shadow-2xl backdrop-blur-xl">
-                <span className="text-xs font-bold uppercase tracking-widest text-amber-400 block">
+              <div className="space-y-4">
+                <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-amber-400 block">
                   Comunicado da Organização
                 </span>
-                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-bold">
+                <h1 className="font-display text-3xl sm:text-5xl text-[#F7DECA] font-bold tracking-tight">
                   {screenMessage.title}
                 </h1>
-                <p className="text-lg sm:text-2xl text-[#D5C5AA]/95 leading-relaxed">
+                <p className="text-lg sm:text-2xl text-[#D5C5AA]/90 leading-relaxed">
                   {screenMessage.body}
                 </p>
               </div>
@@ -1319,37 +1412,40 @@ export function ArenaScreen() {
         )}
       </div>
 
-      {/* 4. Rodapé Autêntico da ARENA: Próxima Etapa & Status (Sem pílulas) */}
-      <footer className="relative z-20 shrink-0 border-t border-white/10 pt-2.5 sm:pt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#D5C5AA]/75">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-            Próxima Etapa:
+      {/* 4. Rodapé de Telemetria Editorial */}
+      <footer className="relative z-20 shrink-0 border-t border-white/[0.08] pt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#D5C5AA]/70">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-400">
+            A Seguir
           </span>
-          <strong className="text-[#F7DECA] text-xs font-semibold">
+          <span className="text-[#D5C5AA]/30">—</span>
+          <strong className="text-[#F7DECA] text-xs font-medium tracking-tight">
             {currentMode === "WAITING"
               ? nextStep
-                ? `${nextStep.title} (${nextStep.responsibleName})`
-                : "Abertura — Apresentação do evento e orientações ao público (Organização)"
+                ? `${nextStep.title} · ${nextStep.responsibleName}`
+                : "Abertura — Apresentação do evento e orientações ao público"
               : nextStep
-                ? `${nextStep.title} (${nextStep.responsibleName})`
+                ? `${nextStep.title} · ${nextStep.responsibleName}`
                 : "Encerramento Oficial"}
           </strong>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {ls?.questionsOpen && activeTopic && (
-            <span className="text-emerald-400 font-semibold flex items-center gap-1.5 text-xs">
+            <span className="text-emerald-400 font-semibold flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>Perguntas abertas: Pauta {activeTopic.number}</span>
+              <span>Captação Aberta · Pauta 0{activeTopic.number}</span>
             </span>
           )}
           {activePoll?.status === "OPEN" && currentMode !== "POLL_OPEN" && (
-            <span className="text-amber-300 font-semibold flex items-center gap-1.5 text-xs">
+            <span className="text-amber-300 font-semibold flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em]">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-              <span>Votação aberta no QR Code</span>
+              <span>Votação Aberta</span>
             </span>
           )}
-          <span className="text-[#D5C5AA]/50 text-[11px]">UEFS · A Nova Moeda</span>
+          <span className="text-[#D5C5AA]/45 text-[10px] uppercase tracking-[0.22em]">
+            UEFS · A Nova Moeda
+          </span>
         </div>
       </footer>
     </main>

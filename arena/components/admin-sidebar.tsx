@@ -104,15 +104,17 @@ export function AdminSidebar() {
         {/* Topo / Logo */}
         <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
           <Link href="/admin/operacao" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-xl bg-[#0A120D] border border-emerald-500/40 p-1 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden">
-              <BrandLogo className="w-full h-full object-contain" />
+            <div className="relative w-9 h-9 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="absolute inset-0 rounded-full bg-emerald-400/15 blur-md pointer-events-none" />
+              <BrandLogo className="relative w-full h-full object-contain drop-shadow-[0_0_12px_rgba(52,211,153,0.35)]" />
             </div>
+            <div className="h-7 w-[1px] bg-gradient-to-b from-transparent via-[#D5C5AA]/35 to-transparent" />
             <div>
-              <div className="font-display font-bold text-sm text-[#F7DECA] leading-tight">
-                A Nova Moeda
-              </div>
-              <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-medium">
+              <div className="text-[9px] uppercase tracking-[0.28em] text-emerald-400 font-bold">
                 Mesa Diretora
+              </div>
+              <div className="font-display font-extrabold text-sm text-[#F7DECA] leading-tight tracking-tight">
+                A Nova Moeda
               </div>
             </div>
           </Link>
@@ -141,10 +143,10 @@ export function AdminSidebar() {
                 <Link
                   href={section.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`w-full px-3 py-2 rounded-xl text-xs flex items-center justify-between transition group cursor-pointer ${
+                  className={`w-full px-3 py-2 text-xs flex items-center justify-between transition group cursor-pointer border-l-2 ${
                     isSectionActive
-                      ? "bg-emerald-950/60 text-white font-semibold border border-emerald-500/30 shadow-xs"
-                      : "text-[#D5C5AA]/70 hover:bg-white/[0.03] hover:text-[#F7DECA]"
+                      ? "border-emerald-400 bg-gradient-to-r from-emerald-500/10 to-transparent text-white font-semibold"
+                      : "border-transparent text-[#D5C5AA]/70 hover:bg-white/[0.03] hover:text-[#F7DECA]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">

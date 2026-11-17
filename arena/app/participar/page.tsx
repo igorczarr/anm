@@ -5,6 +5,7 @@ import { useArenaSync } from "@/hooks/use-arena-sync";
 import { PUBLIC_STATUS_LABELS } from "@/lib/question-status";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandLogo } from "@/components/brand-logo";
+import { ArenaParticleField } from "@/components/arena-particle-field";
 import {
   InstagramVoteReceiptCard,
   InstagramStoryModal,
@@ -728,57 +729,67 @@ export default function ParticiparPage() {
   }
 
   // ============================================================================
-  // PASSO 1: TELA DE LOGIN EXCLUSIVA (EXIGE PRIMEIRO O LOGIN, SEM VOTAÇÃO JUNTO)
+  // PASSO 1: TELA DE LOGIN EXCLUSIVA — ARQUITETURA SOBERANA (SEM CAIXA NO HEADER)
   // 100% NO-SCROLL (h-dvh max-h-dvh overflow-hidden)
   // ============================================================================
   if (loadingSession || !me?.authenticated) {
     return (
-      <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 py-3 flex flex-col justify-between overflow-hidden select-none">
-        {/* Topo Editorial Compacto */}
-        <header
-          style={{ borderRadius: "18px" }}
-          className="border border-slate-200 dark:border-[#D5C5AA]/25 bg-white/95 dark:bg-[#0A150D]/95 px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-md shrink-0"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 flex items-center justify-center shrink-0">
-              <BrandLogo className="w-full h-full object-contain drop-shadow-xs" />
-            </div>
-            <div className="min-w-0">
-              <div className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-[#F7DECA] leading-tight truncate">
-                A Nova Moeda
+      <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-4 py-3 flex flex-col justify-between overflow-hidden select-none relative">
+        {/* Campo Generativo de Partículas 3D ao Fundo */}
+        <div className="fixed inset-0 pointer-events-none z-0 opacity-35 dark:opacity-70">
+          <ArenaParticleField />
+        </div>
+
+        {/* Masthead Arquitetônico Limpo (Sem Retângulo Envolvente) */}
+        <header className="relative z-10 shrink-0 pb-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+                <div className="absolute inset-0 rounded-full bg-emerald-400/15 blur-sm pointer-events-none" />
+                <BrandLogo className="relative w-full h-full object-contain drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]" />
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 truncate">
-                Economia da Solidão · UEFS
+
+              <div className="h-6 w-[1px] bg-gradient-to-b from-transparent via-slate-400/40 dark:via-[#D5C5AA]/35 to-transparent shrink-0" />
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 text-[8.5px] uppercase tracking-[0.26em] text-emerald-700 dark:text-emerald-400 font-bold truncate">
+                  <span>UEFS</span>
+                  <span className="text-slate-400 dark:text-[#D5C5AA]/30">/</span>
+                  <span className="text-slate-600 dark:text-[#D5C5AA]/70">Auditório 02</span>
+                </div>
+                <div className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-[#F7DECA] tracking-tight leading-tight truncate">
+                  A Nova Moeda
+                </div>
               </div>
             </div>
+            <ThemeToggle compact />
           </div>
-          <ThemeToggle compact />
+          <div className="mt-2.5 h-[1px] w-full bg-gradient-to-r from-emerald-500/45 via-slate-300/60 dark:via-white/[0.1] to-emerald-500/25" />
         </header>
 
-        {/* Área Central Verticalmente Equilibrada (Contagem Regressiva Compacta + Especialistas + Login) */}
-        <div className="flex-1 min-h-0 flex flex-col justify-center gap-3 overflow-hidden py-1">
-          {/* Contagem Regressiva Reduzida + Fotos dos 6 Especialistas */}
+        {/* Área Central Verticalmente Equilibrada (Contagem Regressiva + Login) */}
+        <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center gap-3.5 overflow-hidden py-1">
+          {/* Contagem Regressiva Autoral + Fotos dos 6 Especialistas */}
           <CompactWaitingStrip
             hours={eventCountdown.hours}
             minutes={eventCountdown.minutes}
             seconds={eventCountdown.seconds}
           />
 
-          {/* Card Exclusivo de Login (Passo 1) */}
+          {/* Módulo de Identificação (Passo 1) */}
           <div
-            style={{ borderRadius: "22px" }}
-            className="border border-slate-200 dark:border-[#D5C5AA]/30 bg-white/95 dark:bg-[#0A150D]/95 p-4 sm:p-5 space-y-3.5 shadow-xl backdrop-blur-md"
+            style={{ borderRadius: "20px" }}
+            className="border border-slate-200/80 dark:border-white/[0.1] bg-white/90 dark:bg-[#07110B]/88 p-4 sm:p-5 space-y-3.5 shadow-2xl backdrop-blur-xl"
           >
-            <div className="space-y-1 text-center">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-[9.5px] font-bold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
-                <span>Passo 1 de 2 · Identificação do Participante</span>
+            <div className="space-y-1 text-left border-l-2 border-emerald-500 pl-3.5">
+              <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-emerald-700 dark:text-emerald-400 block">
+                Credenciamento Digital · Passo 01 / 02
               </span>
-              <h1 className="font-display text-lg sm:text-xl text-slate-900 dark:text-[#F7DECA] font-extrabold leading-snug pt-0.5">
+              <h1 className="font-display text-lg sm:text-xl text-slate-900 dark:text-[#F7DECA] font-extrabold leading-snug tracking-tight">
                 Identifique-se para Votar na Pauta
               </h1>
-              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-[#D5C5AA]/80 leading-relaxed">
-                Faça seu login rápido para liberar a votação da Mesa-Redonda e gerar seu comprovante para os Stories.
+              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-[#D5C5AA]/75 leading-relaxed">
+                Acesso imediato à cédula oficial da Mesa-Redonda e habilitação automática ao sorteio.
               </p>
             </div>
 
@@ -845,55 +856,68 @@ export default function ParticiparPage() {
   }
 
   // ============================================================================
-  // PASSO 2: APÓS O LOGIN — VOTAÇÃO EM EVIDÊNCIA E COMPROVANTE EM 100% NO-SCROLL
+  // PASSO 2: APÓS O LOGIN — ARQUITETURA SOBERANA EM 100% NO-SCROLL
   // ============================================================================
   return (
-    <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col justify-between gap-2 overflow-hidden relative">
-      {/* Cabeçalho Limpo sem retângulo que envolve */}
-      <header className="px-1 py-0.5 shrink-0 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 flex items-center justify-center shrink-0">
-            <BrandLogo className="w-full h-full object-contain drop-shadow-xs" />
-          </div>
-          <div className="min-w-0">
-            <div className="font-display font-extrabold text-xs sm:text-sm text-slate-900 dark:text-[#F7DECA] leading-tight truncate">
-              A Nova Moeda
-            </div>
-            <div className="text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold flex items-center gap-1 truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
-              <span className="truncate">
-                {snapshot?.activeTopic
-                  ? `Pauta ${snapshot.activeTopic.number} · ${snapshot.activeTopic.mainSpeaker?.name || activeSpecialist?.name || ""}`
-                  : `Olá, ${me.name?.split(" ")[0] || "Participante"}`}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="h-dvh max-h-dvh w-full max-w-lg mx-auto px-3.5 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col justify-between gap-2 overflow-hidden relative">
+      {/* Campo Generativo de Partículas 3D ao Fundo */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-35 dark:opacity-70">
+        <ArenaParticleField />
+      </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {!connected && (
-            <span
-              title="Reconectando..."
-              className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/50 border border-red-300 dark:border-red-500/40 text-red-700 dark:text-red-300"
+      {/* Masthead Arquitetônico Limpo sem retângulo envolvente */}
+      <header className="relative z-10 px-0.5 shrink-0 pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center shrink-0">
+              <div className="absolute inset-0 rounded-full bg-emerald-400/15 blur-sm pointer-events-none" />
+              <BrandLogo className="relative w-full h-full object-contain drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]" />
+            </div>
+
+            <div className="h-6 w-[1px] bg-gradient-to-b from-transparent via-slate-400/40 dark:via-[#D5C5AA]/35 to-transparent shrink-0" />
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[8.5px] uppercase tracking-[0.24em] text-emerald-700 dark:text-emerald-400 font-bold truncate">
+                <span>UEFS</span>
+                <span className="text-slate-400 dark:text-[#D5C5AA]/30">/</span>
+                <span className="text-slate-600 dark:text-[#D5C5AA]/75 truncate">
+                  {snapshot?.activeTopic
+                    ? `Pauta 0${snapshot.activeTopic.number} · ${snapshot.activeTopic.mainSpeaker?.name || activeSpecialist?.name || ""}`
+                    : `Olá, ${me.name?.split(" ")[0] || "Participante"}`}
+                </span>
+              </div>
+              <div className="font-display font-extrabold text-xs sm:text-sm text-slate-900 dark:text-[#F7DECA] tracking-tight leading-tight truncate">
+                A Nova Moeda
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {!connected && (
+              <span
+                title="Reconectando..."
+                className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300"
+              >
+                <WifiOff className="w-3.5 h-3.5" />
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Sair / Trocar participante"
+              className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-[#D5C5AA]/75 hover:text-slate-900 dark:hover:text-[#F7DECA] flex items-center gap-1 cursor-pointer transition"
             >
-              <WifiOff className="w-3.5 h-3.5" />
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={handleLogout}
-            title="Sair / Trocar participante"
-            className="px-2 py-1 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#030A06] text-[10px] font-semibold text-slate-700 dark:text-[#D5C5AA]/80 hover:text-slate-900 dark:hover:text-[#F7DECA] hover:border-emerald-500/40 dark:hover:border-emerald-400/40 flex items-center gap-1 cursor-pointer transition shadow-xs"
-          >
-            <LogOut className="w-3 h-3" />
-            <span>Sair</span>
-          </button>
-          <ThemeToggle compact />
+              <LogOut className="w-3 h-3" />
+              <span>Sair</span>
+            </button>
+            <ThemeToggle compact />
+          </div>
         </div>
+        <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-emerald-500/45 via-slate-300/60 dark:via-white/[0.1] to-emerald-500/25" />
       </header>
 
       {/* ÁREA DE CONTEÚDO PRINCIPAL (100% NO-SCROLL) */}
-      <div className="flex-1 min-h-0 flex flex-col justify-start gap-2 overflow-hidden">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-start gap-2 overflow-hidden">
         {/* ABA 1: INÍCIO (HUB DINÂMICO COMPLETO DO EVENTO) */}
         {activeTab === "inicio" && (
           <div className="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-hidden">
@@ -1141,22 +1165,21 @@ export default function ParticiparPage() {
                   seconds={eventCountdown.seconds}
                 />
 
-                {/* Status de Elegibilidade ao Sorteio */}
+                {/* Status de Elegibilidade ao Sorteio — Linha Editorial Sem Caixa Fechada */}
                 <div
-                  style={{ borderRadius: "14px" }}
-                  className={`px-3 py-1.5 border text-center shrink-0 text-[10.5px] transition ${
+                  className={`border-l-2 pl-3 py-1 text-left shrink-0 text-[10.5px] transition ${
                     me?.votes && me.votes.length > 0
-                      ? "border-emerald-500/40 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200"
-                      : "border-amber-500/40 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-200"
+                      ? "border-emerald-500 text-emerald-900 dark:text-emerald-200"
+                      : "border-amber-500 text-amber-950 dark:text-amber-200"
                   }`}
                 >
                   {me?.votes && me.votes.length > 0 ? (
-                    <span className="flex items-center justify-center gap-1.5 font-bold">
+                    <span className="flex items-center gap-1.5 font-bold">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span>Credencial #{me?.credentialCode || me?.code} validada e concorrendo aos sorteios!</span>
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center gap-1.5">
+                    <span className="flex items-center gap-1.5">
                       <Gift className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                       <span>Vote na pauta abaixo para validar sua credencial (#{me?.credentialCode || me?.code}) para o sorteio.</span>
                     </span>
